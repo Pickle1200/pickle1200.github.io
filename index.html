@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Puranjay Kumar</title>
+<meta name="description" content="Second-year maths and data science at LSE. Projects, games, CV.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14120E;
+  --panel:#1C1913;
+  --ink:#EFE9DC;
+  --ink-soft:#968C7B;
+  --amber:#E0A72B;
+  --amber-deep:#F0BC4B;
+  --rule:#2F2A22;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --serif:"IBM Plex Serif",Georgia,serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:15px;
+  line-height:1.55;
+  padding:0 20px 90px;
+}
+.wrap{max-width:660px;margin:0 auto}
+
+/* ---------- top bar ---------- */
+.top{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:20px;
+  padding:26px 0 20px;border-bottom:1px solid var(--rule);margin-bottom:34px;
+}
+.name{font-weight:600;letter-spacing:-0.03em;font-size:23px;display:block}
+.sub{font-size:11.5px;color:var(--ink-soft);margin-top:5px;line-height:1.45;max-width:38ch}
+.skip{
+  font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-soft);background:none;border:0;border-bottom:1px solid var(--ink-soft);
+  cursor:pointer;padding:0 0 2px;font-family:var(--mono);
+}
+.skip:hover{color:var(--ink);border-color:var(--ink)}
+.skip:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+
+/* ---------- counter ---------- */
+.ledger{
+  border:1px solid var(--rule);background:var(--panel);
+  padding:22px 22px 20px;margin-bottom:14px;
+}
+.ledger-top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
+.count{
+  font-size:clamp(38px,9vw,58px);font-weight:500;letter-spacing:-0.045em;
+  line-height:1;font-variant-numeric:tabular-nums;
+}
+.count-label{
+  font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-soft);margin-top:8px;
+}
+.rate{text-align:right;font-size:13px;color:var(--ink-soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+.rate b{display:block;color:var(--ink);font-size:18px;font-weight:500}
+
+.press{
+  width:100%;margin-top:20px;padding:15px;cursor:pointer;
+  background:var(--amber);border:1px solid var(--amber);color:#14120E;
+  font-family:var(--mono);font-size:13px;font-weight:600;
+  letter-spacing:.13em;text-transform:uppercase;
+  transition:transform .04s ease, background .12s ease;
+}
+.press:hover{background:var(--amber-deep);border-color:var(--amber-deep)}
+.press:active{transform:translateY(2px)}
+.press:focus-visible{outline:2px solid var(--amber-deep);outline-offset:3px}
+
+.hint{font-size:11px;color:var(--ink-soft);margin-bottom:32px;line-height:1.5}
+
+/* ---------- holdings table ---------- */
+.sec-label{
+  font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-soft);padding-bottom:7px;border-bottom:1px solid var(--rule);
+  margin-bottom:14px;display:flex;justify-content:space-between;
+}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;margin-bottom:34px}
+th{
+  font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft);
+  font-weight:400;text-align:right;padding:0 0 8px;border-bottom:1px solid var(--rule);
+}
+th:first-child{text-align:left}
+td{padding:11px 0;border-bottom:1px solid var(--rule);vertical-align:top;text-align:right;font-size:13px}
+td:first-child{text-align:left}
+.rname{font-weight:500}
+.rdesc{font-size:11px;color:var(--ink-soft);font-family:var(--serif);font-style:italic;margin-top:3px;line-height:1.4}
+.buy{
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  padding:6px 11px;border:1px solid var(--rule);background:transparent;color:var(--ink);cursor:pointer;
+  white-space:nowrap;
+}
+.buy:hover:not(:disabled){background:var(--amber);border-color:var(--amber);color:#14120E}
+.buy:disabled{opacity:.3;cursor:default}
+.buy:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.qty{font-size:16px;font-weight:500}
+.qty.zero{color:var(--ink-soft);font-weight:400}
+
+/* ---------- unlockable sections ---------- */
+.block{margin-bottom:34px}
+.locked{opacity:.4}
+.locked .body{display:none}
+.lockbar{
+  display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);
+  padding-bottom:7px;border-bottom:1px solid var(--rule);margin-bottom:14px;
+}
+.lockbar .need{font-variant-numeric:tabular-nums;white-space:nowrap}
+.unlocked .lockbar{color:var(--ink)}
+.unlocked .lockbar .need{color:var(--amber-deep)}
+
+.body p{font-family:var(--serif);font-size:15px;line-height:1.65;margin-bottom:13px}
+.body p:last-child{margin-bottom:0}
+
+.item{padding:13px 0;border-bottom:1px solid var(--rule)}
+.item:last-child{border-bottom:0}
+.item h3{font-size:13px;font-weight:600;letter-spacing:-0.01em;margin-bottom:4px}
+.item p{font-family:var(--serif);font-size:13.5px;color:var(--ink-soft);line-height:1.55;margin:0}
+a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--amber)}
+a:hover{color:var(--amber-deep);border-color:var(--amber-deep)}
+a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+.facts{list-style:none;font-size:13.5px}
+.facts li{padding:8px 0;border-bottom:1px solid var(--rule);display:flex;gap:14px}
+.facts li:last-child{border-bottom:0}
+.facts .n{color:var(--ink-soft);font-size:11px;min-width:22px;padding-top:2px}
+
+.contact{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.contact a{
+  border:1px solid var(--rule);border-bottom-width:1px;padding:9px 14px;
+  font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+}
+.contact a:hover{background:var(--amber);border-color:var(--amber);color:#14120E}
+
+.foot{
+  margin-top:46px;padding-top:18px;border-top:1px solid var(--rule);
+  font-size:11px;color:var(--ink-soft);line-height:1.6;
+}
+
+/* ---------- flash on unlock ---------- */
+@keyframes flash{0%{background:rgba(224,167,43,.18)}100%{background:transparent}}
+.just-unlocked{animation:flash .7s ease-out}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+@media (max-width:520px){
+  th:nth-child(3),td:nth-child(3){display:none}
+  body{padding:0 15px 70px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <span class="name">Puranjay Kumar</span>
+      <div class="sub">Maths and data science, LSE. This is a game. The CV is one click away.</div>
+    </div>
+    <button class="skip" id="skip">Skip the game</button>
+  </div>
+
+  <div class="ledger">
+    <div class="ledger-top">
+      <div>
+        <div class="count" id="count">0</div>
+        <div class="count-label">Cheese</div>
+      </div>
+      <div class="rate">
+        <b id="rate">0.000</b>
+        per second
+      </div>
+    </div>
+    <button class="press" id="press">Press for cheese</button>
+  </div>
+  <p class="hint">Everything on this page unlocks as you go. If you would rather not,
+  there is a link in the corner.</p>
+
+  <div class="sec-label"><span>Holdings</span><span id="hold-sum">0 of 6 hired</span></div>
+  <table>
+    <thead>
+      <tr><th>Position</th><th>Rate</th><th>Qty</th><th>Cost</th></tr>
+    </thead>
+    <tbody id="roster"></tbody>
+  </table>
+
+  <div class="block locked" id="b-about">
+    <div class="lockbar"><span>About</span><span class="need" data-need="10">10 cheese</span></div>
+    <div class="body">
+      <p>Second-year BSc Mathematics with Data Science at LSE. I build things and then
+      measure whether they worked, usually in that order.</p>
+    </div>
+  </div>
+
+  <div class="block locked" id="b-projects">
+    <div class="lockbar"><span>Projects</span><span class="need" data-need="60">60 cheese</span></div>
+    <div class="body">
+      <div class="item">
+        <h3>Moving-average crossover backtest</h3>
+        <p>Ten years of SPY against a buy-and-hold benchmark, with realistic transaction
+        costs and a one-day signal lag. It reduced drawdown and lost to doing nothing once
+        the costs were counted. Published as it came out.
+        <a href="https://github.com/Pickle1200/ma-crossover-backtest">Code</a></p>
+      </div>
+      <div class="item">
+        <h3>Market risk-return dashboard</h3>
+        <p>Return, volatility, correlation structure and maximum drawdown across four asset
+        classes. Halfway through I found every Sharpe ratio was wrong, because I had
+        implicitly treated the risk-free rate as zero.
+        <a href="https://github.com/Pickle1200/Market-risk-dashboard">Code</a></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="block locked" id="b-games">
+    <div class="lockbar"><span>Games</span><span class="need" data-need="200">200 cheese</span></div>
+    <div class="body">
+      <div class="item">
+        <h3>Rats vs Cheese</h3>
+        <p>Built solo in ten days. Persistent player economy, rebirth mechanics,
+        server-authoritative state and a payments layer. Balancing the economy took longer
+        than writing it.
+        <a href="https://www.roblox.com/games/117858380922857/Rats-vs-Cheese">Play</a></p>
+      </div>
+      <div class="item">
+        <h3>My Runway</h3>
+        <p>Second of three shipped over one summer.
+        <a href="https://www.roblox.com/games/125331328583955/My-Runway">Play</a></p>
+      </div>
+      <div class="item">
+        <h3>Build a Wizard Army</h3>
+        <p>Built in a single night, which is either impressive or a warning.
+        <a href="https://www.roblox.com/games/71643630968022/Build-a-Wizard-Army">Play</a></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="block locked" id="b-cv">
+    <div class="lockbar"><span>CV and contact</span><span class="need" data-need="500">500 cheese</span></div>
+    <div class="body">
+      <p>A-Levels at 16 alongside GCSEs. Founded a tutoring agency at 14 and ran it to
+      roughly fifty students before starting at LSE.</p>
+      <div class="contact">
+        <a href="puranjaykumarcv.pdf">CV</a>
+        <a href="mailto:Puranjay1010@gmail.com">Puranjay1010@gmail.com</a>
+        <a href="https://www.linkedin.com/in/puranjay-kumar">LinkedIn</a>
+        <a href="https://github.com/Pickle1200">GitHub</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="block locked" id="b-hidden">
+    <div class="lockbar"><span>Everything else</span><span class="need" data-need="1200">1,200 cheese</span></div>
+    <div class="body">
+      <p>I built a portfolio holding equities, technology, long-dated bonds and gold,
+      expecting four positions. The correlation matrix showed something closer to two.
+      Bonds and gold were moving together because both were priced off real rates, so the
+      diversification I thought I had bought was conditional on a rate regime rather than
+      structural. Most portfolios are fewer bets than they look.</p>
+      <ul class="facts">
+        <li><span class="n">01</span><span>Six foot.</span></li>
+        <li><span class="n">02</span><span>250 kg calf raise.</span></li>
+        <li><span class="n">03</span><span>Sat three A-Levels at sixteen, alongside my GCSEs.</span></li>
+        <li><span class="n">04</span><span>Read Lord of the Rings early enough that it did most of the damage.</span></li>
+        <li><span class="n">05</span><span>Taught myself Luau in a week and shipped three games with it.</span></li>
+        <li><span class="n">06</span><span>Drank eighty-odd Monsters in first year. Fully intend to beat it in second.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="foot">
+    The unlock curve was balanced by the same person who balanced Rats vs Cheese. Proceed accordingly.
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- storage: works on a real host, degrades quietly elsewhere ---------- */
+  var mem = {};
+  function save(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem[k]=v; } }
+  function load(k){ try{ var v=localStorage.getItem(k); return v===null?mem[k]:v; }catch(e){ return mem[k]; } }
+
+  /* ---------- rat pool ---------- */
+  var POOL = [
+    ["Derek",     "Reliable. Unremarkable. The index fund of rats."],
+    ["Susan",     "Outperformed in Q2 and has not stopped mentioning it."],
+    ["Gary",      "Produces cheese at a rate that has not been independently verified."],
+    ["Malcolm",   "Reads the whitepaper. Rarely finishes it."],
+    ["Brenda",    "Consistent. Refuses to discuss methodology."],
+    ["Trevor",    "High variance. Currently in drawdown."],
+    ["Janet",     "Compounds quietly. Has never appeared on a leaderboard."],
+    ["Keith",     "Bought at the top. Remains bullish."],
+    ["Denise",    "Risk-adjusted returns better than they appear."],
+    ["Nigel",     "Insists the fundamentals are unchanged."],
+    ["Pauline",   "Long duration. Sensitive to rates."],
+    ["Clive",     "Was told cheese production is a solved problem."],
+    ["Maureen",   "Illiquid. Cannot be sold."],
+    ["Barry",     "Underperforms the benchmark. Charges fees regardless."],
+    ["Yvonne",    "Uncorrelated, allegedly."]
+  ];
+  var RARE = ["Sir Reginald","Rare. Produces no cheese whatsoever. Purely decorative."];
+
+  var BASE_COST = [12, 60, 260, 900, 2600, 6500];
+  var BASE_RATE = [0.7, 3.2, 12.5, 42, 120, 320];
+
+  function pickRoster(){
+    var pool = POOL.slice(), out = [];
+    for(var i=0;i<6;i++){
+      var j = Math.floor(Math.random()*pool.length);
+      out.push(pool.splice(j,1)[0]);
+    }
+    if(Math.random()<0.04) out[5] = RARE;
+    return out.map(function(r,i){
+      return {
+        name:r[0], desc:r[1], qty:0,
+        cost:BASE_COST[i],
+        rate:(r[0]===RARE[0] ? 0 : BASE_RATE[i]),
+        precise:(BASE_RATE[i] + Math.random()*0.4 - 0.2)
+      };
+    });
+  }
+
+  var rats = pickRoster();
+  var cheese = 0, perClick = 1, lastTick = Date.now();
+
+  var BLOCKS = [
+    {id:"b-about",    need:10},
+    {id:"b-projects", need:60},
+    {id:"b-games",    need:200},
+    {id:"b-cv",       need:500},
+    {id:"b-hidden",   need:1200}
+  ];
+
+  var $ = function(id){ return document.getElementById(id); };
+  var countEl=$("count"), rateEl=$("rate"), rosterEl=$("roster"), sumEl=$("hold-sum");
+
+  function fmt(n){
+    if(n>=1000) return Math.floor(n).toLocaleString("en-GB");
+    if(n>=100) return Math.floor(n).toString();
+    return (Math.round(n*10)/10).toString();
+  }
+  function totalRate(){
+    var t=0; for(var i=0;i<rats.length;i++) t += rats[i].qty * rats[i].rate;
+    return t;
+  }
+
+  /* ---------- roster render ---------- */
+  function drawRoster(){
+    rosterEl.innerHTML = "";
+    rats.forEach(function(r,i){
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        '<td><span class="rname">'+r.name+'</span><div class="rdesc">'+r.desc+'</div></td>'+
+        '<td>'+(r.rate===0 ? "0.000" : r.precise.toFixed(3))+'</td>'+
+        '<td class="qty'+(r.qty?"":" zero")+'">'+r.qty+'</td>'+
+        '<td></td>';
+      var btnCell = tr.lastElementChild;
+      var b = document.createElement("button");
+      b.className = "buy";
+      b.textContent = fmt(r.cost);
+      b.setAttribute("aria-label","Hire "+r.name+" for "+fmt(r.cost)+" cheese");
+      b.addEventListener("click", function(){
+        if(cheese < r.cost) return;
+        cheese -= r.cost;
+        r.qty++;
+        r.cost = Math.ceil(r.cost * 1.55);
+        drawRoster(); render();
+      });
+      btnCell.appendChild(b);
+      rosterEl.appendChild(tr);
+    });
+    refreshButtons();
+  }
+  function refreshButtons(){
+    var btns = rosterEl.querySelectorAll(".buy");
+    for(var i=0;i<btns.length;i++){
+      btns[i].disabled = cheese < rats[i].cost;
+      btns[i].textContent = fmt(rats[i].cost);
+    }
+    var owned = rats.filter(function(r){return r.qty>0;}).length;
+    sumEl.textContent = owned + " of " + rats.length + " hired";
+  }
+
+  /* ---------- unlocking ---------- */
+  function unlock(b, animate){
+    var el = $(b.id);
+    if(el.classList.contains("unlocked")) return;
+    el.classList.remove("locked");
+    el.classList.add("unlocked");
+    var need = el.querySelector(".need");
+    if(need) need.textContent = "Unlocked";
+    if(animate){
+      el.classList.add("just-unlocked");
+      setTimeout(function(){ el.classList.remove("just-unlocked"); }, 700);
+    }
+    save("pk_unlocked_"+b.id, "1");
+  }
+  function unlockAll(animate){
+    BLOCKS.forEach(function(b){ unlock(b, animate); });
+  }
+
+  function render(){
+    countEl.textContent = fmt(cheese);
+    rateEl.textContent = totalRate().toFixed(3);
+    BLOCKS.forEach(function(b){
+      if(cheese >= b.need) unlock(b, true);
+    });
+    refreshButtons();
+  }
+
+  /* ---------- interaction ---------- */
+  $("press").addEventListener("click", function(){
+    cheese += perClick;
+    render();
+  });
+  $("skip").addEventListener("click", function(){
+    unlockAll(false);
+    var el = $("b-about");
+    if(el && el.scrollIntoView) el.scrollIntoView({behavior:"smooth", block:"start"});
+  });
+
+  /* returning visitors keep their unlocks, the game itself starts fresh */
+  BLOCKS.forEach(function(b){
+    if(load("pk_unlocked_"+b.id) === "1") unlock(b, false);
+  });
+
+  setInterval(function(){
+    var now = Date.now();
+    var dt = (now - lastTick)/1000;
+    lastTick = now;
+    var r = totalRate();
+    if(r > 0){ cheese += r * dt; render(); }
+  }, 200);
+
+  drawRoster();
+  render();
+})();
+</script>
+</body>
+</html>
