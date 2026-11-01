@@ -116,7 +116,39 @@ section{margin-bottom:34px}
 .rat .lock-note{display:none;font-size:11px;color:var(--ink-soft)}
 .rat.locked .lock-note{display:block}
 
+/* ---------- staff upgrades ---------- */
+.supgs{display:grid;gap:8px}
+.supg{display:flex;align-items:center;gap:12px;border:1px solid var(--rule);background:var(--panel);padding:10px 14px}
+.supg .rat-icon{width:38px}
+.supg .info{flex:1;min-width:0}
+.supg .nm{font-weight:500;font-size:13px}
+.supg .eff{font-size:11px;color:var(--amber-deep)}
+.supg .ds{font-family:var(--serif);font-size:12.5px;color:var(--ink-mid);line-height:1.45}
+.supg-next{font-size:12px;color:var(--ink-soft);border:1px dashed var(--rule);padding:10px 14px}
+
+/* ---------- golden cheese and bonuses ---------- */
+.golden{position:fixed;z-index:40;width:64px;height:64px;padding:0;border:0;background:none;cursor:pointer;
+  animation:g-in .4s ease-out, g-bob 2.2s ease-in-out .4s infinite;-webkit-tap-highlight-color:transparent}
+.golden svg{display:block;width:100%;height:100%}
+.golden.leaving{animation:g-out .5s ease-in forwards}
+@keyframes g-in{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+@keyframes g-out{to{opacity:0;transform:scale(.6)}}
+@keyframes g-bob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
+.toast{position:fixed;z-index:41;pointer-events:none;transform:translate(-50%,-50%);white-space:nowrap;
+  background:var(--panel);border:1px solid var(--amber);color:var(--ink);padding:7px 12px;font-size:13px;font-weight:500;
+  animation:t-up 2.6s ease-out forwards}
+.toast b{color:var(--amber-deep);font-weight:600}
+@keyframes t-up{0%{opacity:0;transform:translate(-50%,-30%)}12%{opacity:1;transform:translate(-50%,-50%)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-120%)}}
+.buff{margin-top:14px;font-size:12px}
+.buff[hidden]{display:none}
+.buff .row{display:flex;justify-content:space-between;gap:10px}
+.buff b{color:var(--amber-deep);font-weight:500}
+.buff .bar{margin-top:5px}
+.boosted{color:var(--amber-deep)}
+
 @media (prefers-reduced-motion:reduce){
+  .golden{animation:none}.golden.leaving{animation:none;opacity:0}
+  .toast{animation:none;opacity:0}
   .pop{animation:none;opacity:0}
   .wheel svg,.bar i{transition:none}
 }
@@ -165,6 +197,17 @@ section{margin-bottom:34px}
           <div><b id="per-press">1</b>per press</div>
         </div>
 
+        <div class="buff" id="buff-bull" hidden role="status">
+          <div class="row"><b>Bull run</b><span id="bull-left"></span></div>
+          <div class="row"><span id="bull-what"></span></div>
+          <div class="bar"><i id="bull-bar"></i></div>
+        </div>
+        <div class="buff" id="buff-paws" hidden role="status">
+          <div class="row"><b>Busy paws</b><span id="paws-left"></span></div>
+          <div class="row"><span id="paws-what"></span></div>
+          <div class="bar"><i id="paws-bar"></i></div>
+        </div>
+
         <div class="paused" id="paused" role="status">
           <span id="paused-text">Paused while the game is open in another tab.</span>
           <br><button type="button" id="play-here">Play here instead</button>
@@ -175,8 +218,13 @@ section{margin-bottom:34px}
 
     <main>
       <section id="upgrades-sec" hidden>
-        <div class="sec-label"><b>Upgrades</b><span id="upg-sum"></span></div>
+        <div class="sec-label"><b>Press upgrades</b><span id="upg-sum"></span></div>
         <div class="upgrades" id="upgrades"></div>
+      </section>
+
+      <section id="supg-sec" hidden>
+        <div class="sec-label"><b>Staff upgrades</b><span id="supg-sum"></span></div>
+        <div class="supgs" id="supgs"></div>
       </section>
 
       <section>
@@ -196,8 +244,8 @@ section{margin-bottom:34px}
 </div>
 
 <!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
-<script src="../js/cheese-core.js?v=5"></script>
-<script src="../js/reginald.js?v=5"></script>
+<script src="../js/cheese-core.js?v=7"></script>
+<script src="../js/reginald.js?v=7"></script>
 <script>
 (function(){
   "use strict";
@@ -305,6 +353,9 @@ section{margin-bottom:34px}
       if(!show) continue;
 
       var q = s.owned[i], m = G.multiplierOf(i), next = G.nextMilestone(i), quote = G.quote(i);
+      var um = G.staffUpMultOf(i);
+      var roleText = ROLES[i] + (um > 1 ? ", upgraded \u00d7" + um : "");
+      if(c.roleEl.textContent !== roleText) c.roleEl.textContent = roleText;
       c.qty.textContent = fmt(q);
       c.qty.className = "rat-qty" + (q ? "" : " zero");
       c.each.innerHTML = "Each <b>" + fmt(G.rateOf(i), true) + "/s</b>";
@@ -387,6 +438,119 @@ section{margin-bottom:34px}
     setTimeout(gone, 1200);
   });
 
+  /* ---------- staff upgrades: shown once you own enough of a rat ---------- */
+  var supgRows = {}, supgNext = el("div","supg-next");
+  $("supgs").appendChild(supgNext);
+  function renderStaffUps(){
+    var avail = 0, owned = 0, nearest = null;
+    G.staffUpgrades.forEach(function(u){
+      if(G.hasStaffUp(u.id)) owned++;
+      var row = supgRows[u.id];
+      if(G.staffUpAvailable(u.id)){
+        avail++;
+        if(!row){
+          var box = el("div","supg");
+          var icon = el("div","rat-icon"); icon.innerHTML = ratIcon(u.tier);
+          var info = el("div","info");
+          info.appendChild(el("div","nm", u.name));
+          info.appendChild(el("div","eff", ROLES[u.tier] + "s produce \u00d72"));
+          info.appendChild(el("div","ds", u.desc));
+          var b = el("button","buy"); b.type = "button";
+          b.addEventListener("click", function(){ G.buyStaffUp(u.id); });
+          box.appendChild(icon); box.appendChild(info); box.appendChild(b);
+          $("supgs").insertBefore(box, supgNext);
+          row = supgRows[u.id] = {box:box, btn:b};
+        }
+        row.btn.textContent = fmt(u.cost);
+        row.btn.disabled = G.state.cheese < u.cost;
+        row.btn.setAttribute("aria-label", "Buy " + u.name + " for " + fmt(u.cost) + " cheese");
+      } else {
+        if(row){ row.box.parentNode.removeChild(row.box); delete supgRows[u.id]; }
+        // The next one to unlock: the step after the last bought, for a revealed tier.
+        if(!G.hasStaffUp(u.id) && G.tierRevealed(u.tier) && (u.step === 0 || G.hasStaffUp("s" + u.tier + "_" + (u.step - 1)))){
+          var need = u.at - G.state.owned[u.tier];
+          if(need > 0 && (!nearest || need < nearest.need)) nearest = {u:u, need:need};
+        }
+      }
+    });
+    supgNext.hidden = !nearest || avail > 0;
+    if(nearest) supgNext.textContent = "Next: hire " + nearest.need + " more " + ROLES[nearest.u.tier] +
+      (nearest.need === 1 ? "" : "s") + " to unlock " + nearest.u.name + ".";
+    $("supg-sec").hidden = !avail && !nearest && !owned;
+    $("supg-sum").textContent = owned + " of " + G.staffUpgrades.length + " owned";
+  }
+
+  /* ---------- golden cheese: appears every few minutes, gone in 12 seconds ---------- */
+  var GOLD_FIRST = [45, 90], GOLD_GAP = [90, 240], GOLD_STAY = 12;
+  var GOLD_SVG = '<svg viewBox="0 0 120 92" aria-hidden="true" focusable="false">' +
+    '<path d="M8 62 L60 12 L112 62 L112 84 L8 84 Z" fill="#E8B21C" stroke="#FFF2B8" stroke-width="3" stroke-linejoin="round"/>' +
+    '<path d="M8 62 L60 12 L112 62 Z" fill="#FFD84A"/>' +
+    '<circle cx="40" cy="73" r="5" fill="#C9930F"/><circle cx="86" cy="76" r="4" fill="#C9930F"/><circle cx="60" cy="42" r="6" fill="#F2C230"/>' +
+    '<path d="M98 18 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3z" fill="#FFF2B8"/>' +
+    '<path d="M16 26 l2 4.5 4.5 2 -4.5 2 -2 4.5 -2 -4.5 -4.5 -2 4.5 -2z" fill="#FFF2B8"/></svg>';
+  var golden = null, goldTimer = null, nextGoldAt = Date.now() + rnd(GOLD_FIRST) * 1000;
+  function rnd(r){ return r[0] + Math.random() * (r[1] - r[0]); }
+
+  function spawnGolden(){
+    golden = el("button","golden"); golden.type = "button";
+    golden.setAttribute("aria-label", "Golden cheese. Click for a bonus");
+    golden.innerHTML = GOLD_SVG;
+    var vw = window.innerWidth || 800, vh = window.innerHeight || 600;
+    // Keep clear of the edges and of Reginald in the bottom right corner.
+    golden.style.left = Math.round(vw * (0.08 + Math.random() * 0.6)) + "px";
+    golden.style.top = Math.round(vh * (0.14 + Math.random() * 0.56)) + "px";
+    golden.addEventListener("click", function(){
+      var g = golden; if(!g) return;
+      var r = g.getBoundingClientRect();
+      var res = G.claimGolden();
+      removeGolden(false);
+      if(res) toast(res, r.left + r.width / 2, r.top + r.height / 2);
+    });
+    document.body.appendChild(golden);
+    goldTimer = setTimeout(function(){ removeGolden(true); }, GOLD_STAY * 1000);
+  }
+  function removeGolden(fade){
+    clearTimeout(goldTimer);
+    var g = golden; golden = null;
+    nextGoldAt = Date.now() + rnd(GOLD_GAP) * 1000;
+    if(!g) return;
+    if(fade){ g.classList.add("leaving"); setTimeout(function(){ if(g.parentNode) g.parentNode.removeChild(g); }, 600); }
+    else if(g.parentNode) g.parentNode.removeChild(g);
+  }
+  function toast(res, x, y){
+    var t = el("div","toast");
+    var strong = el("b", null, res.label + "!");
+    t.appendChild(strong);
+    t.appendChild(document.createTextNode(res.kind === "windfall" ? " +" + fmt(res.amount) + " cheese"
+      : res.kind === "bull" ? " Output \u00d7" + res.mult + " for " + res.seconds + "s"
+      : " Presses \u00d7" + res.mult + " for " + res.seconds + "s"));
+    t.setAttribute("role","status");
+    var vw = window.innerWidth || 800;
+    t.style.left = Math.max(110, Math.min(vw - 110, x)) + "px";
+    t.style.top = y + "px";
+    document.body.appendChild(t);
+    setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 2700);
+  }
+  setInterval(function(){
+    // Only for someone actually here: active tab, visible page.
+    if(golden || document.visibilityState === "hidden" || !G.isActive()) return;
+    if(Date.now() >= nextGoldAt) spawnGolden();
+  }, 1000);
+
+  function renderBuffs(){
+    [["bull", G.buffActive("bull"), G.golden.bull.seconds], ["paws", G.buffActive("paws"), G.golden.paws.seconds]].forEach(function(b){
+      var box = $("buff-" + b[0]);
+      box.hidden = !b[1];
+      if(b[1]){
+        var left = G.buffLeft(b[0]);
+        $(b[0] + "-left").textContent = Math.ceil(left) + "s";
+        $(b[0] + "-bar").style.width = Math.max(0, Math.min(100, left / b[2] * 100)).toFixed(1) + "%";
+      }
+    });
+    $("rate").classList.toggle("boosted", G.buffActive("bull"));
+    $("per-press").classList.toggle("boosted", G.buffActive("paws"));
+  }
+
   /* ---------- buy mode ---------- */
   var modeBtns = document.querySelectorAll(".buymode button");
   for(var mb=0;mb<modeBtns.length;mb++){
@@ -416,13 +580,18 @@ section{margin-bottom:34px}
       modeBtns[m].setAttribute("aria-pressed", String(Number(modeBtns[m].getAttribute("data-mode")) === s.buyMode));
     }
     renderUpgrades();
+    renderStaffUps();
     renderStaff();
+    renderBuffs();
   }
 
   // Reginald only does facts here; his tutorial lives on the main page.
   if(window.Reginald) window.Reginald.setTutorial(false);
 
   G.start(render);
+  $("bull-what").textContent = "Output \u00d7" + G.golden.bull.mult;
+  $("paws-what").textContent = "Presses \u00d7" + G.golden.paws.mult;
+  setInterval(renderBuffs, 250);
 })();
 </script>
 <script data-goatcounter="https://puranjay.goatcounter.com/count"

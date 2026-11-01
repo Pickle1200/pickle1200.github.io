@@ -13,7 +13,7 @@
   // The version of this code. Bump it on every release, together with the
   // ?v= on the script tags. An older tab that sees a newer version has run
   // stops saving and asks to be refreshed, so it can never clash with it.
-  var CODE_VERSION = 5;
+  var CODE_VERSION = 7;
   var CODE_KEY = "pk_cheese_code";
   var TICK_MS = 200;
   var AUTOSAVE_MS = 5000;
@@ -59,6 +59,59 @@
       desc: "Each press earns a further 5% of your cheese per second. Taxed as cheese." }
   ];
   var BUY_MODES = [1, 10, 0];   // 0 means max
+
+  /* ---------- staff upgrades (sold on /cheese) ----------
+     Four per tier, each doubling that tier's output. One appears once you
+     own 5, 15, 30 and 60 of that rat, priced at 25, 200, 5,000 and 100,000
+     times the tier's first price. Modelled: early pacing barely changes, and
+     after an hour or two you're making 2 to 5 times more. */
+  var STAFF_UP_AT = [5, 15, 30, 60];
+  var STAFF_UP_COST = [25, 200, 5000, 100000];
+  var STAFF_UP_NAMES = [
+    [["Free coffee", "The coffee is not free."],
+     ["Keyboard shortcuts", "Ctrl+C, Ctrl+V, Ctrl+Cheese."],
+     ["Return offer", "Suddenly very motivated."],
+     ["Graduate scheme", "They\u2019re staying."]],
+    [["Second monitor", "Twice the screens, twice the cheese."],
+     ["Pivot tables", "Finally understood."],
+     ["INDEX MATCH", "VLOOKUP is for interns."],
+     ["Model audit", "Found the circular reference."]],
+    [["Better slides", "Same content, nicer fonts."],
+     ["Client lunch", "Expensed."],
+     ["Deal team", "Associates can now delegate."],
+     ["Promotion chat", "Not this year, but soon."]],
+    [["Noise-cancelling headset", "Hears only cheese."],
+     ["Second phone", "One for clients, one for cheese."],
+     ["Corner desk", "Natural light. Output doubles."],
+     ["Golf membership", "Most of the work happens on the ninth hole."]],
+    [["Board seat", "Votes for more cheese, every time."],
+     ["Chauffeur", "Reads the numbers on the way in."],
+     ["Private office", "The door is always closed."],
+     ["Bowler hat polish", "Morale has never been higher."]],
+    [["Name on the door", "Brass, naturally."],
+     ["Partners\u2019 dinner", "Nobody remembers who paid."],
+     ["Second home", "In the Cotswolds. Works remotely."],
+     ["Retirement, deferred", "Simply enjoys it too much."]]
+  ];
+  var STAFF_UPGRADES = [];
+  for (var su = 0; su < STAFF_UP_NAMES.length; su++) {
+    for (var sk = 0; sk < 4; sk++) {
+      STAFF_UPGRADES.push({
+        id: "s" + su + "_" + sk, tier: su, step: sk,
+        at: STAFF_UP_AT[sk], cost: TIERS[su].cost * STAFF_UP_COST[sk],
+        name: STAFF_UP_NAMES[su][sk][0], desc: STAFF_UP_NAMES[su][sk][1]
+      });
+    }
+  }
+
+  /* ---------- golden cheese bonuses (spawned by /cheese) ---------- */
+  var GOLDEN = {
+    windfall: { label: "Windfall" },
+    // Tuned to be worth roughly one windfall each: a bull run adds about 50
+    // seconds of output; busy paws rewards tapping without dwarfing everything.
+    bull:     { label: "Bull run", mult: 3, seconds: 25 },
+    paws:     { label: "Busy paws", mult: 5, seconds: 15 }
+  };
 
   /* ---------- rat pool: who staffs each tier is rerolled every visit ---------- */
   var POOL = [
@@ -129,6 +182,9 @@
       upgrades: {},         // upgrade id -> true
       buyMode: 1,           // 1, 10, or 0 for max
       reginald: { done: false, seen: [], factsOff: false },
+      staffUps: {},         // staff upgrade id -> true
+      buffs: { prodMult: 1, prodUntil: 0, pressMult: 1, pressUntil: 0 },
+      goldenClicks: 0,
       savedAt: 0
     };
   }
@@ -157,6 +213,20 @@
       }
     }
     if (BUY_MODES.indexOf(d.buyMode) !== -1) s.buyMode = d.buyMode;
+    if (d.staffUps && typeof d.staffUps === "object") {
+      for (var x = 0; x < STAFF_UPGRADES.length; x++) {
+        if (d.staffUps[STAFF_UPGRADES[x].id] === true) s.staffUps[STAFF_UPGRADES[x].id] = true;
+      }
+    }
+    if (d.buffs && typeof d.buffs === "object") {
+      // Only the bonuses golden cheese can actually give, so a save can't be edited into a cheat.
+      if (d.buffs.prodMult === GOLDEN.bull.mult) { s.buffs.prodMult = GOLDEN.bull.mult; s.buffs.prodUntil = num(d.buffs.prodUntil); }
+      if (d.buffs.pressMult === GOLDEN.paws.mult) { s.buffs.pressMult = GOLDEN.paws.mult; s.buffs.pressUntil = num(d.buffs.pressUntil); }
+      var limit = Date.now() + 60000;
+      if (s.buffs.prodUntil > limit) s.buffs.prodUntil = 0;
+      if (s.buffs.pressUntil > limit) s.buffs.pressUntil = 0;
+    }
+    s.goldenClicks = whole(d.goldenClicks);
     if (d.reginald && typeof d.reginald === "object") {
       s.reginald.done = d.reginald.done === true;
       s.reginald.factsOff = d.reginald.factsOff === true;
@@ -402,12 +472,33 @@
   }
   function revealAt(tier) { return TIERS[tier].cost / 2; }
 
-  // What one rat of this tier currently makes per second.
-  function rateOf(tier) { return TIERS[tier].rate * multiplierOf(tier); }
-  function totalRate() {
+  // Doubling from staff upgrades bought for this tier.
+  function staffUpMultOf(tier) {
+    var m = 1;
+    for (var k = 0; k < 4; k++) if (state.staffUps["s" + tier + "_" + k]) m *= 2;
+    return m;
+  }
+
+  // What one rat of this tier currently makes per second (before golden bonuses).
+  function rateOf(tier) { return TIERS[tier].rate * multiplierOf(tier) * staffUpMultOf(tier); }
+
+  function buffActive(kind) {
+    var now = Date.now();
+    if (kind === "bull") return state.buffs.prodMult > 1 && now < state.buffs.prodUntil;
+    if (kind === "paws") return state.buffs.pressMult > 1 && now < state.buffs.pressUntil;
+    return false;
+  }
+  function buffLeft(kind) {
+    if (!buffActive(kind)) return 0;
+    return ((kind === "bull" ? state.buffs.prodUntil : state.buffs.pressUntil) - Date.now()) / 1000;
+  }
+  function baseRate() {
     var t = 0;
     for (var i = 0; i < TIERS.length; i++) t += state.owned[i] * rateOf(i);
     return t;
+  }
+  function totalRate() {
+    return baseRate() * (buffActive("bull") ? state.buffs.prodMult : 1);
   }
 
   /* ---------- pressing ---------- */
@@ -419,7 +510,8 @@
       if (u.press) v *= u.press;
       if (u.share) share += u.share;
     }
-    return v + share * totalRate();
+    v = v + share * totalRate();
+    return buffActive("paws") ? v * state.buffs.pressMult : v;
   }
 
   function press() {
@@ -489,6 +581,58 @@
     var u = upgradeById(id);
     return !!u && (hasUpgrade(id) || state.lifetime >= u.cost / 2);
   }
+  /* ---------- staff upgrades ---------- */
+  function staffUpById(id) {
+    for (var i = 0; i < STAFF_UPGRADES.length; i++) if (STAFF_UPGRADES[i].id === id) return STAFF_UPGRADES[i];
+    return null;
+  }
+  function hasStaffUp(id) { return state.staffUps[id] === true; }
+  // Available to buy: you own enough of the rat and haven't bought it yet.
+  function staffUpAvailable(id) {
+    var u = staffUpById(id);
+    return !!u && !hasStaffUp(id) && state.owned[u.tier] >= u.at;
+  }
+  function buyStaffUp(id) {
+    if (!active) { claim(); return false; }
+    var u = staffUpById(id);
+    if (!u || !staffUpAvailable(id) || state.cheese < u.cost) return false;
+    state.cheese -= u.cost;
+    state.staffUps[id] = true;
+    dirty = true;
+    save();
+    onChange();
+    return true;
+  }
+
+  /* ---------- golden cheese ---------- */
+  // Picks and applies a bonus. Returns {kind, label, amount} for the page to show.
+  function claimGolden() {
+    if (!active) { claim(); return null; }
+    var roll = Math.random(), kind = roll < 0.5 ? "windfall" : roll < 0.85 ? "bull" : "paws";
+    var out = { kind: kind, label: GOLDEN[kind].label, amount: 0 };
+    if (kind === "windfall") {
+      // 15% of what you hold or 10 minutes of output, whichever is smaller,
+      // and never less than 25 presses' worth.
+      var amt = Math.min(state.cheese * 0.15 + 13, baseRate() * 600 + 13);
+      amt = Math.max(amt, perPress() * 25);
+      earn(amt);
+      out.amount = amt;
+    } else if (kind === "bull") {
+      state.buffs.prodMult = GOLDEN.bull.mult;
+      state.buffs.prodUntil = Date.now() + GOLDEN.bull.seconds * 1000;
+      out.mult = GOLDEN.bull.mult; out.seconds = GOLDEN.bull.seconds;
+    } else {
+      state.buffs.pressMult = GOLDEN.paws.mult;
+      state.buffs.pressUntil = Date.now() + GOLDEN.paws.seconds * 1000;
+      out.mult = GOLDEN.paws.mult; out.seconds = GOLDEN.paws.seconds;
+    }
+    state.goldenClicks++;
+    dirty = true;
+    save();
+    onChange();
+    return out;
+  }
+
   function buyUpgrade(id) {
     if (!active) { claim(); return false; }
     var u = upgradeById(id);
@@ -591,6 +735,16 @@
     isUnlocked: isUnlocked,
     save: save,
     reset: reset,
+    staffUpgrades: STAFF_UPGRADES,
+    staffUpMultOf: staffUpMultOf,
+    hasStaffUp: hasStaffUp,
+    staffUpAvailable: staffUpAvailable,
+    buyStaffUp: buyStaffUp,
+    claimGolden: claimGolden,
+    golden: GOLDEN,
+    buffActive: buffActive,
+    buffLeft: buffLeft,
+    baseRate: baseRate,
     isActive: isActive,
     isOutdated: isOutdated,
     start: start
