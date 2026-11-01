@@ -216,14 +216,51 @@
   }
 
   /* ---------- roster ---------- */
-  function rollRoster() {
-    var pool = POOL.slice(), out = [];
-    for (var i = 0; i < TIERS.length; i++) {
-      var j = Math.floor(Math.random() * pool.length);
-      var r = pool.splice(j, 1)[0];
-      out.push({ name: r[0], desc: r[1] });
+  /* The roster is rolled once per visit and shared by every page and tab, so
+     the main page and /cheese show the same staff. A visit ends after 30
+     minutes with no activity; the next page load after that rolls new staff. */
+  var ROSTER_KEY = "pk_cheese_roster";
+  var VISIT_GAP_MS = 30 * 60 * 1000;
+  var rosterIds = [];
+
+  function rosterFromIds(ids) {
+    return ids.map(function (j) { return { name: POOL[j][0], desc: POOL[j][1] }; });
+  }
+  function validIds(ids) {
+    if (Object.prototype.toString.call(ids) !== "[object Array]" || ids.length !== TIERS.length) return false;
+    var seenIds = {};
+    for (var i = 0; i < ids.length; i++) {
+      var j = ids[i];
+      if (typeof j !== "number" || j % 1 !== 0 || j < 0 || j >= POOL.length || seenIds[j]) return false;
+      seenIds[j] = true;
     }
-    return out;
+    return true;
+  }
+  function readRoster() {
+    try {
+      var r = JSON.parse(rawGet(ROSTER_KEY));
+      if (r && validIds(r.ids) && typeof r.seen === "number") return r;
+    } catch (e) {}
+    return null;
+  }
+  function writeRoster() {
+    rawSet(ROSTER_KEY, JSON.stringify({ ids: rosterIds, seen: Date.now() }));
+  }
+  // allowNew: only a fresh page load may start a new visit and roll new staff.
+  function useRoster(allowNew) {
+    var r = readRoster();
+    if (r && (!allowNew || Date.now() - r.seen < VISIT_GAP_MS)) {
+      rosterIds = r.ids.slice();
+    } else if (allowNew || !rosterIds.length) {
+      var order = [];
+      for (var k = 0; k < POOL.length; k++) order.push(k);
+      rosterIds = [];
+      for (var i = 0; i < TIERS.length; i++) {
+        rosterIds.push(order.splice(Math.floor(Math.random() * order.length), 1)[0]);
+      }
+    }
+    roster = rosterFromIds(rosterIds);
+    writeRoster();
   }
 
   /* ---------- number formatting: 999, 1.23K, 45.6M, 789B, 1.5T, then 1.23e15 ---------- */
@@ -251,11 +288,70 @@
 
   /* ---------- game ---------- */
   var state = loadState();
-  var roster = rollRoster();
+  var roster = [];
+  useRoster(true);
   var lastTick = Date.now();
   var dirty = false;
   var onChange = function () {};
   var started = false;
+
+  /* ---------- one active tab ----------
+     If the game is open in several tabs (say / and /cheese), only the tab you
+     are looking at plays. Switching to a tab makes it take over: the old tab
+     saves and pauses, the new one loads that save and carries on. Paused tabs
+     follow the save so their numbers stay current. */
+  var LOCK_KEY = "pk_cheese_active";
+  var TAB_ID = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  var active = true, claiming = false, claimTimer = null;
+  var HANDOVER_WAIT_MS = 400;
+
+  function lockOwner() {
+    try { var l = JSON.parse(rawGet(LOCK_KEY)); return l && typeof l.id === "string" ? l.id : null; }
+    catch (e) { return null; }
+  }
+  function activate() {
+    clearTimeout(claimTimer);
+    claiming = false;
+    state = loadState();
+    useRoster(false);
+    lastTick = Date.now();
+    active = true;
+    dirty = false;
+    onChange();
+  }
+  function claim() {
+    if (!storageOK || claiming) return;   // already taking over: wait for it
+    var owner = lockOwner();
+    if (owner === TAB_ID && active) return;
+    active = false;
+    rawSet(LOCK_KEY, JSON.stringify({ id: TAB_ID, t: Date.now() }));
+    if (!owner || owner === TAB_ID) { activate(); return; }
+    // Another tab was playing: wait briefly for its final save, then load it.
+    claiming = true;
+    clearTimeout(claimTimer);
+    claimTimer = setTimeout(activate, HANDOVER_WAIT_MS);
+  }
+  function onStorage(e) {
+    if (!e || !e.key) return;
+    if (e.key === LOCK_KEY) {
+      var id = null;
+      try { id = JSON.parse(e.newValue).id; } catch (x) {}
+      if (id && id !== TAB_ID && (active || claiming)) {
+        if (active) save(true);          // hand over the latest progress
+        active = false;
+        claiming = false;
+        clearTimeout(claimTimer);
+        onChange();
+      }
+    } else if (e.key === ROSTER_KEY) {
+      var r = readRoster();
+      if (r && r.ids.join() !== rosterIds.join()) { rosterIds = r.ids.slice(); roster = rosterFromIds(rosterIds); onChange(); }
+    } else if (e.key === SAVE_KEY) {
+      if (claiming) activate();
+      else if (!active) { state = loadState(); onChange(); }
+    }
+  }
+  function isActive() { return active; }
 
   function earn(amount) {
     if (!(amount > 0)) return;
@@ -278,6 +374,13 @@
     for (var i = 0; i < MILESTONES.length; i++) if (n < MILESTONES[i]) return MILESTONES[i];
     return null;
   }
+  // A tier is revealed once you own one, or once you've earned half its
+  // first price in total. Until then pages show it greyed out, as "???".
+  function tierRevealed(tier) {
+    return tier === 0 || state.owned[tier] > 0 || state.lifetime >= TIERS[tier].cost / 2;
+  }
+  function revealAt(tier) { return TIERS[tier].cost / 2; }
+
   // What one rat of this tier currently makes per second.
   function rateOf(tier) { return TIERS[tier].rate * multiplierOf(tier); }
   function totalRate() {
@@ -299,6 +402,7 @@
   }
 
   function press() {
+    if (!active) { claim(); return; }
     earn(perPress());
     state.clicks++;
     onChange();
@@ -333,6 +437,8 @@
   }
 
   function buy(tier) {
+    if (!active) { claim(); return false; }
+    if (!tierRevealed(tier)) return false;
     var q = quote(tier);
     if (!q.affordable) return false;
     state.cheese -= q.cost;
@@ -345,6 +451,7 @@
   }
 
   function setBuyMode(mode) {
+    if (!active) { claim(); return; }
     if (BUY_MODES.indexOf(mode) === -1) return;
     state.buyMode = mode;
     dirty = true;
@@ -362,6 +469,7 @@
     return !!u && (hasUpgrade(id) || state.lifetime >= u.cost / 2);
   }
   function buyUpgrade(id) {
+    if (!active) { claim(); return false; }
     var u = upgradeById(id);
     if (!u || hasUpgrade(id) || state.cheese < u.cost) return false;
     state.cheese -= u.cost;
@@ -374,6 +482,7 @@
 
   function unlock(id) {
     if (state.unlocked[id]) return false;
+    if (!active) return false;
     state.unlocked[id] = true;
     save();
     return true;
@@ -384,16 +493,18 @@
     var now = Date.now();
     var dt = (now - lastTick) / 1000;
     lastTick = now;
-    if (dt <= 0) return;
+    if (!active || dt <= 0) return;
     if (dt > MAX_STEP_SECONDS) dt = MAX_STEP_SECONDS;
     var r = totalRate();
     if (r > 0) { earn(r * dt); onChange(); }
   }
 
-  function save() {
+  function save(force) {
     if (newerSaveExists) return;
+    if (!active && force !== true) return;
     state.savedAt = Date.now();
     rawSet(SAVE_KEY, JSON.stringify(state));
+    writeRoster();                       // activity keeps the visit (and its staff) going
     dirty = false;
   }
 
@@ -413,11 +524,18 @@
     setInterval(tick, TICK_MS);
     setInterval(function () { if (dirty) save(); }, AUTOSAVE_MS);
     // Save when the tab is hidden or closed. pagehide is the reliable one on phones.
-    global.addEventListener("pagehide", save);
+    global.addEventListener("pagehide", function () {
+      save();
+      // Give up the claim on closing, so the next page load starts instantly.
+      if (active && lockOwner() === TAB_ID) rawRemove(LOCK_KEY);
+    });
     global.document.addEventListener("visibilitychange", function () {
       if (global.document.visibilityState === "hidden") save();
-      else tick();
+      else { claim(); tick(); }
     });
+    global.addEventListener("focus", claim);
+    global.addEventListener("storage", onStorage);
+    claim();
     onChange();
   }
 
@@ -438,6 +556,8 @@
     buyUpgrade: buyUpgrade,
     rateOf: rateOf,
     multiplierOf: multiplierOf,
+    tierRevealed: tierRevealed,
+    revealAt: revealAt,
     nextMilestone: nextMilestone,
     format: format,
     totalRate: totalRate,
@@ -447,6 +567,7 @@
     isUnlocked: isUnlocked,
     save: save,
     reset: reset,
+    isActive: isActive,
     start: start
   };
 })(window);

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cheese · Puranjay Kumar</title>
+<meta name="description" content="The full cheese game from puranjaykumar.com.">
+<!-- Hidden from search engines until the page is linked from the main site -->
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14120E;
+  --panel:#1C1913;
+  --ink:#EFE9DC;
+  --ink-soft:#968C7B;
+  --ink-mid:#B5AB98;
+  --amber:#E0A72B;
+  --amber-deep:#F0BC4B;
+  --rule:#2F2A22;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --serif:"IBM Plex Serif",Georgia,serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:14px;line-height:1.55;padding:0 20px 120px}
+.wrap{max-width:980px;margin:0 auto}
+a{color:inherit}
+button{font-family:var(--mono)}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+
+/* ---------- top bar ---------- */
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:20px;padding:26px 0 20px;border-bottom:1px solid var(--rule);margin-bottom:30px}
+.name{font-weight:600;letter-spacing:-0.03em;font-size:21px;text-decoration:none}
+.sub{font-size:11.5px;color:var(--ink-soft);margin-top:4px}
+.back{font-size:12px;color:var(--ink-soft);text-decoration:none;border-bottom:1px solid var(--ink-soft);padding-bottom:2px;white-space:nowrap}
+.back:hover{color:var(--ink);border-color:var(--ink)}
+
+/* ---------- layout ---------- */
+.game{display:grid;gap:30px}
+@media (min-width:820px){
+  .game{grid-template-columns:300px minmax(0,1fr);align-items:start}
+  .side{position:sticky;top:20px}
+}
+
+/* ---------- the cheese panel ---------- */
+.ledger{border:1px solid var(--rule);background:var(--panel);padding:20px}
+.count{font-size:clamp(40px,8vw,52px);font-weight:500;letter-spacing:-0.045em;line-height:1;font-variant-numeric:tabular-nums}
+.count-label{font-size:11px;color:var(--ink-soft);margin-top:8px}
+.rates{display:flex;justify-content:space-between;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid var(--rule);font-size:11px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.rates b{display:block;color:var(--ink);font-size:16px;font-weight:500}
+.rates div:last-child{text-align:right}
+
+.wheel-wrap{position:relative;margin-top:18px;user-select:none;-webkit-user-select:none}
+.wheel{display:block;width:100%;padding:14px 0 6px;background:none;border:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.wheel svg{display:block;width:78%;margin:0 auto;transition:transform .08s ease}
+.wheel:active svg,.wheel.squish svg{transform:scale(.94)}
+.wheel-hint{text-align:center;font-size:11px;color:var(--ink-soft);margin-top:2px}
+.pop{position:absolute;z-index:2;pointer-events:none;font-weight:600;font-size:17px;color:var(--ink);white-space:nowrap;
+  text-shadow:0 0 2px #14120E,0 0 2px #14120E,0 1px 3px #14120E;transform:translate(-50%,-50%);animation:pop .9s ease-out forwards}
+@keyframes pop{0%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(-50%,-260%)}}
+
+.paused{display:none;margin-top:14px;border:1px solid var(--amber);padding:10px 12px;font-size:12px;line-height:1.5}
+.paused.on{display:block}
+.paused button{margin-top:8px;background:var(--amber);border:0;color:#14120E;font-weight:600;font-size:11px;letter-spacing:.06em;padding:6px 12px;cursor:pointer}
+.shared{font-size:11px;color:var(--ink-soft);margin-top:12px;line-height:1.5}
+
+/* ---------- section labels ---------- */
+.sec-label{font-size:11px;color:var(--ink-soft);padding-bottom:7px;border-bottom:1px solid var(--rule);margin-bottom:14px;display:flex;justify-content:space-between;gap:12px}
+.sec-label b{font-weight:500;color:var(--ink);font-size:12px}
+section{margin-bottom:34px}
+
+/* ---------- buttons ---------- */
+.buy{font-size:11px;letter-spacing:.04em;padding:6px 11px;border:1px solid var(--rule);background:transparent;color:var(--ink);cursor:pointer;white-space:nowrap;font-variant-numeric:tabular-nums}
+.buy:hover:not(:disabled){background:var(--amber);border-color:var(--amber);color:#14120E}
+.buy:disabled{opacity:.35;cursor:default}
+
+.buymode{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-soft)}
+.buymode button{font-size:11px;padding:3px 9px;cursor:pointer;border:1px solid var(--rule);background:transparent;color:var(--ink-soft)}
+.buymode button[aria-pressed="true"]{border-color:var(--amber);color:var(--amber-deep)}
+
+/* ---------- upgrades ---------- */
+.upgrades{display:grid;gap:8px}
+.upg{display:flex;justify-content:space-between;align-items:center;gap:16px;border:1px solid var(--rule);background:var(--panel);padding:11px 14px}
+.upg .nm{font-weight:500;font-size:13px}
+.upg .ds{font-family:var(--serif);font-size:12.5px;color:var(--ink-mid);margin-top:2px;line-height:1.45}
+.upg.owned{background:transparent}
+.upg.owned .nm{color:var(--ink-soft)}
+.owned-tag{font-size:11px;color:var(--ink-soft);white-space:nowrap}
+
+/* ---------- staff cards ---------- */
+.staff{display:grid;gap:12px}
+@media (min-width:560px){.staff{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.rat{border:1px solid var(--rule);background:var(--panel);padding:14px;display:flex;flex-direction:column;gap:10px}
+.rat-head{display:flex;align-items:center;gap:10px}
+.rat-icon{width:46px;flex:none}
+.rat-icon svg{display:block;width:100%;height:auto}
+.rat-id{flex:1;min-width:0}
+.rat-name{font-weight:500;font-size:14px}
+.rat-role{font-size:11px;color:var(--ink-soft)}
+.rat-qty{font-size:20px;font-weight:500;font-variant-numeric:tabular-nums}
+.rat-qty.zero{color:var(--ink-soft);font-weight:400}
+.rat .ds{font-family:var(--serif);font-size:12.5px;color:var(--ink-mid);line-height:1.45}
+.rat-stats{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.rat-stats b{color:var(--ink);font-weight:500}
+.bar{height:4px;background:var(--rule)}
+.bar i{display:block;height:100%;background:var(--amber);transition:width .25s ease}
+.rat-foot{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.mile{font-size:11px;color:var(--ink-soft)}
+.rat.locked{border-style:dashed;background:transparent}
+.rat.locked .rat-name{color:var(--ink-soft);letter-spacing:.2em}
+.rat .open-view{display:flex;flex-direction:column;gap:10px}
+.rat.locked .open-view{display:none}
+.rat .lock-note{display:none;font-size:11px;color:var(--ink-soft)}
+.rat.locked .lock-note{display:block}
+
+@media (prefers-reduced-motion:reduce){
+  .pop{animation:none;opacity:0}
+  .wheel svg,.bar i{transition:none}
+}
+@media (max-width:520px){
+  body{padding:0 14px 120px}
+  .wheel svg{width:62%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <a class="name" href="/">Puranjay Kumar</a>
+      <div class="sub">Cheese, the full game</div>
+    </div>
+    <a class="back" href="/">Back to the portfolio</a>
+  </div>
+
+  <div class="game">
+    <aside class="side">
+      <div class="ledger">
+        <div class="count" id="count">0</div>
+        <div class="count-label">cheese</div>
+
+        <div class="wheel-wrap" id="wheel-wrap">
+          <button class="wheel" id="wheel" type="button" aria-label="Press for cheese">
+            <svg viewBox="0 0 120 92" aria-hidden="true" focusable="false">
+              <path d="M8 62 L60 12 L112 62 L112 84 L8 84 Z" fill="#C48E1C"/>
+              <path d="M8 62 L60 12 L112 62 Z" fill="#F0BC4B"/>
+              <path d="M8 62 L112 62 L112 84 L8 84 Z" fill="#E0A72B"/>
+              <circle cx="40" cy="73" r="5.5" fill="#A87612"/>
+              <circle cx="86" cy="76" r="4" fill="#A87612"/>
+              <circle cx="100" cy="68" r="2.5" fill="#A87612"/>
+              <circle cx="60" cy="42" r="6" fill="#E0A72B"/>
+              <circle cx="78" cy="53" r="3.5" fill="#E0A72B"/>
+              <circle cx="44" cy="54" r="2.5" fill="#E0A72B"/>
+            </svg>
+          </button>
+          <div class="wheel-hint">Tap the cheese</div>
+        </div>
+
+        <div class="rates">
+          <div><b id="rate">0</b>per second</div>
+          <div><b id="per-press">1</b>per press</div>
+        </div>
+
+        <div class="paused" id="paused" role="status">
+          Paused while the game is open in another tab.
+          <br><button type="button" id="play-here">Play here instead</button>
+        </div>
+      </div>
+      <p class="shared">Progress is shared with the cheese game on the main page.</p>
+    </aside>
+
+    <main>
+      <section id="upgrades-sec" hidden>
+        <div class="sec-label"><b>Upgrades</b><span id="upg-sum"></span></div>
+        <div class="upgrades" id="upgrades"></div>
+      </section>
+
+      <section>
+        <div class="sec-label">
+          <b>Staff</b>
+          <div class="buymode" role="group" aria-label="How many to hire at once">
+            <span>Hire</span>
+            <button type="button" data-mode="1">1</button>
+            <button type="button" data-mode="10">10</button>
+            <button type="button" data-mode="0">Max</button>
+          </div>
+        </div>
+        <div class="staff" id="staff"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
+<script src="../js/cheese-core.js?v=4"></script>
+<script src="../js/reginald.js?v=4"></script>
+<script>
+(function(){
+  "use strict";
+  var G = window.CheeseCore;
+  var $ = function(id){ return document.getElementById(id); };
+  if(!G){
+    $("wheel").disabled = true;
+    document.querySelector(".wheel-hint").textContent = "The game could not load. Try refreshing.";
+    return;
+  }
+  var fmt = G.format;
+
+  /* ---------- tiers: a finance career ladder ---------- */
+  var ROLES = ["Intern", "Analyst", "Associate", "Vice President", "Director", "Partner"];
+
+  // A small rat, with an accessory for each rung of the ladder.
+  // Locked tiers show as a dark silhouette: the shape of the outfit, nothing more.
+  function silhouette(svg){
+    return svg.replace(/fill="(#[0-9A-Fa-f]+|rgba\([^)]*\))"/g, 'fill="#2F2A22"')
+              .replace(/stroke="#[0-9A-Fa-f]+"/g, 'stroke="#2F2A22"');
+  }
+  function ratIcon(tier){
+    var acc = [
+      // Intern: lanyard and pass
+      '<path d="M17 26 L21 31 L25 26" fill="none" stroke="#D8D2C4" stroke-width=".9"/><rect x="18.5" y="30.5" width="5" height="4" rx=".6" fill="#EFE9DC"/><rect x="19.5" y="31.6" width="3" height=".8" fill="#8A8478"/>',
+      // Analyst: tie with a knot
+      '<rect x="18.4" y="24.6" width="4" height="2.6" rx=".6" fill="#F0BC4B"/><polygon points="18.8,27 22,27 23.2,35 20.4,38 17.6,35" fill="#E0A72B"/>',
+      // Associate: side-on glasses, lens over the eye, arm back to the ear
+      '<rect x="8.6" y="14.4" width="7.2" height="5.4" rx="1.6" fill="rgba(239,233,220,.12)" stroke="#EFE9DC" stroke-width="1.1"/><line x1="15.8" y1="16" x2="22.5" y2="14" stroke="#EFE9DC" stroke-width="1.1"/>',
+      // Vice President: headset with a mic in front of the snout
+      '<path d="M9.5 13 C10 4 24 3 25.5 10.5" fill="none" stroke="#D8D2C4" stroke-width="1.8" stroke-linecap="round"/><circle cx="24.5" cy="13" r="3.2" fill="#3A342B" stroke="#D8D2C4" stroke-width="1"/><path d="M23 15.5 C20 21 13 24 7 24.5" fill="none" stroke="#D8D2C4" stroke-width="1.1" stroke-linecap="round"/><circle cx="6.6" cy="24.5" r="1.5" fill="#EFE9DC"/>',
+      // Director: bowler hat, outlined so it shows on the dark card
+      '<ellipse cx="18" cy="10.2" rx="11.5" ry="2.4" fill="#1E1B17" stroke="#7A6F60" stroke-width=".9"/><path d="M11.2 10 C11.2 1 24.8 1 24.8 10 Z" fill="#1E1B17" stroke="#7A6F60" stroke-width=".9"/><rect x="11.4" y="7.2" width="13.2" height="1.8" fill="#E0A72B"/>',
+      // Partner: crown
+      '<path d="M10.5 10.5 L12 2.5 L15.5 7 L18.5 1.5 L21.5 7 L25 2.5 L26.5 10.5 Z" fill="#E0A72B" stroke="#F0BC4B" stroke-width=".6"/><circle cx="18.5" cy="7.6" r="1.1" fill="#C0392B"/>'
+    ][tier] || '';
+    return '<svg viewBox="0 0 48 40" aria-hidden="true" focusable="false">' +
+      '<path d="M38 31 C46 33 47 24 44 21" fill="none" stroke="#C99A95" stroke-width="2" stroke-linecap="round"/>' +
+      '<ellipse cx="29" cy="28" rx="13" ry="9" fill="#8A8478"/>' +
+      '<circle cx="24" cy="12" r="5" fill="#8A8478"/><circle cx="24" cy="12" r="3" fill="#C99A95"/>' +
+      '<ellipse cx="16" cy="19" rx="11" ry="9" fill="#8A8478"/>' +
+      '<ellipse cx="7.5" cy="22" rx="6" ry="4.5" fill="#8A8478"/>' +
+      '<circle cx="2.8" cy="22" r="2" fill="#D98C8C"/>' +
+      '<circle cx="12" cy="17" r="1.6" fill="#14120E"/>' +
+      '<ellipse cx="22" cy="37" rx="4" ry="1.8" fill="#C99A95"/><ellipse cx="34" cy="37" rx="4" ry="1.8" fill="#C99A95"/>' +
+      acc + '</svg>';
+  }
+
+  /* ---------- staff cards ---------- */
+  var staffEl = $("staff"), cards = [];
+  function el(tag, cls, text){ var e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; }
+
+  G.roster.forEach(function(r, i){
+    var card = el("article","rat");
+    var head = el("div","rat-head");
+    var icon = el("div","rat-icon");
+    var id = el("div","rat-id");
+    var nameEl = el("div","rat-name"), roleEl = el("div","rat-role");
+    id.appendChild(nameEl); id.appendChild(roleEl);
+    var qty = el("div","rat-qty zero","0");
+    head.appendChild(icon); head.appendChild(id); head.appendChild(qty);
+    var lockNote = el("p","lock-note", "Appears once you\u2019ve earned " + fmt(G.revealAt(i)) + " cheese in total");
+
+    var desc = el("p","ds");
+    var stats = el("div","rat-stats");
+    var each = el("span"), total = el("span");
+    stats.appendChild(each); stats.appendChild(total);
+    var bar = el("div","bar"); var fill = el("i"); bar.appendChild(fill);
+    bar.setAttribute("role","progressbar"); bar.setAttribute("aria-label","Progress to next milestone");
+    bar.setAttribute("aria-valuemin","0"); bar.setAttribute("aria-valuemax","100");
+    var foot = el("div","rat-foot");
+    var mile = el("span","mile");
+    var btn = el("button","buy"); btn.type = "button";
+    btn.addEventListener("click", function(){ G.buy(i); });
+    foot.appendChild(mile); foot.appendChild(btn);
+
+    var openView = el("div","open-view");
+    [desc, stats, bar, foot].forEach(function(x){ openView.appendChild(x); });
+    card.appendChild(head); card.appendChild(lockNote); card.appendChild(openView);
+    staffEl.appendChild(card);
+    cards.push({card:card, icon:icon, nameEl:nameEl, roleEl:roleEl, desc:desc, descText:r.desc, qty:qty, each:each, total:total,
+                bar:bar, fill:fill, mile:mile, btn:btn, name:r.name, shown:null});
+  });
+
+  var revealed = G.tierRevealed;
+
+  var MILES = [0, 10, 25, 50, 100];
+  function renderStaff(){
+    var s = G.state;
+    for(var i=0;i<cards.length;i++){
+      var c = cards[i], show = revealed(i), who = G.roster[i];
+      if(who && who.name !== c.name){                // staff changed (shared from another tab)
+        c.name = who.name; c.descText = who.desc; c.shown = null;
+      }
+      if(c.shown !== show){
+        c.shown = show;
+        c.card.classList.toggle("locked", !show);
+        c.icon.innerHTML = show ? ratIcon(i) : silhouette(ratIcon(i));
+        c.nameEl.textContent = show ? c.name : "???";
+        c.roleEl.textContent = show ? ROLES[i] : "";
+        c.desc.textContent = show ? c.descText : "";
+        c.qty.hidden = !show;
+        c.card.setAttribute("aria-label", show ? c.name + ", " + ROLES[i] : "Locked staff member");
+      }
+      if(!show) continue;
+
+      var q = s.owned[i], m = G.multiplierOf(i), next = G.nextMilestone(i), quote = G.quote(i);
+      c.qty.textContent = fmt(q);
+      c.qty.className = "rat-qty" + (q ? "" : " zero");
+      c.each.innerHTML = "Each <b>" + fmt(G.rateOf(i), true) + "/s</b>";
+      c.total.innerHTML = "Total <b>" + fmt(G.rateOf(i) * q, true) + "/s</b>";
+
+      var pct = 100;
+      if(next){
+        var prev = 0;
+        for(var k=0;k<MILES.length;k++) if(MILES[k] <= q) prev = MILES[k];
+        pct = Math.max(0, Math.min(100, (q - prev) / (next - prev) * 100));
+      }
+      c.fill.style.width = pct.toFixed(1) + "%";
+      c.bar.setAttribute("aria-valuenow", Math.round(pct));
+      c.mile.textContent = next
+        ? (m > 1 ? "\u00d7" + m + " (\u00d7" + (m*2) + " at " + next + ")" : "\u00d72 at " + next)
+        : "\u00d7" + m + " (max)";
+
+      c.btn.textContent = (quote.count > 1 ? "\u00d7" + quote.count + " " : "") + fmt(quote.cost);
+      c.btn.disabled = !quote.affordable;
+      c.btn.setAttribute("aria-label", "Hire " + quote.count + " " + c.name + " for " + fmt(quote.cost) + " cheese");
+    }
+  }
+
+  /* ---------- upgrades ---------- */
+  var upgRows = {};
+  function renderUpgrades(){
+    var shown = 0, owned = 0;
+    G.upgrades.forEach(function(u){
+      if(!G.upgradeVisible(u.id)) return;
+      shown++;
+      var row = upgRows[u.id];
+      if(!row){
+        var box = el("div","upg");
+        var info = el("div");
+        info.appendChild(el("div","nm", u.name));
+        info.appendChild(el("div","ds", u.desc));
+        var b = el("button","buy"); b.type = "button";
+        b.addEventListener("click", function(){ G.buyUpgrade(u.id); });
+        box.appendChild(info); box.appendChild(b);
+        $("upgrades").appendChild(box);
+        row = upgRows[u.id] = {box:box, btn:b};
+      }
+      if(G.hasUpgrade(u.id)){
+        owned++;
+        if(row.btn.parentNode){
+          row.box.removeChild(row.btn);
+          row.box.classList.add("owned");
+          row.box.appendChild(el("span","owned-tag","Owned"));
+        }
+      } else {
+        row.btn.textContent = fmt(u.cost);
+        row.btn.disabled = G.state.cheese < u.cost;
+        row.btn.setAttribute("aria-label", "Buy " + u.name + " for " + fmt(u.cost) + " cheese");
+      }
+    });
+    $("upgrades-sec").hidden = shown === 0;
+    $("upg-sum").textContent = owned + " of " + G.upgrades.length + " owned";
+  }
+
+  /* ---------- the cheese: tap, squish, numbers float up ---------- */
+  var wheel = $("wheel"), wrap = $("wheel-wrap"), lastPoint = null, pops = 0;
+  wheel.addEventListener("pointerdown", function(e){
+    var r = wrap.getBoundingClientRect();
+    lastPoint = {x: e.clientX - r.left, y: e.clientY - r.top, t: Date.now()};
+  });
+  wheel.addEventListener("click", function(){
+    if(!G.isActive()){ G.press(); return; }    // first press in a paused tab takes over
+    var gain = G.perPress();
+    G.press();
+    if(pops > 24) return;
+    var p = el("span","pop","+" + fmt(gain, true));
+    var near = lastPoint && Date.now() - lastPoint.t < 600;
+    var x = near ? lastPoint.x : wrap.clientWidth / 2;
+    var y = near ? lastPoint.y : wrap.clientHeight / 2;
+    p.style.left = (x + (Math.random()*16 - 8)) + "px";
+    p.style.top = y + "px";
+    wrap.appendChild(p); pops++;
+    var gone = function(){ if(p.parentNode){ p.parentNode.removeChild(p); pops--; } };
+    p.addEventListener("animationend", gone);
+    setTimeout(gone, 1200);
+  });
+
+  /* ---------- buy mode ---------- */
+  var modeBtns = document.querySelectorAll(".buymode button");
+  for(var mb=0;mb<modeBtns.length;mb++){
+    modeBtns[mb].addEventListener("click", function(){ G.setBuyMode(Number(this.getAttribute("data-mode"))); });
+  }
+  $("play-here").addEventListener("click", function(){ G.press(); });
+
+  /* ---------- render ---------- */
+  function render(){
+    var s = G.state;
+    $("count").textContent = fmt(s.cheese);
+    $("rate").textContent = fmt(G.totalRate(), true);
+    $("per-press").textContent = fmt(G.perPress(), true);
+    $("paused").classList.toggle("on", !G.isActive());
+    for(var m=0;m<modeBtns.length;m++){
+      modeBtns[m].setAttribute("aria-pressed", String(Number(modeBtns[m].getAttribute("data-mode")) === s.buyMode));
+    }
+    renderUpgrades();
+    renderStaff();
+  }
+
+  // Reginald only does facts here; his tutorial lives on the main page.
+  if(window.Reginald) window.Reginald.setTutorial(false);
+
+  G.start(render);
+})();
+</script>
+<script data-goatcounter="https://puranjay.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

@@ -114,6 +114,9 @@ td:first-child{text-align:left}
 .buymode button[aria-pressed="true"]{border-color:var(--amber);color:var(--amber-deep)}
 .buymode button:hover{color:var(--ink)}
 .buymode button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.locked-row .rname{color:var(--ink-soft);letter-spacing:.2em}
+.locked-row .rdesc{color:var(--ink-soft)}
+.locked-row td{border-bottom-style:dashed}
 .mqty{display:none;color:var(--amber-deep);font-weight:500;margin-left:6px}
 .qty{font-size:16px;font-weight:500}
 .qty.zero{color:var(--ink-soft);font-weight:400}
@@ -309,8 +312,8 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 </div>
 
 <!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
-<script src="js/cheese-core.js?v=3"></script>
-<script src="js/reginald.js?v=3"></script>
+<script src="js/cheese-core.js?v=4"></script>
+<script src="js/reginald.js?v=4"></script>
 <script>
 (function(){
   "use strict";
@@ -351,9 +354,9 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
       var tr = document.createElement("tr");
 
       var who = document.createElement("td");
-      var nm = document.createElement("span"); nm.className = "rname"; nm.textContent = r.name;
+      var nm = document.createElement("span"); nm.className = "rname";
       var mq = document.createElement("span"); mq.className = "mqty";
-      var ds = document.createElement("div");  ds.className = "rdesc"; ds.textContent = r.desc;
+      var ds = document.createElement("div");  ds.className = "rdesc";
       who.appendChild(nm); who.appendChild(mq); who.appendChild(ds);
 
       var rate = document.createElement("td");
@@ -371,7 +374,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 
       tr.appendChild(who); tr.appendChild(rate); tr.appendChild(qty); tr.appendChild(buyCell);
       rosterEl.appendChild(tr);
-      rows.push({qty:qty, mqty:mq, btn:b, name:r.name, rate:rv, mile:mile});
+      rows.push({tr:tr, nm:nm, ds:ds, qty:qty, mqty:mq, btn:b, name:r.name, desc:r.desc, rate:rv, mile:mile, shown:null});
     });
   }
 
@@ -409,6 +412,23 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 
     var hired = 0;
     for(var i=0;i<rows.length;i++){
+      var who = G.roster[i];
+      if(who && who.name !== rows[i].name){          // staff changed (shared from another tab)
+        rows[i].name = who.name; rows[i].desc = who.desc; rows[i].shown = null;
+      }
+      var show = G.tierRevealed(i);
+      if(rows[i].shown !== show){
+        rows[i].shown = show;
+        rows[i].tr.classList.toggle("locked-row", !show);
+        rows[i].nm.textContent = show ? rows[i].name : "???";
+        rows[i].ds.textContent = show ? rows[i].desc : "Appears once you\u2019ve earned " + fmt(G.revealAt(i)) + " cheese in total";
+        rows[i].btn.hidden = !show;
+      }
+      if(!show){
+        rows[i].rate.textContent = "\u2013"; rows[i].mile.textContent = "";
+        rows[i].qty.textContent = ""; rows[i].mqty.textContent = "";
+        continue;
+      }
       var q = s.owned[i], quote = G.quote(i), c = quote.cost;
       if(q>0) hired++;
       var m = G.multiplierOf(i), next = G.nextMilestone(i);

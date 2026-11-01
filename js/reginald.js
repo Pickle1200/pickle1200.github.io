@@ -255,7 +255,9 @@
 
   function seen(id) { return G.state.reginald.seen.indexOf(id) !== -1; }
 
+  var tutorialOn = true;
   function update() {
+    if (!tutorialOn) return;
     var r = G.state.reginald;
     if (!checkedReturning) {
       checkedReturning = true;
@@ -305,7 +307,8 @@
 
   setInterval(function () {
     var r = G.state.reginald, now = Date.now();
-    if (!r.done || r.factsOff || showing) return;
+    if ((tutorialOn && !r.done) || r.factsOff || showing) return;
+    if (G.isActive && !G.isActive()) return;
     if (doc.visibilityState === "hidden") return;
     if (now - lastActive > ACTIVE_WINDOW || now < nextFactAt) return;
     say(nextFact(), { fact: true, ms: FACT_MS });
@@ -321,5 +324,14 @@
     }
   }
 
-  global.Reginald = { update: update, skip: skip, say: say, hide: hide, facts: FACTS, setSections: setSections };
+  // Pages without the portfolio sections (like /cheese) switch the tutorial
+  // off; Reginald then only does facts there, and the tutorial waits for the
+  // main page.
+  function setTutorial(on) {
+    tutorialOn = on !== false;
+    if (!tutorialOn) nextFactAt = Date.now() + FIRST_FACT_AFTER;
+  }
+
+  global.Reginald = { update: update, skip: skip, say: say, hide: hide, facts: FACTS,
+                      setSections: setSections, setTutorial: setTutorial };
 })(window);
