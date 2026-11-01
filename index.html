@@ -92,6 +92,7 @@ th:first-child{text-align:left}
 td{padding:11px 0;border-bottom:1px solid var(--rule);vertical-align:top;text-align:right;font-size:13px}
 td:first-child{text-align:left}
 .rname{font-weight:500}
+.mile{display:block;font-size:11px;color:var(--ink-soft);margin-top:4px;white-space:nowrap}
 .rdesc{font-size:12.5px;color:#B5AB98;font-family:var(--serif);margin-top:4px;line-height:1.5;max-width:36ch}
 .buy{
   font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
@@ -101,6 +102,19 @@ td:first-child{text-align:left}
 .buy:hover:not(:disabled){background:var(--amber);border-color:var(--amber);color:#14120E}
 .buy:disabled{opacity:.3;cursor:default}
 .buy:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.perpress{display:block;margin-top:6px;font-size:11px}
+.upgrades td:last-child{width:1%;padding-left:16px}
+.upgrades .owned{font-size:11px;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase}
+.buymode{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin:-4px 0 10px;font-size:11px;color:var(--ink-soft)}
+.buymode span{margin-right:4px}
+.buymode button{
+  font-family:var(--mono);font-size:11px;padding:4px 10px;cursor:pointer;
+  border:1px solid var(--rule);background:transparent;color:var(--ink-soft);
+}
+.buymode button[aria-pressed="true"]{border-color:var(--amber);color:var(--amber-deep)}
+.buymode button:hover{color:var(--ink)}
+.buymode button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.mqty{display:none;color:var(--amber-deep);font-weight:500;margin-left:6px}
 .qty{font-size:16px;font-weight:500}
 .qty.zero{color:var(--ink-soft);font-weight:400}
 
@@ -152,7 +166,8 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   *{animation:none!important;transition:none!important}
 }
 @media (max-width:520px){
-  th:nth-child(3),td:nth-child(3){display:none}
+  table:not(.upgrades) th:nth-child(3),table:not(.upgrades) td:nth-child(3){display:none}
+  .mqty{display:inline}
   body{padding:0 15px 70px}
 }
 </style>
@@ -175,8 +190,9 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
         <div class="count-label">Cheese</div>
       </div>
       <div class="rate">
-        <b id="rate">0.000</b>
+        <b id="rate">0</b>
         per second
+        <span class="perpress" id="per-press">+1 per press</span>
       </div>
     </div>
     <button class="press" id="press">Press for cheese</button>
@@ -184,7 +200,18 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <p class="hint">Everything on this page unlocks as you go. If you would rather not,
   there is a link in the corner.</p>
 
+  <div id="upgrades-wrap" hidden>
+    <div class="sec-label"><span>Upgrades</span><span id="upg-sum"></span></div>
+    <table class="upgrades"><tbody id="upgrades"></tbody></table>
+  </div>
+
   <div class="sec-label"><span>Holdings</span><span id="hold-sum">0 of 6 hired</span></div>
+  <div class="buymode" role="group" aria-label="How many to hire at once">
+    <span>Hire</span>
+    <button type="button" data-mode="1">1</button>
+    <button type="button" data-mode="10">10</button>
+    <button type="button" data-mode="0">Max</button>
+  </div>
   <table>
     <thead>
       <tr><th>Position</th><th>Rate</th><th>Qty</th><th>Cost</th></tr>
@@ -281,7 +308,9 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   </div>
 </div>
 
-<script src="js/cheese-core.js"></script>
+<!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
+<script src="js/cheese-core.js?v=3"></script>
+<script src="js/reginald.js?v=3"></script>
 <script>
 (function(){
   "use strict";
@@ -312,11 +341,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 
   var countEl=$("count"), rateEl=$("rate"), rosterEl=$("roster"), sumEl=$("hold-sum");
 
-  function fmt(n){
-    if(n>=1000) return Math.floor(n).toLocaleString("en-GB");
-    if(n>=100) return Math.floor(n).toString();
-    return (Math.floor(n*10)/10).toString();
-  }
+  var fmt = G.format;
 
   /* ---------- roster: rows built once, then updated in place ---------- */
   var rows = [];
@@ -327,11 +352,14 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 
       var who = document.createElement("td");
       var nm = document.createElement("span"); nm.className = "rname"; nm.textContent = r.name;
+      var mq = document.createElement("span"); mq.className = "mqty";
       var ds = document.createElement("div");  ds.className = "rdesc"; ds.textContent = r.desc;
-      who.appendChild(nm); who.appendChild(ds);
+      who.appendChild(nm); who.appendChild(mq); who.appendChild(ds);
 
       var rate = document.createElement("td");
-      rate.textContent = G.rateOf(i).toFixed(3);
+      var rv = document.createElement("span");
+      var mile = document.createElement("span"); mile.className = "mile";
+      rate.appendChild(rv); rate.appendChild(mile);
 
       var qty = document.createElement("td");
 
@@ -343,7 +371,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 
       tr.appendChild(who); tr.appendChild(rate); tr.appendChild(qty); tr.appendChild(buyCell);
       rosterEl.appendChild(tr);
-      rows.push({qty:qty, btn:b, name:r.name});
+      rows.push({qty:qty, mqty:mq, btn:b, name:r.name, rate:rv, mile:mile});
     });
   }
 
@@ -368,7 +396,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   function render(){
     var s = G.state;
     countEl.textContent = fmt(s.cheese);
-    rateEl.textContent = G.totalRate().toFixed(3);
+    rateEl.textContent = fmt(G.totalRate(), true);
 
     BLOCKS.forEach(function(b){
       if(!G.isUnlocked(b.id) && s.lifetime >= b.need){
@@ -377,23 +405,82 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
       }
     });
 
+    $("per-press").textContent = "+" + fmt(G.perPress(), true) + " per press";
+
     var hired = 0;
     for(var i=0;i<rows.length;i++){
-      var q = s.owned[i], c = G.costOf(i);
+      var q = s.owned[i], quote = G.quote(i), c = quote.cost;
       if(q>0) hired++;
-      rows[i].qty.textContent = q;
+      var m = G.multiplierOf(i), next = G.nextMilestone(i);
+      rows[i].rate.textContent = fmt(G.rateOf(i), true);
+      // e.g. "x2 at 10", then "x2 (x4 at 25)", and finally "x16 (max)"
+      rows[i].mile.textContent = next
+        ? (m>1 ? "\u00d7"+m+" (\u00d7"+(m*2)+" at "+next+")" : "\u00d72 at "+next)
+        : "\u00d7"+m+" (max)";
+      rows[i].qty.textContent = fmt(q);
+      rows[i].mqty.textContent = q ? "\u00d7" + fmt(q) : "";
       rows[i].qty.className = "qty" + (q ? "" : " zero");
-      rows[i].btn.textContent = fmt(c);
-      rows[i].btn.disabled = s.cheese < c;
-      rows[i].btn.setAttribute("aria-label", "Hire "+rows[i].name+" for "+fmt(c)+" cheese");
+      rows[i].btn.textContent = (quote.count > 1 ? "\u00d7" + quote.count + " " : "") + fmt(c);
+      rows[i].btn.disabled = !quote.affordable;
+      rows[i].btn.setAttribute("aria-label", "Hire " + quote.count + " " + rows[i].name + " for " + fmt(c) + " cheese");
     }
     sumEl.textContent = hired + " of " + rows.length + " hired";
+
+    for(var m=0;m<modeBtns.length;m++){
+      modeBtns[m].setAttribute("aria-pressed", String(Number(modeBtns[m].getAttribute("data-mode")) === s.buyMode));
+    }
+    renderUpgrades();
+    if(window.Reginald) window.Reginald.update();
+  }
+
+  /* ---------- upgrades: rows appear once you are halfway to affording them ---------- */
+  var upgRows = {};
+  function renderUpgrades(){
+    var shown = 0, owned = 0;
+    G.upgrades.forEach(function(u){
+      if(!G.upgradeVisible(u.id)) return;
+      shown++;
+      var row = upgRows[u.id];
+      if(!row){
+        var tr = document.createElement("tr");
+        var info = document.createElement("td");
+        var nm = document.createElement("span"); nm.className = "rname"; nm.textContent = u.name;
+        var ds = document.createElement("div");  ds.className = "rdesc"; ds.textContent = u.desc;
+        info.appendChild(nm); info.appendChild(ds);
+        var cell = document.createElement("td");
+        var b = document.createElement("button"); b.className = "buy";
+        b.addEventListener("click", function(){ G.buyUpgrade(u.id); });
+        cell.appendChild(b);
+        tr.appendChild(info); tr.appendChild(cell);
+        $("upgrades").appendChild(tr);
+        row = upgRows[u.id] = {cell:cell, btn:b};
+      }
+      if(G.hasUpgrade(u.id)){
+        owned++;
+        if(row.btn.parentNode){
+          row.cell.removeChild(row.btn);
+          var o = document.createElement("span"); o.className = "owned"; o.textContent = "Owned";
+          row.cell.appendChild(o);
+        }
+      } else {
+        row.btn.textContent = fmt(u.cost);
+        row.btn.disabled = G.state.cheese < u.cost;
+        row.btn.setAttribute("aria-label", "Buy " + u.name + " for " + fmt(u.cost) + " cheese");
+      }
+    });
+    $("upgrades-wrap").hidden = shown === 0;
+    $("upg-sum").textContent = owned + " of " + G.upgrades.length + " owned";
   }
 
   /* ---------- interaction ---------- */
+  var modeBtns = document.querySelectorAll(".buymode button");
+  for(var mb=0;mb<modeBtns.length;mb++){
+    modeBtns[mb].addEventListener("click", function(){ G.setBuyMode(Number(this.getAttribute("data-mode"))); });
+  }
   $("press").addEventListener("click", function(){ G.press(); });
   $("skip").addEventListener("click", function(){
     unlockAll();
+    if(window.Reginald) window.Reginald.skip();
     var el = $("b-about");
     if(el && el.scrollIntoView) el.scrollIntoView({behavior:"smooth", block:"start"});
   });
