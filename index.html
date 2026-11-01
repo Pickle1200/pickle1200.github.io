@@ -76,6 +76,8 @@ body{
 .press:focus-visible{outline:2px solid var(--amber-deep);outline-offset:3px}
 
 .hint{font-size:11px;color:var(--ink-soft);margin-bottom:32px;line-height:1.5}
+.hint.outdated{color:var(--amber-deep);margin-bottom:10px}
+.hint.outdated .skip{margin-left:8px;color:var(--amber-deep);border-color:var(--amber-deep)}
 
 /* ---------- holdings table ---------- */
 .sec-label{
@@ -200,6 +202,8 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     </div>
     <button class="press" id="press">Press for cheese</button>
   </div>
+  <p class="hint outdated" id="outdated" hidden>This page is out of date, so the game is paused.
+  <button type="button" class="skip" id="refresh">Refresh</button></p>
   <p class="hint">Everything on this page unlocks as you go. If you would rather not,
   there is a link in the corner.</p>
 
@@ -312,8 +316,8 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 </div>
 
 <!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
-<script src="js/cheese-core.js?v=4"></script>
-<script src="js/reginald.js?v=4"></script>
+<script src="js/cheese-core.js?v=5"></script>
+<script src="js/reginald.js?v=5"></script>
 <script>
 (function(){
   "use strict";
@@ -409,6 +413,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     });
 
     $("per-press").textContent = "+" + fmt(G.perPress(), true) + " per press";
+    $("outdated").hidden = !G.isOutdated();
 
     var hired = 0;
     for(var i=0;i<rows.length;i++){
@@ -498,6 +503,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     modeBtns[mb].addEventListener("click", function(){ G.setBuyMode(Number(this.getAttribute("data-mode"))); });
   }
   $("press").addEventListener("click", function(){ G.press(); });
+  $("refresh").addEventListener("click", function(){ location.reload(); });
   $("skip").addEventListener("click", function(){
     unlockAll();
     if(window.Reginald) window.Reginald.skip();

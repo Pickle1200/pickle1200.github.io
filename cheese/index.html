@@ -166,7 +166,7 @@ section{margin-bottom:34px}
         </div>
 
         <div class="paused" id="paused" role="status">
-          Paused while the game is open in another tab.
+          <span id="paused-text">Paused while the game is open in another tab.</span>
           <br><button type="button" id="play-here">Play here instead</button>
         </div>
       </div>
@@ -196,8 +196,8 @@ section{margin-bottom:34px}
 </div>
 
 <!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
-<script src="../js/cheese-core.js?v=4"></script>
-<script src="../js/reginald.js?v=4"></script>
+<script src="../js/cheese-core.js?v=5"></script>
+<script src="../js/reginald.js?v=5"></script>
 <script>
 (function(){
   "use strict";
@@ -392,15 +392,26 @@ section{margin-bottom:34px}
   for(var mb=0;mb<modeBtns.length;mb++){
     modeBtns[mb].addEventListener("click", function(){ G.setBuyMode(Number(this.getAttribute("data-mode"))); });
   }
-  $("play-here").addEventListener("click", function(){ G.press(); });
+  $("play-here").addEventListener("click", function(){
+    if(G.isOutdated()) location.reload(); else G.press();
+  });
 
   /* ---------- render ---------- */
+  var wasOld = false;
   function render(){
     var s = G.state;
     $("count").textContent = fmt(s.cheese);
     $("rate").textContent = fmt(G.totalRate(), true);
     $("per-press").textContent = fmt(G.perPress(), true);
+    var old = G.isOutdated();
     $("paused").classList.toggle("on", !G.isActive());
+    if(old !== wasOld){
+      wasOld = old;
+      $("paused-text").textContent = old
+        ? "This page is out of date. Refresh to keep playing."
+        : "Paused while the game is open in another tab.";
+      $("play-here").textContent = old ? "Refresh" : "Play here instead";
+    }
     for(var m=0;m<modeBtns.length;m++){
       modeBtns[m].setAttribute("aria-pressed", String(Number(modeBtns[m].getAttribute("data-mode")) === s.buyMode));
     }

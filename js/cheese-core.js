@@ -10,6 +10,11 @@
   /* ---------- settings ---------- */
   var SAVE_KEY = "pk_cheese_save";
   var SAVE_VERSION = 3;
+  // The version of this code. Bump it on every release, together with the
+  // ?v= on the script tags. An older tab that sees a newer version has run
+  // stops saving and asks to be refreshed, so it can never clash with it.
+  var CODE_VERSION = 5;
+  var CODE_KEY = "pk_cheese_code";
   var TICK_MS = 200;
   var AUTOSAVE_MS = 5000;
   // Longest gap that still pays out. Background tabs tick at least once a
@@ -300,6 +305,7 @@
      are looking at plays. Switching to a tab makes it take over: the old tab
      saves and pauses, the new one loads that save and carries on. Paused tabs
      follow the save so their numbers stay current. */
+  var outdated = false;
   var LOCK_KEY = "pk_cheese_active";
   var TAB_ID = Math.random().toString(36).slice(2) + Date.now().toString(36);
   var active = true, claiming = false, claimTimer = null;
@@ -320,7 +326,7 @@
     onChange();
   }
   function claim() {
-    if (!storageOK || claiming) return;   // already taking over: wait for it
+    if (!storageOK || claiming || outdated) return;   // already taking over, or out of date
     var owner = lockOwner();
     if (owner === TAB_ID && active) return;
     active = false;
@@ -333,6 +339,8 @@
   }
   function onStorage(e) {
     if (!e || !e.key) return;
+    if (e.key === CODE_KEY) { checkCode(e.newValue); return; }
+    if (outdated) return;
     if (e.key === LOCK_KEY) {
       var id = null;
       try { id = JSON.parse(e.newValue).id; } catch (x) {}
@@ -352,6 +360,19 @@
     }
   }
   function isActive() { return active; }
+
+  function checkCode(v) {
+    v = Number(v);
+    if (v > CODE_VERSION && !outdated) {
+      if (active) save(true);            // hand over what we have, then stand down
+      outdated = true;
+      active = false;
+      claiming = false;
+      clearTimeout(claimTimer);
+      onChange();
+    }
+  }
+  function isOutdated() { return outdated; }
 
   function earn(amount) {
     if (!(amount > 0)) return;
@@ -500,7 +521,7 @@
   }
 
   function save(force) {
-    if (newerSaveExists) return;
+    if (newerSaveExists || outdated) return;
     if (!active && force !== true) return;
     state.savedAt = Date.now();
     rawSet(SAVE_KEY, JSON.stringify(state));
@@ -535,6 +556,9 @@
     });
     global.addEventListener("focus", claim);
     global.addEventListener("storage", onStorage);
+    var seenCode = Number(rawGet(CODE_KEY)) || 0;
+    if (seenCode > CODE_VERSION) checkCode(seenCode);
+    else if (seenCode < CODE_VERSION) rawSet(CODE_KEY, String(CODE_VERSION));
     claim();
     onChange();
   }
@@ -568,6 +592,7 @@
     save: save,
     reset: reset,
     isActive: isActive,
+    isOutdated: isOutdated,
     start: start
   };
 })(window);
