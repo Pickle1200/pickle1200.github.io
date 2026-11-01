@@ -485,6 +485,8 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     if(el && el.scrollIntoView) el.scrollIntoView({behavior:"smooth", block:"start"});
   });
 
+  if(window.Reginald) window.Reginald.setSections(BLOCKS.map(function(b){ return b.need; }));
+
   /* returning visitors keep their sections, cheese and staff */
   BLOCKS.forEach(function(b){ if(G.isUnlocked(b.id)) showUnlocked(b.id, false); });
 

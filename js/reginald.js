@@ -26,10 +26,13 @@
   var ACTIVE_WINDOW = 30000;    // facts only for someone who interacted recently
 
   /* ---------- tutorial: shown in order, triggered by what the visitor does ---------- */
-  var BLOCK_IDS = ["b-about", "b-projects", "b-games", "b-cv", "b-hidden"];
+  // Section lines follow cheese earned, not unlocks, so they still make sense
+  // for visitors whose sections were already open. The page passes its
+  // thresholds in with Reginald.setSections([...]).
+  var sectionNeeds = [10, 1200];
+  function firstSection() { return G.state.lifetime >= sectionNeeds[0]; }
+  function lastSection() { return G.state.lifetime >= sectionNeeds[sectionNeeds.length - 1]; }
   function owns() { for (var i = 0; i < G.state.owned.length; i++) if (G.state.owned[i] > 0) return true; return false; }
-  function anyOpen() { for (var i = 0; i < BLOCK_IDS.length; i++) if (G.isUnlocked(BLOCK_IDS[i])) return true; return false; }
-  function allOpen() { for (var i = 0; i < BLOCK_IDS.length; i++) if (!G.isUnlocked(BLOCK_IDS[i])) return false; return true; }
 
   var STEPS = [
     { id: "intro", stay: true, tip: true,
@@ -39,8 +42,8 @@
       when: function () { return G.state.clicks > 0; },
       text: "Splendid. Do carry on." },
     { id: "opened",
-      when: anyOpen,
-      text: "That\u2019s a section open. They stay open for good, you\u2019ll be pleased to hear." },
+      when: firstSection,
+      text: "Cheese opens the sections of this page as you go. Once open, they stay open." },
     { id: "afford",
       when: function () { return !owns() && G.state.cheese >= G.costOf(0); },
       text: "You can afford staff. Hire someone. I would, but I\u2019m management." },
@@ -51,8 +54,8 @@
       when: function () { return G.upgradeVisible(G.upgrades[0].id); },
       text: "An upgrade has appeared, just above the staff. Worth a look." },
     { id: "allopen", end: true,
-      when: allOpen,
-      text: "That\u2019s everything open. The rest is simply cheese. Stay as long as you like." }
+      when: lastSection,
+      text: "That\u2019s every section reached. The rest is simply cheese. Stay as long as you like." }
   ];
 
   /* ---------- facts: all true, checked before writing ---------- */
@@ -312,5 +315,11 @@
   // Keep the tutorial moving even between renders (for the intro delay).
   setInterval(update, 500);
 
-  global.Reginald = { update: update, skip: skip, say: say, hide: hide, facts: FACTS };
+  function setSections(needs) {
+    if (Object.prototype.toString.call(needs) === "[object Array]" && needs.length) {
+      sectionNeeds = needs.slice().sort(function (a, b) { return a - b; });
+    }
+  }
+
+  global.Reginald = { update: update, skip: skip, say: say, hide: hide, facts: FACTS, setSections: setSections };
 })(window);

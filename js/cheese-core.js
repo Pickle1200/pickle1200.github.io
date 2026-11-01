@@ -9,7 +9,7 @@
 
   /* ---------- settings ---------- */
   var SAVE_KEY = "pk_cheese_save";
-  var SAVE_VERSION = 2;
+  var SAVE_VERSION = 3;
   var TICK_MS = 200;
   var AUTOSAVE_MS = 5000;
   // Longest gap that still pays out. Background tabs tick at least once a
@@ -171,20 +171,11 @@
   function migrate(d) {
     if (!d || typeof d !== "object") return null;
     if (typeof d.v !== "number") return null;
-    if (d.v === 1) {
-      // v1 used the old economy. Rats bought under it would be wildly
-      // overpowered now, so refund what they cost and let the player rebuy.
-      var OLD_BASE = [12, 60, 260, 900, 2600, 6500];
-      var refund = 0;
-      if (Object.prototype.toString.call(d.owned) === "[object Array]") {
-        for (var t = 0; t < OLD_BASE.length; t++) {
-          var c = OLD_BASE[t], n = Math.min(whole(d.owned[t]), 400);
-          for (var k = 0; k < n; k++) { refund += c; c = Math.ceil(c * 1.55); }
-        }
-      }
-      d.cheese = num(d.cheese) + (isFinite(refund) ? refund : 0);
-      d.owned = [];
-      d.v = 2;
+    if (d.v < 3) {
+      // Version 3 launched the new economy and Sir Reginald, so everyone's game
+      // was reset to give them the tutorial. Unlocked sections are kept: a
+      // visitor who already opened the portfolio never finds it locked again.
+      d = { v: 3, unlocked: d.unlocked };
     }
     return d;
   }
