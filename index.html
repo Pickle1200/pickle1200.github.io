@@ -281,58 +281,13 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   </div>
 </div>
 
+<script src="js/cheese-core.js"></script>
 <script>
 (function(){
   "use strict";
+  var G = window.CheeseCore;
 
-  /* ---------- storage: works on a real host, degrades quietly elsewhere ---------- */
-  var mem = {};
-  function save(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem[k]=v; } }
-  function load(k){ try{ var v=localStorage.getItem(k); return v===null?mem[k]:v; }catch(e){ return mem[k]; } }
-
-  /* ---------- rat pool ---------- */
-  var POOL = [
-    ["Derek",     "Reliable. Unremarkable. The index fund of rats."],
-    ["Susan",     "Outperformed in Q2 and has not stopped mentioning it."],
-    ["Gary",      "Produces cheese at a rate that has not been independently verified."],
-    ["Malcolm",   "Reads the whitepaper. Rarely finishes it."],
-    ["Brenda",    "Consistent. Refuses to discuss methodology."],
-    ["Trevor",    "High variance. Currently in drawdown."],
-    ["Janet",     "Compounds quietly. Has never appeared on a leaderboard."],
-    ["Keith",     "Bought at the top. Remains bullish."],
-    ["Denise",    "Risk-adjusted returns better than they appear."],
-    ["Nigel",     "Insists the fundamentals are unchanged."],
-    ["Pauline",   "Long duration. Sensitive to rates."],
-    ["Clive",     "Was told cheese production is a solved problem."],
-    ["Maureen",   "Illiquid. Cannot be sold."],
-    ["Barry",     "Underperforms the benchmark. Charges fees regardless."],
-    ["Yvonne",    "Uncorrelated, allegedly."]
-  ];
-  var RARE = ["Sir Reginald","Rare. Produces no cheese whatsoever. Purely decorative."];
-
-  var BASE_COST = [12, 60, 260, 900, 2600, 6500];
-  var BASE_RATE = [0.7, 3.2, 12.5, 42, 120, 320];
-
-  function pickRoster(){
-    var pool = POOL.slice(), out = [];
-    for(var i=0;i<6;i++){
-      var j = Math.floor(Math.random()*pool.length);
-      out.push(pool.splice(j,1)[0]);
-    }
-    if(Math.random()<0.04) out[5] = RARE;
-    return out.map(function(r,i){
-      return {
-        name:r[0], desc:r[1], qty:0,
-        cost:BASE_COST[i],
-        rate:(r[0]===RARE[0] ? 0 : BASE_RATE[i]),
-        precise:(BASE_RATE[i] + Math.random()*0.4 - 0.2)
-      };
-    });
-  }
-
-  var rats = pickRoster();
-  var cheese = 0, perClick = 1, lastTick = Date.now();
-
+  /* sections unlock once lifetime cheese reaches the threshold, and stay unlocked */
   var BLOCKS = [
     {id:"b-about",    need:10},
     {id:"b-projects", need:60},
@@ -342,59 +297,60 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   ];
 
   var $ = function(id){ return document.getElementById(id); };
+
+  /* if the game file failed to load, never leave the portfolio locked */
+  if(!G){
+    BLOCKS.forEach(function(b){
+      var el = $(b.id); if(!el) return;
+      el.classList.remove("locked"); el.classList.add("unlocked");
+      var need = el.querySelector(".need"); if(need) need.textContent = "Unlocked";
+    });
+    $("press").disabled = true;
+    $("press").textContent = "Game unavailable";
+    return;
+  }
+
   var countEl=$("count"), rateEl=$("rate"), rosterEl=$("roster"), sumEl=$("hold-sum");
 
   function fmt(n){
     if(n>=1000) return Math.floor(n).toLocaleString("en-GB");
     if(n>=100) return Math.floor(n).toString();
-    return (Math.round(n*10)/10).toString();
-  }
-  function totalRate(){
-    var t=0; for(var i=0;i<rats.length;i++) t += rats[i].qty * rats[i].rate;
-    return t;
+    return (Math.floor(n*10)/10).toString();
   }
 
-  /* ---------- roster render ---------- */
+  /* ---------- roster: rows built once, then updated in place ---------- */
+  var rows = [];
   function drawRoster(){
     rosterEl.innerHTML = "";
-    rats.forEach(function(r,i){
+    G.roster.forEach(function(r,i){
       var tr = document.createElement("tr");
-      tr.innerHTML =
-        '<td><span class="rname">'+r.name+'</span><div class="rdesc">'+r.desc+'</div></td>'+
-        '<td>'+(r.rate===0 ? "0.000" : r.precise.toFixed(3))+'</td>'+
-        '<td class="qty'+(r.qty?"":" zero")+'">'+r.qty+'</td>'+
-        '<td></td>';
-      var btnCell = tr.lastElementChild;
+
+      var who = document.createElement("td");
+      var nm = document.createElement("span"); nm.className = "rname"; nm.textContent = r.name;
+      var ds = document.createElement("div");  ds.className = "rdesc"; ds.textContent = r.desc;
+      who.appendChild(nm); who.appendChild(ds);
+
+      var rate = document.createElement("td");
+      rate.textContent = G.rateOf(i).toFixed(3);
+
+      var qty = document.createElement("td");
+
+      var buyCell = document.createElement("td");
       var b = document.createElement("button");
       b.className = "buy";
-      b.textContent = fmt(r.cost);
-      b.setAttribute("aria-label","Hire "+r.name+" for "+fmt(r.cost)+" cheese");
-      b.addEventListener("click", function(){
-        if(cheese < r.cost) return;
-        cheese -= r.cost;
-        r.qty++;
-        r.cost = Math.ceil(r.cost * 1.55);
-        drawRoster(); render();
-      });
-      btnCell.appendChild(b);
+      b.addEventListener("click", function(){ G.buy(i); });
+      buyCell.appendChild(b);
+
+      tr.appendChild(who); tr.appendChild(rate); tr.appendChild(qty); tr.appendChild(buyCell);
       rosterEl.appendChild(tr);
+      rows.push({qty:qty, btn:b, name:r.name});
     });
-    refreshButtons();
-  }
-  function refreshButtons(){
-    var btns = rosterEl.querySelectorAll(".buy");
-    for(var i=0;i<btns.length;i++){
-      btns[i].disabled = cheese < rats[i].cost;
-      btns[i].textContent = fmt(rats[i].cost);
-    }
-    var owned = rats.filter(function(r){return r.qty>0;}).length;
-    sumEl.textContent = owned + " of " + rats.length + " hired";
   }
 
   /* ---------- unlocking ---------- */
-  function unlock(b, animate){
-    var el = $(b.id);
-    if(el.classList.contains("unlocked")) return;
+  function showUnlocked(id, animate){
+    var el = $(id);
+    if(!el || el.classList.contains("unlocked")) return;
     el.classList.remove("locked");
     el.classList.add("unlocked");
     var need = el.querySelector(".need");
@@ -403,47 +359,50 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
       el.classList.add("just-unlocked");
       setTimeout(function(){ el.classList.remove("just-unlocked"); }, 700);
     }
-    save("pk_unlocked_"+b.id, "1");
   }
-  function unlockAll(animate){
-    BLOCKS.forEach(function(b){ unlock(b, animate); });
+  function unlockAll(){
+    BLOCKS.forEach(function(b){ G.unlock(b.id); showUnlocked(b.id, false); });
   }
 
+  /* ---------- render ---------- */
   function render(){
-    countEl.textContent = fmt(cheese);
-    rateEl.textContent = totalRate().toFixed(3);
+    var s = G.state;
+    countEl.textContent = fmt(s.cheese);
+    rateEl.textContent = G.totalRate().toFixed(3);
+
     BLOCKS.forEach(function(b){
-      if(cheese >= b.need) unlock(b, true);
+      if(!G.isUnlocked(b.id) && s.lifetime >= b.need){
+        G.unlock(b.id);
+        showUnlocked(b.id, true);
+      }
     });
-    refreshButtons();
+
+    var hired = 0;
+    for(var i=0;i<rows.length;i++){
+      var q = s.owned[i], c = G.costOf(i);
+      if(q>0) hired++;
+      rows[i].qty.textContent = q;
+      rows[i].qty.className = "qty" + (q ? "" : " zero");
+      rows[i].btn.textContent = fmt(c);
+      rows[i].btn.disabled = s.cheese < c;
+      rows[i].btn.setAttribute("aria-label", "Hire "+rows[i].name+" for "+fmt(c)+" cheese");
+    }
+    sumEl.textContent = hired + " of " + rows.length + " hired";
   }
 
   /* ---------- interaction ---------- */
-  $("press").addEventListener("click", function(){
-    cheese += perClick;
-    render();
-  });
+  $("press").addEventListener("click", function(){ G.press(); });
   $("skip").addEventListener("click", function(){
-    unlockAll(false);
+    unlockAll();
     var el = $("b-about");
     if(el && el.scrollIntoView) el.scrollIntoView({behavior:"smooth", block:"start"});
   });
 
-  /* returning visitors keep their unlocks, the game itself starts fresh */
-  BLOCKS.forEach(function(b){
-    if(load("pk_unlocked_"+b.id) === "1") unlock(b, false);
-  });
-
-  setInterval(function(){
-    var now = Date.now();
-    var dt = (now - lastTick)/1000;
-    lastTick = now;
-    var r = totalRate();
-    if(r > 0){ cheese += r * dt; render(); }
-  }, 200);
+  /* returning visitors keep their sections, cheese and staff */
+  BLOCKS.forEach(function(b){ if(G.isUnlocked(b.id)) showUnlocked(b.id, false); });
 
   drawRoster();
-  render();
+  G.start(render);
 })();
 </script>
 <script data-goatcounter="https://puranjay.goatcounter.com/count"
