@@ -120,6 +120,7 @@ td:first-child{text-align:left}
 .perpress{display:block;margin-top:6px;font-size:11px}
 .upgrades td:last-child{width:1%;padding-left:16px}
 .upgrades .owned{font-size:11px;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase}
+.upgrades .owned[hidden],.upgrades .buy[hidden],.upgrades tr[hidden]{display:none}
 .buymode{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin:-4px 0 10px;font-size:11px;color:var(--ink-soft)}
 .buymode span{margin-right:4px}
 .buymode button{
@@ -352,8 +353,8 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 </div>
 
 <!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
-<script src="js/cheese-core.js?v=14"></script>
-<script src="js/reginald.js?v=14"></script>
+<script src="js/cheese-core.js?v=23"></script>
+<script src="js/reginald.js?v=23"></script>
 <script>
 (function(){
   "use strict";
@@ -392,6 +393,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   function drawRoster(){
     rosterEl.innerHTML = "";
     G.roster.forEach(function(r,i){
+      if(i >= G.mainPageTiers) return;          // the higher tiers live on /cheese
       var tr = document.createElement("tr");
 
       var who = document.createElement("td");
@@ -494,16 +496,19 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     }
     renderUpgrades();
     if(G.takeNewAchievements) G.takeNewAchievements();   // recorded quietly here; announced on /cheese
+    if(G.takeConsultReports) G.takeConsultReports();     // consultant results are shown on /cheese
+    if(G.takeTradeReports) G.takeTradeReports();
+    if(G.takeContractReports){ G.takeContractReports(); G.takeBondReports(); }
     if(window.Reginald) window.Reginald.update();
   }
 
   /* ---------- upgrades: rows appear once you are halfway to affording them ---------- */
   var upgRows = {};
+  // Drawn from the current state each time, so selling the company on /cheese
+  // (which takes press upgrades away) never leaves a stale "Owned".
   function renderUpgrades(){
     var shown = 0, owned = 0;
     G.upgrades.forEach(function(u){
-      if(!G.upgradeVisible(u.id)) return;
-      shown++;
       var row = upgRows[u.id];
       if(!row){
         var tr = document.createElement("tr");
@@ -514,19 +519,20 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
         var cell = document.createElement("td");
         var b = document.createElement("button"); b.className = "buy";
         b.addEventListener("click", function(){ G.buyUpgrade(u.id); });
-        cell.appendChild(b);
+        var o = document.createElement("span"); o.className = "owned"; o.textContent = "Owned";
+        cell.appendChild(b); cell.appendChild(o);
         tr.appendChild(info); tr.appendChild(cell);
         $("upgrades").appendChild(tr);
-        row = upgRows[u.id] = {cell:cell, btn:b};
+        row = upgRows[u.id] = {tr:tr, btn:b, tag:o};
       }
-      if(G.hasUpgrade(u.id)){
-        owned++;
-        if(row.btn.parentNode){
-          row.cell.removeChild(row.btn);
-          var o = document.createElement("span"); o.className = "owned"; o.textContent = "Owned";
-          row.cell.appendChild(o);
-        }
-      } else {
+      var visible = G.upgradeVisible(u.id), has = G.hasUpgrade(u.id);
+      row.tr.hidden = !visible;
+      if(!visible) return;
+      shown++;
+      if(has) owned++;
+      row.btn.hidden = has;
+      row.tag.hidden = !has;
+      if(!has){
         row.btn.textContent = fmt(u.cost);
         row.btn.disabled = G.state.cheese < u.cost;
         row.btn.setAttribute("aria-label", "Buy " + u.name + " for " + fmt(u.cost) + " cheese");

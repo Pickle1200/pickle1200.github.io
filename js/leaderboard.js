@@ -100,7 +100,8 @@
     if (!force && (s.allTime === lastSent || Date.now() - lastSentAt < SUBMIT_EVERY_MS)) return;
     lastSentAt = Date.now();
     api("/submit", { player: me.player, token: me.token, score: s.allTime, playSeconds: s.playSeconds,
-                     runs: s.runs, shares: s.sharesEarned }).then(function (d) {
+                     // Sales since the last listing: each earned at least one of the current shares.
+                     runs: typeof s.runsSinceIpo === "number" ? s.runsSinceIpo : s.runs, shares: s.sharesEarned }).then(function (d) {
       if (d._status === 403) { me = null; writeId(null); render(); return; }
       if (d.ok && !d.waited) { lastSent = s.allTime; refresh(); }
     }).catch(function () {});

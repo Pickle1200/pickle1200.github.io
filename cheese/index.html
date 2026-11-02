@@ -99,6 +99,7 @@ section{margin-bottom:34px}
 .upg.owned{background:transparent}
 .upg.owned .nm{color:var(--ink-soft)}
 .owned-tag{font-size:11px;color:var(--ink-soft);white-space:nowrap}
+.owned-tag[hidden],.upg[hidden],.buy[hidden]{display:none}
 
 /* ---------- staff cards ---------- */
 .staff{display:grid;gap:12px}
@@ -135,6 +136,7 @@ section{margin-bottom:34px}
 .supg .eff{font-size:11px;color:var(--amber-deep)}
 .supg .ds{font-family:var(--serif);font-size:12.5px;color:var(--ink-mid);line-height:1.45}
 .supg-next{font-size:12px;color:var(--ink-soft);border:1px dashed var(--rule);padding:10px 14px}
+.supg[hidden],.perk[hidden]{display:none}
 
 /* ---------- leaderboard ---------- */
 .lb-intro{font-size:12.5px;color:var(--ink-mid);line-height:1.5;margin-bottom:10px}
@@ -153,6 +155,62 @@ section{margin-bottom:34px}
 .lb-gap{text-align:center;color:var(--ink-soft);padding:2px 0}
 .lb-empty{font-size:12.5px;color:var(--ink-soft);padding:8px 0}
 .lb-foot{margin-top:10px}
+
+/* ---------- market and futures ---------- */
+.market-line{margin-top:12px;font-size:11px;color:var(--ink-soft);display:flex;justify-content:space-between;gap:8px}
+.market-line b{font-weight:500}
+.market-line.bull b{color:var(--amber-deep)}
+.market-line.bear b{color:#E07A6B}
+.futures{border:1px solid var(--rule);background:var(--panel);padding:14px}
+.fut-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.fut-price{font-size:28px;font-weight:500;letter-spacing:-0.02em;font-variant-numeric:tabular-nums}
+.fut-change{font-size:12px;font-variant-numeric:tabular-nums}
+.fut-change.up{color:var(--amber-deep)}.fut-change.down{color:#E07A6B}
+.fut-chart{display:block;width:100%;height:70px;margin:8px 0 10px}
+.fut-chart polyline{fill:none;stroke:var(--amber);stroke-width:1.6;vector-effect:non-scaling-stroke}
+.fut-chart line{stroke:var(--rule);stroke-width:1;vector-effect:non-scaling-stroke;stroke-dasharray:3 3}
+.fut-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fut-controls .buymode{margin:0}
+.fut-pos{font-size:12.5px;line-height:1.5}
+.fut-pos b{font-weight:500}
+.fut-note{font-size:11.5px;color:var(--ink-soft);margin-top:10px;line-height:1.5}
+.fut-pos[hidden],.fut-controls[hidden]{display:none}
+
+/* ---------- contracts and bonds ---------- */
+.deals{display:grid;gap:10px}
+@media (min-width:640px){.deals{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.deal{border:1px solid var(--rule);background:var(--panel);padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.deal .nm{font-weight:500;font-size:13px}
+.deal .ds{font-size:12px;color:var(--ink-mid);line-height:1.45}
+.deal .rw{font-size:11px;color:var(--amber-deep)}
+.deal .foot{display:flex;justify-content:flex-end;margin-top:auto;padding-top:4px}
+.active-deal{border:1px solid var(--amber);background:var(--panel);padding:12px 14px;font-size:12.5px;line-height:1.5}
+.active-deal .bar{margin-top:8px}
+.active-deal[hidden],.deal[hidden],.bond-row[hidden]{display:none}
+.bond-terms{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+.bond-row{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:7px 0;border-bottom:1px solid var(--rule)}
+.promote{font-size:11px;background:none;border:0;color:var(--ink-soft);cursor:pointer;padding:0;border-bottom:1px solid var(--ink-soft);align-self:flex-start}
+.promote:hover:not(:disabled){color:var(--amber-deep);border-color:var(--amber-deep)}
+.promote:disabled{opacity:.4;cursor:default}
+.promote[hidden]{display:none}
+
+/* ---------- consultants ---------- */
+.firms{display:grid;gap:10px}
+@media (min-width:640px){.firms{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.firm{border:1px solid var(--rule);background:var(--panel);padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.firm .nm{font-weight:500;font-size:13px}
+.firm .ds{font-family:var(--serif);font-size:12.5px;color:var(--ink-mid);line-height:1.45}
+.firm .odds{font-size:11px;color:var(--ink-soft);line-height:1.5}
+.firm .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto;padding-top:6px}
+.firm .fee{font-size:11px;color:var(--ink-soft)}
+.firm.working{border-color:var(--amber)}
+.firm .work[hidden]{display:none}
+.firm .work{font-size:11px;color:var(--amber-deep)}
+.consult-note{font-size:12px;color:var(--ink-soft);margin-bottom:10px;line-height:1.5}
+.consult-report{font-size:12.5px;margin-top:10px;padding:9px 12px;border-left:3px solid var(--rule);line-height:1.5}
+.consult-report.good{border-color:var(--amber)}
+.consult-report.bad{border-color:#C0392B}
+.consult-report[hidden]{display:none}
 
 /* ---------- achievements and stats ---------- */
 .achs{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
@@ -269,6 +327,7 @@ section{margin-bottom:34px}
           <div><b id="per-press">1</b>per press</div>
         </div>
 
+        <div class="market-line" id="market-line"><span>Market <b id="market-phase">Flat</b> <span id="market-effect"></span></span><span id="market-left"></span></div>
         <div class="shares-line" id="shares-line" hidden></div>
 
         <div class="recruiter" id="recruiter" hidden>
@@ -282,7 +341,7 @@ section{margin-bottom:34px}
         </div>
 
         <div class="buff" id="buff-bull" hidden role="status">
-          <div class="row"><b>Bull run</b><span id="bull-left"></span></div>
+          <div class="row"><b>Frenzy</b><span id="bull-left"></span></div>
           <div class="row"><span id="bull-what"></span></div>
           <div class="bar"><i id="bull-bar"></i></div>
         </div>
@@ -291,6 +350,8 @@ section{margin-bottom:34px}
           <div class="row"><span id="paws-what"></span></div>
           <div class="bar"><i id="paws-bar"></i></div>
         </div>
+
+        <div class="buff" id="boosts" hidden></div>
 
         <div class="paused" id="paused" role="status">
           <span id="paused-text">Paused while the game is open in another tab.</span>
@@ -305,13 +366,24 @@ section{margin-bottom:34px}
         <div class="sec-label"><b>Your company</b><span id="runs-sum"></span></div>
         <div class="company">
           <div class="big" id="sell-headline"></div>
+          <p class="muted" id="sell-value"></p>
           <p class="muted" id="sell-detail"></p>
           <div class="actions">
             <button type="button" class="sell" id="sell"></button>
             <button type="button" class="linkish" id="sell-cancel" hidden>Not yet</button>
           </div>
           <p class="warn" id="sell-warn" hidden>Selling resets this run: your cheese, staff and upgrades go.
-          You keep your shares, perks, unlocked sections and stats.</p>
+          You keep your shares, perks, unlocked sections and stats. Spending cheese on staff first doesn’t lower the price.</p>
+        </div>
+        <div class="company" id="ipo-box" hidden style="margin-top:12px">
+          <div class="big" id="ipo-headline"></div>
+          <p class="muted" id="ipo-detail"></p>
+          <div class="actions">
+            <button type="button" class="sell" id="ipo-go"></button>
+            <button type="button" class="linkish" id="ipo-cancel" hidden>Not yet</button>
+          </div>
+          <p class="warn" id="ipo-warn" hidden>Going public sells the company, then trades all your shares for stock.
+          Your perks and unlocked staff stay. Shares start again from zero.</p>
         </div>
         <div id="perks-wrap" hidden>
           <div class="sec-label" style="margin-top:22px"><b>Shareholder perks</b><span id="perks-sum"></span></div>
@@ -340,6 +412,71 @@ section{margin-bottom:34px}
           </div>
         </div>
         <div class="staff" id="staff"></div>
+      </section>
+
+      <section id="fut-sec" hidden>
+        <div class="sec-label"><b>Cheese futures</b><span id="fut-sum"></span></div>
+        <p class="consult-note" id="fut-teaser" hidden></p>
+        <div class="futures" id="fut-box" hidden>
+          <div class="fut-top">
+            <div><span class="fut-price" id="fut-price">100.0</span> <span class="fut-change" id="fut-change"></span></div>
+            <span class="fee" id="fut-phase"></span>
+          </div>
+          <svg class="fut-chart" id="fut-chart" viewBox="0 0 100 40" preserveAspectRatio="none" role="img" aria-label="Cheese price over the last six minutes">
+            <line x1="0" x2="100" y1="20" y2="20"></line><polyline id="fut-line" points=""></polyline>
+          </svg>
+          <div class="fut-controls" id="fut-controls">
+            <div class="buymode" role="group" aria-label="How much to stake">
+              <span>Stake</span>
+              <button type="button" data-stake="0.1">10%</button>
+              <button type="button" data-stake="0.25" aria-pressed="true">25%</button>
+              <button type="button" data-stake="0.5">50%</button>
+            </div>
+            <button type="button" class="buy" id="fut-long">Go long</button>
+            <button type="button" class="buy" id="fut-short">Go short</button>
+          </div>
+          <div class="fut-pos" id="fut-pos" hidden>
+            <span id="fut-pos-text"></span>
+            <button type="button" class="buy" id="fut-close" style="margin-left:8px">Close</button>
+          </div>
+          <p class="fut-note">Long profits if the price rises, short if it falls. Bull markets nudge the price up and bear
+          markets down, but the noise is bigger than the nudge. Open positions count toward your company’s value.</p>
+        </div>
+      </section>
+
+      <section id="contract-sec" hidden>
+        <div class="sec-label"><b>Contracts</b><span id="contract-sum"></span></div>
+        <p class="consult-note" id="contract-note"></p>
+        <div class="active-deal" id="contract-active" hidden>
+          <span id="contract-active-text"></span>
+          <div class="bar" role="progressbar" aria-label="Contract progress" aria-valuemin="0" aria-valuemax="100"><i id="contract-bar"></i></div>
+        </div>
+        <div class="deals" id="deals"></div>
+        <p class="consult-report" id="contract-report" hidden role="status"></p>
+      </section>
+
+      <section id="bond-sec" hidden>
+        <div class="sec-label"><b>Treasury bonds</b><span id="bond-sum"></span></div>
+        <p class="consult-note" id="bond-note"></p>
+        <div id="bond-desk">
+          <div class="bond-terms">
+            <div class="buymode" role="group" aria-label="How much to put in">
+              <span>Put in</span>
+              <button type="button" data-bond="0.25" aria-pressed="true">25%</button>
+              <button type="button" data-bond="0.5">50%</button>
+              <button type="button" data-bond="1">Max</button>
+            </div>
+          </div>
+          <div class="bond-terms" id="bond-buttons"></div>
+          <div id="bond-list"></div>
+        </div>
+      </section>
+
+      <section id="consult-sec" hidden>
+        <div class="sec-label"><b>Consultants</b><span id="consult-sum"></span></div>
+        <p class="consult-note" id="consult-note"></p>
+        <div class="firms" id="firms"></div>
+        <p class="consult-report" id="consult-report" hidden role="status"></p>
       </section>
 
       <section id="lb-sec" hidden>
@@ -378,9 +515,9 @@ section{margin-bottom:34px}
 </div>
 
 <!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
-<script src="../js/cheese-core.js?v=14"></script>
-<script src="../js/reginald.js?v=14"></script>
-<script src="../js/leaderboard.js?v=14" defer></script>
+<script src="../js/cheese-core.js?v=23"></script>
+<script src="../js/reginald.js?v=23"></script>
+<script src="../js/leaderboard.js?v=23" defer></script>
 <script>
 (function(){
   "use strict";
@@ -394,7 +531,10 @@ section{margin-bottom:34px}
   var fmt = G.format;
 
   /* ---------- tiers: a finance career ladder ---------- */
-  var ROLES = ["Intern", "Analyst", "Associate", "Vice President", "Director", "Partner"];
+  var ROLES = ["Intern", "Analyst", "Associate", "Vice President", "Director", "Partner",
+               "Managing Partner", "CEO", "Chair of the Board", "Founder", "Central Banker"];
+  var ROLES_PLURAL = ["Interns", "Analysts", "Associates", "Vice Presidents", "Directors", "Partners",
+               "Managing Partners", "CEOs", "Chairs of the Board", "Founders", "Central Bankers"];
 
   // A small rat, with an accessory for each rung of the ladder.
   // Locked tiers show as a dark silhouette: the shape of the outfit, nothing more.
@@ -415,7 +555,17 @@ section{margin-bottom:34px}
       // Director: bowler hat, outlined so it shows on the dark card
       '<ellipse cx="18" cy="10.2" rx="11.5" ry="2.4" fill="#1E1B17" stroke="#7A6F60" stroke-width=".9"/><path d="M11.2 10 C11.2 1 24.8 1 24.8 10 Z" fill="#1E1B17" stroke="#7A6F60" stroke-width=".9"/><rect x="11.4" y="7.2" width="13.2" height="1.8" fill="#E0A72B"/>',
       // Partner: crown
-      '<path d="M10.5 10.5 L12 2.5 L15.5 7 L18.5 1.5 L21.5 7 L25 2.5 L26.5 10.5 Z" fill="#E0A72B" stroke="#F0BC4B" stroke-width=".6"/><circle cx="18.5" cy="7.6" r="1.1" fill="#C0392B"/>'
+      '<path d="M10.5 10.5 L12 2.5 L15.5 7 L18.5 1.5 L21.5 7 L25 2.5 L26.5 10.5 Z" fill="#E0A72B" stroke="#F0BC4B" stroke-width=".6"/><circle cx="18.5" cy="7.6" r="1.1" fill="#C0392B"/>',
+      // Managing Partner: briefcase
+      '<path d="M4.5 28.5 C4.5 26 9.5 26 9.5 28.5" fill="none" stroke="#3A2A1C" stroke-width="1.2"/><rect x="2" y="28.5" width="10" height="7.5" rx="1.2" fill="#6B4A2B" stroke="#3A2A1C" stroke-width=".7"/><rect x="6.2" y="30.8" width="1.6" height="1.4" fill="#E0A72B"/>',
+      // CEO: aviator sunglasses
+      '<path d="M7.5 15.2 L16.2 15.2 C16.4 18.4 14.6 20.4 12 20.4 C9.2 20.4 7.6 18.2 7.5 15.2 Z" fill="#1A1A22" stroke="#D9B44A" stroke-width=".8"/><line x1="4" y1="16.4" x2="7.5" y2="15.6" stroke="#D9B44A" stroke-width=".9"/><line x1="16.2" y1="15.2" x2="23" y2="13.6" stroke="#D9B44A" stroke-width=".9"/><path d="M9.2 16.6 L11.6 16.2" stroke="#EFE9DC" stroke-width=".8" opacity=".75"/>',
+      // Chair of the Board: gavel
+      '<line x1="29" y1="27" x2="39" y2="14" stroke="#6B4A2B" stroke-width="2" stroke-linecap="round"/><rect x="35" y="9" width="9" height="5" rx="1.2" fill="#8B5E34" stroke="#3A2A1C" stroke-width=".7" transform="rotate(38 39.5 11.5)"/>',
+      // Founder: grey hoodie, hood up at the back, drawstrings
+      '<path d="M13 9.5 C17 3.5 29 3.5 31 13 C32 18 31 23 28.5 27.5 C26 22 23.5 19.5 20.5 18.5 C20 14 17 11 13 9.5 Z" fill="#5A5652" stroke="#46423E" stroke-width=".8"/><path d="M14.5 10.5 C18 12 19.5 15 19.8 18.6" fill="none" stroke="#46423E" stroke-width="1.4"/><line x1="16.5" y1="24" x2="16" y2="30" stroke="#D8D2C4" stroke-width=".8" stroke-linecap="round"/><line x1="19.5" y1="24.5" x2="19.5" y2="30.5" stroke="#D8D2C4" stroke-width=".8" stroke-linecap="round"/>',
+      // Central Banker: a stack of gold coins
+      '<ellipse cx="7" cy="35" rx="5.5" ry="1.8" fill="#C48E1C"/><ellipse cx="7" cy="32.6" rx="5.5" ry="1.8" fill="#E0A72B"/><ellipse cx="7" cy="30.2" rx="5.5" ry="1.8" fill="#F0BC4B" stroke="#C48E1C" stroke-width=".5"/>'
     ][tier] || '';
     return '<svg viewBox="0 0 48 40" aria-hidden="true" focusable="false">' +
       '<path d="M38 31 C46 33 47 24 44 21" fill="none" stroke="#C99A95" stroke-width="2" stroke-linecap="round"/>' +
@@ -442,7 +592,7 @@ section{margin-bottom:34px}
     id.appendChild(nameEl); id.appendChild(roleEl);
     var qty = el("div","rat-qty zero","0");
     head.appendChild(icon); head.appendChild(id); head.appendChild(qty);
-    var lockNote = el("p","lock-note", "Appears once you\u2019ve earned " + fmt(G.revealAt(i)) + " cheese in total");
+    var lockNote = el("p","lock-note");
 
     var desc = el("p","ds");
     var stats = el("div","rat-stats");
@@ -457,11 +607,13 @@ section{margin-bottom:34px}
     btn.addEventListener("click", function(){ G.buy(i); });
     foot.appendChild(mile); foot.appendChild(btn);
 
+    var promo = el("button","promote"); promo.type = "button"; promo.hidden = true;
+    promo.addEventListener("click", function(){ G.promote(i); });
     var openView = el("div","open-view");
-    [desc, stats, bar, foot].forEach(function(x){ openView.appendChild(x); });
+    [desc, stats, bar, foot, promo].forEach(function(x){ openView.appendChild(x); });
     card.appendChild(head); card.appendChild(lockNote); card.appendChild(openView);
     staffEl.appendChild(card);
-    cards.push({card:card, icon:icon, nameEl:nameEl, roleEl:roleEl, desc:desc, descText:r.desc, qty:qty, each:each, total:total,
+    cards.push({card:card, icon:icon, nameEl:nameEl, roleEl:roleEl, desc:desc, descText:r.desc, lockNote:lockNote, qty:qty, promo:promo, each:each, total:total,
                 bar:bar, fill:fill, mile:mile, btn:btn, name:r.name, shown:null});
   });
 
@@ -475,6 +627,10 @@ section{margin-bottom:34px}
       if(who && who.name !== c.name){                // staff changed (shared from another tab)
         c.name = who.name; c.descText = who.desc; c.shown = null;
       }
+      var lockText = !G.tierUnlocked(i)
+        ? "Unlocks after you sell the company " + (G.tiers[i].needRuns === 1 ? "for the first time" : G.tiers[i].needRuns + " times")
+        : "Appears once you\u2019ve earned " + fmt(G.revealAt(i)) + " cheese in total";
+      if(c.lockNote.textContent !== lockText) c.lockNote.textContent = lockText;
       if(c.shown !== show){
         c.shown = show;
         c.card.classList.toggle("locked", !show);
@@ -508,6 +664,12 @@ section{margin-bottom:34px}
         ? (m > 1 ? "\u00d7" + m + " (\u00d7" + (m*2) + " at " + next + ")" : "\u00d72 at " + next)
         : "\u00d7" + m + " (max)";
 
+      var pq = G.promotionQuote(i);
+      c.promo.hidden = !pq;
+      if(pq){
+        c.promo.textContent = "Promote 10 to " + ROLES[pq.next] + (pq.cost ? ", costs " + fmt(pq.cost) : ", free");
+        c.promo.disabled = !pq.affordable;
+      }
       c.btn.textContent = (quote.count > 1 ? "\u00d7" + quote.count + " " : "") + fmt(quote.cost);
       c.btn.disabled = !quote.affordable;
       c.btn.setAttribute("aria-label", "Hire " + quote.count + " " + c.name + " for " + fmt(quote.cost) + " cheese");
@@ -516,11 +678,11 @@ section{margin-bottom:34px}
 
   /* ---------- upgrades ---------- */
   var upgRows = {};
+  // Every row is drawn from the current state each time, so a sale (which
+  // takes press upgrades away) shows correctly instead of leaving "Owned".
   function renderUpgrades(){
     var shown = 0, owned = 0;
     G.upgrades.forEach(function(u){
-      if(!G.upgradeVisible(u.id)) return;
-      shown++;
       var row = upgRows[u.id];
       if(!row){
         var box = el("div","upg");
@@ -529,18 +691,20 @@ section{margin-bottom:34px}
         info.appendChild(el("div","ds", u.desc));
         var b = el("button","buy"); b.type = "button";
         b.addEventListener("click", function(){ G.buyUpgrade(u.id); });
-        box.appendChild(info); box.appendChild(b);
+        var tag = el("span","owned-tag","Owned");
+        box.appendChild(info); box.appendChild(b); box.appendChild(tag);
         $("upgrades").appendChild(box);
-        row = upgRows[u.id] = {box:box, btn:b};
+        row = upgRows[u.id] = {box:box, btn:b, tag:tag};
       }
-      if(G.hasUpgrade(u.id)){
-        owned++;
-        if(row.btn.parentNode){
-          row.box.removeChild(row.btn);
-          row.box.classList.add("owned");
-          row.box.appendChild(el("span","owned-tag","Owned"));
-        }
-      } else {
+      var visible = G.upgradeVisible(u.id), has = G.hasUpgrade(u.id);
+      row.box.hidden = !visible;
+      if(!visible) return;
+      shown++;
+      if(has) owned++;
+      row.box.classList.toggle("owned", has);
+      row.btn.hidden = has;
+      row.tag.hidden = !has;
+      if(!has){
         row.btn.textContent = fmt(u.cost);
         row.btn.disabled = G.state.cheese < u.cost;
         row.btn.setAttribute("aria-label", "Buy " + u.name + " for " + fmt(u.cost) + " cheese");
@@ -575,32 +739,33 @@ section{margin-bottom:34px}
 
   /* ---------- staff upgrades: shown once you own enough of a rat ---------- */
   var supgRows = {}, supgNext = el("div","supg-next");
+  G.staffUpgrades.forEach(function(u){
+    var box = el("div","supg"); box.hidden = true;
+    var icon = el("div","rat-icon"); icon.innerHTML = ratIcon(u.tier);
+    var info = el("div","info");
+    info.appendChild(el("div","nm", u.name));
+    info.appendChild(el("div","eff", ROLES_PLURAL[u.tier] + " produce \u00d72"));
+    info.appendChild(el("div","ds", u.desc));
+    var b = el("button","buy"); b.type = "button";
+    b.addEventListener("click", function(){ G.buyStaffUp(u.id); });
+    box.appendChild(icon); box.appendChild(info); box.appendChild(b);
+    $("supgs").appendChild(box);
+    supgRows[u.id] = {box:box, btn:b};
+  });
   $("supgs").appendChild(supgNext);
   function renderStaffUps(){
     var avail = 0, owned = 0, nearest = null;
     G.staffUpgrades.forEach(function(u){
       if(G.hasStaffUp(u.id)) owned++;
-      var row = supgRows[u.id];
-      if(G.staffUpAvailable(u.id)){
+      var row = supgRows[u.id], availNow = G.staffUpAvailable(u.id);
+      row.box.hidden = !availNow;
+      if(availNow){
         avail++;
-        if(!row){
-          var box = el("div","supg");
-          var icon = el("div","rat-icon"); icon.innerHTML = ratIcon(u.tier);
-          var info = el("div","info");
-          info.appendChild(el("div","nm", u.name));
-          info.appendChild(el("div","eff", ROLES[u.tier] + "s produce \u00d72"));
-          info.appendChild(el("div","ds", u.desc));
-          var b = el("button","buy"); b.type = "button";
-          b.addEventListener("click", function(){ G.buyStaffUp(u.id); });
-          box.appendChild(icon); box.appendChild(info); box.appendChild(b);
-          $("supgs").insertBefore(box, supgNext);
-          row = supgRows[u.id] = {box:box, btn:b};
-        }
-        row.btn.textContent = fmt(u.cost);
-        row.btn.disabled = G.state.cheese < u.cost;
-        row.btn.setAttribute("aria-label", "Buy " + u.name + " for " + fmt(u.cost) + " cheese");
+        var uc = G.staffUpCost(u);
+        row.btn.textContent = fmt(uc);
+        row.btn.disabled = G.state.cheese < uc;
+        row.btn.setAttribute("aria-label", "Buy " + u.name + " for " + fmt(uc) + " cheese");
       } else {
-        if(row){ row.box.parentNode.removeChild(row.box); delete supgRows[u.id]; }
         // The next one to unlock: the step after the last bought, for a revealed tier.
         if(!G.hasStaffUp(u.id) && G.tierRevealed(u.tier) && (u.step === 0 || G.hasStaffUp("s" + u.tier + "_" + (u.step - 1)))){
           var need = u.at - G.state.owned[u.tier];
@@ -609,8 +774,8 @@ section{margin-bottom:34px}
       }
     });
     supgNext.hidden = !nearest || avail > 0;
-    if(nearest) supgNext.textContent = "Next: hire " + nearest.need + " more " + ROLES[nearest.u.tier] +
-      (nearest.need === 1 ? "" : "s") + " to unlock " + nearest.u.name + ".";
+    if(nearest) supgNext.textContent = "Next: hire " + nearest.need + " more " +
+      (nearest.need === 1 ? ROLES[nearest.u.tier] : ROLES_PLURAL[nearest.u.tier]) + " to unlock " + nearest.u.name + ".";
     $("supg-sec").hidden = !avail && !nearest && !owned;
     $("supg-sum").textContent = owned + " of " + G.staffUpgrades.length + " owned";
   }
@@ -642,7 +807,7 @@ section{margin-bottom:34px}
       if(res) toast(res, r.left + r.width / 2, r.top + r.height / 2);
     });
     document.body.appendChild(golden);
-    goldTimer = setTimeout(function(){ removeGolden(true); }, GOLD_STAY * 1000);
+    goldTimer = setTimeout(function(){ removeGolden(true); }, G.goldenStay() * 1000);
   }
   function removeGolden(fade){
     clearTimeout(goldTimer);
@@ -656,7 +821,8 @@ section{margin-bottom:34px}
     var t = el("div","toast");
     var strong = el("b", null, res.label + "!");
     t.appendChild(strong);
-    t.appendChild(document.createTextNode(res.kind === "sale" ? " +" + fmt(res.amount) + (res.amount === 1 ? " share" : " shares")
+    t.appendChild(document.createTextNode(res.kind === "consult" || res.kind === "trade" ? " " + res.text
+      : res.kind === "sale" ? " +" + fmt(res.amount) + (res.amount === 1 ? " share" : " shares")
       : res.kind === "windfall" ? " +" + fmt(res.amount) + " cheese"
       : res.kind === "bull" ? " Output \u00d7" + res.mult + " for " + res.seconds + "s"
       : " Presses \u00d7" + res.mult + " for " + res.seconds + "s"));
@@ -728,7 +894,7 @@ section{margin-bottom:34px}
   function pct(x){ return Math.round(x * 100) + "%"; }
   function renderCompany(){
     var s = G.state, pending = G.pendingShares(), earned = s.sharesEarned;
-    var show = earned > 0 || s.allTime >= 250000;
+    var show = earned > 0 || s.ipos > 0 || G.valuation() >= 250000 || s.allTime >= 1e6;
     $("company-sec").hidden = !show;
     var line = $("shares-line");
     line.hidden = earned === 0;
@@ -736,14 +902,17 @@ section{margin-bottom:34px}
     if(!show) return;
 
     $("runs-sum").textContent = s.runs ? "Sold " + s.runs + (s.runs === 1 ? " time" : " times") : "";
+    var value = G.valuation();
+    $("sell-value").textContent = "Valued at " + fmt(value) + ": cheese " + fmt(s.cheese) +
+      ", staff " + fmt(G.staffValue()) + ", staff upgrades " + fmt(G.staffUpValue()) + ".";
     if(pending >= 1){
       $("sell-headline").textContent = "Sell for " + fmt(pending) + (pending === 1 ? " share" : " shares");
-      var after = 1 + G.perShare() * (earned + pending);
+      var after = G.shareMultFor(earned + pending);
       $("sell-detail").textContent = "Output would go from +" + pct(G.shareMult() - 1) + " to +" + pct(after - 1) +
-        " for good. " + fmt(G.cheeseToNextShare()) + " more cheese earned adds another share.";
+        " for good. Another " + fmt(G.cheeseToNextShare()) + " of company value adds a share.";
     } else {
       $("sell-headline").textContent = earned ? "Not worth selling yet" : "Sell the company for shares";
-      $("sell-detail").textContent = "Earn " + fmt(G.cheeseToNextShare()) + " more cheese in total for " +
+      $("sell-detail").textContent = "Grow the company\u2019s value by " + fmt(G.cheeseToNextShare()) + " for " +
         (earned ? "your next share." : "your first share. Each one boosts output by " + pct(G.perShare()) + " for good.");
     }
     if(pending < 1 && confirming){ confirming = false; clearTimeout(confirmTimer); }
@@ -753,30 +922,33 @@ section{margin-bottom:34px}
     btn.classList.toggle("confirm", confirming);
     $("sell-cancel").hidden = !confirming;
     $("sell-warn").hidden = !confirming;
-    $("perks-wrap").hidden = earned === 0;
-    if(earned) renderPerks();
+    $("perks-wrap").hidden = earned === 0 && G.sharesFree() <= 0 && !Object.keys(s.perma).length;
+    if(!$("perks-wrap").hidden) renderPerks();
+    renderIpo();
   }
+  // Rows are built once, in shop order, and shown or hidden, so the list never
+  // reorders itself when a new level appears.
   var perkRows = {};
+  G.shop.forEach(function(it){
+    var box = el("div","perk"); box.hidden = true;
+    var info = el("div");
+    info.appendChild(el("div","nm", it.name));
+    info.appendChild(el("div","ds", it.desc));
+    var b = el("button","buy"); b.type = "button";
+    b.addEventListener("click", function(){ G.buyPerma(it.id); });
+    box.appendChild(info); box.appendChild(b);
+    $("perks").appendChild(box);
+    perkRows[it.id] = {box:box, btn:b};
+  });
   function renderPerks(){
     var free = G.sharesFree();
     G.shop.forEach(function(it){
       var showIt = G.owns(it.id) || G.shopAvailable(it.id);
       var row = perkRows[it.id];
-      if(!showIt){ if(row) row.box.hidden = true; return; }
-      if(!row){
-        var box = el("div","perk");
-        var info = el("div");
-        info.appendChild(el("div","nm", it.name));
-        info.appendChild(el("div","ds", it.desc));
-        var b = el("button","buy"); b.type = "button";
-        b.addEventListener("click", function(){ G.buyPerma(it.id); });
-        box.appendChild(info); box.appendChild(b);
-        $("perks").appendChild(box);
-        row = perkRows[it.id] = {box:box, btn:b};
-      }
-      row.box.hidden = false;
+      row.box.hidden = !showIt;
+      if(!showIt) return;
+      row.box.classList.toggle("owned", G.owns(it.id));
       if(G.owns(it.id)){
-        row.box.classList.add("owned");
         row.btn.disabled = true;
         row.btn.textContent = "Owned";
         row.btn.removeAttribute("aria-label");
@@ -789,6 +961,39 @@ section{margin-bottom:34px}
     $("perks-sum").textContent = fmt(free) + " to spend";
   }
   function cancelSell(){ confirming = false; clearTimeout(confirmTimer); render(); }
+
+  /* ---------- going public ---------- */
+  var ipoConfirm = false, ipoTimer = null;
+  function renderIpo(){
+    var s = G.state, q = G.ipoQuote(), show = s.sharesEarned >= 100 || s.ipos > 0;
+    $("ipo-box").hidden = !show;
+    if(!show) return;
+    if(q.ready && q.stock >= 1){
+      $("ipo-headline").textContent = "Go public for " + q.stock + " stock";
+      $("ipo-detail").textContent = "Trade " + fmt(q.shares) + " shares for " + q.stock + " stock (" + q.totalStock + " in total). Output goes from \u00d7" +
+        q.nowMult.toFixed(1) + " (shares and stock) to \u00d7" + q.afterMult.toFixed(1) + ", then shares build again from zero on top.";
+    } else {
+      $("ipo-headline").textContent = s.ipos ? "Stock " + s.stock + ", output \u00d7" + G.stockMult() : "Going public";
+      $("ipo-detail").textContent = "Reach " + G.ipoMinShares + " shares, with a sale on offer, to list the company. Each point of stock adds +100% output for good.";
+    }
+    var btn = $("ipo-go");
+    btn.disabled = !(q.ready && q.stock >= 1);
+    btn.textContent = ipoConfirm ? "Confirm listing" : "Go public";
+    btn.classList.toggle("confirm", ipoConfirm);
+    $("ipo-cancel").hidden = !ipoConfirm;
+    $("ipo-warn").hidden = !ipoConfirm;
+  }
+  $("ipo-go").addEventListener("click", function(){
+    if(!ipoConfirm){ ipoConfirm = true; clearTimeout(ipoTimer); ipoTimer = setTimeout(function(){ ipoConfirm = false; render(); }, 10000); render(); return; }
+    ipoConfirm = false; clearTimeout(ipoTimer);
+    var res = G.goPublic(); render();
+    if(res){
+      var c = $("count").getBoundingClientRect();
+      toast({kind:"trade", label:"Listed", text:"+" + res.stock + " stock, output \u00d7" + res.mult}, c.left + c.width / 2, c.top + c.height + 30);
+      if(window.Reginald) window.Reginald.say("We\u2019re a public company. I\u2019ve ordered a slightly larger top hat.", {ms: 7000, tip: true, reaction: true});
+    }
+  });
+  $("ipo-cancel").addEventListener("click", function(){ ipoConfirm = false; clearTimeout(ipoTimer); render(); });
   $("sell").addEventListener("click", function(){
     if(!confirming){
       confirming = true; clearTimeout(confirmTimer);
@@ -801,7 +1006,7 @@ section{margin-bottom:34px}
     if(res){
       var r = $("count").getBoundingClientRect();
       toast({kind:"sale", label:"Sold", amount:res.shares}, r.left + r.width / 2, r.top + r.height + 30);
-      if(window.Reginald) window.Reginald.say("Congratulations on the sale. Do try not to spend it all at once.", {ms: 6000, tip: true});
+      if(window.Reginald) window.Reginald.react(G.state.runs === 1 ? "firstSale" : "sale", true);
     }
   });
   $("sell-cancel").addEventListener("click", cancelSell);
@@ -831,6 +1036,8 @@ section{margin-bottom:34px}
       ", output +" + G.achievementCount() + "%";
     var fresh = G.takeNewAchievements();
     fresh.forEach(function(a, k){ setTimeout(function(){ achToast(a); }, k * 900); });
+    var REACT = { t1: "chair", t2: "founder", t3: "banker", g1: "golden" };
+    fresh.forEach(function(a){ if(REACT[a.id] && window.Reginald) window.Reginald.react(REACT[a.id]); });
   }
   function achToast(a){
     var t = el("div","toast ach-toast");
@@ -850,8 +1057,13 @@ section{margin-bottom:34px}
     ["Cheese from pressing",     function(s){ return fmt(s.pressCheese); }],
     ["Rats hired",               function(s){ return fmt(s.hired); }],
     ["Golden cheese clicked",    function(s){ return fmt(s.goldenClicks); }],
+    ["Consultants hired",        function(s){ return fmt(s.consultsHired); }],
+    ["Futures profit",           function(s){ return (s.tradePnl < 0 ? "\u2212" : "") + fmt(Math.abs(s.tradePnl)); }],
+    ["Contracts completed",      function(s){ return fmt(s.contractsDone); }],
+    ["Bond interest",            function(s){ return fmt(s.bondInterest); }],
     ["Times sold",               function(s){ return fmt(s.runs); }],
     ["Shares earned",            function(s){ return fmt(s.sharesEarned); }],
+    ["Stock",                    function(s){ return fmt(s.stock); }],
     ["Time this run",            function(s){ return fmtDuration(s.runSeconds); }],
     ["Time played",              function(s){ return fmtDuration(s.playSeconds); }],
     ["Output bonus",             function(){ return "\u00d7" + (G.shareMult() * G.achievementMult()).toFixed(2); }]
@@ -873,6 +1085,303 @@ section{margin-bottom:34px}
       var v = STATS[i][1](s);
       if(statCells[i].textContent !== v) statCells[i].textContent = v;
     }
+  }
+
+  /* ---------- market and futures ---------- */
+  var stakeFrac = 0.25;
+  var stakeBtns = document.querySelectorAll("[data-stake]");
+  for(var sb=0; sb<stakeBtns.length; sb++){
+    stakeBtns[sb].addEventListener("click", function(){
+      stakeFrac = Number(this.getAttribute("data-stake"));
+      for(var k=0;k<stakeBtns.length;k++) stakeBtns[k].setAttribute("aria-pressed", String(stakeBtns[k] === this));
+      renderMarket();
+    });
+  }
+  $("fut-long").addEventListener("click", function(){ G.openPosition("long", stakeFrac); });
+  $("fut-short").addEventListener("click", function(){ G.openPosition("short", stakeFrac); });
+  $("fut-close").addEventListener("click", function(){
+    var rep = G.closePosition();
+    if(rep){
+      var c = $("count").getBoundingClientRect();
+      toast({kind:"trade", label: rep.profit >= 0 ? "Closed" : "Closed at a loss",
+             text: (rep.profit >= 0 ? "+" : "\u2212") + fmt(Math.abs(rep.profit)) + " cheese"}, c.left + c.width / 2, c.top + c.height + 30);
+      if(window.Reginald){
+        if(rep.profit >= 0.2 * rep.stake) window.Reginald.react("bigWin");
+        else if(rep.profit <= -0.2 * rep.stake) window.Reginald.react("bigLoss");
+      }
+    }
+  });
+  function mmss(sec){ sec = Math.ceil(sec); var m = Math.floor(sec / 60), x = sec % 60; return m + "m " + (x < 10 ? "0" : "") + x + "s"; }
+  function renderMarket(){
+    var s = G.state, ph = G.marketPhase(), info = G.phases[ph], pct = Math.round((info.mult - 1) * 100);
+    $("market-line").className = "market-line " + ph;
+    $("market-phase").textContent = info.label;
+    $("market-effect").textContent = pct ? "output " + (pct > 0 ? "+" : "\u2212") + Math.abs(pct) + "%" : "";
+    var nx = G.marketNext();
+    $("market-left").textContent = mmss(G.marketLeft()) + (nx ? ", then " + G.phases[nx].label : " left");
+    $("market-line").title = "The market changes every few minutes";
+
+    var unlocked = G.futuresUnlocked();
+    $("fut-sec").hidden = !(unlocked || s.allTime >= G.futuresUnlockAt / 2);
+    if($("fut-sec").hidden) return;
+    $("fut-teaser").hidden = unlocked;
+    $("fut-box").hidden = !unlocked;
+    if(!unlocked){ $("fut-teaser").textContent = "The futures desk opens once you\u2019ve earned " + fmt(G.futuresUnlockAt) + " cheese in total."; return; }
+    var m = s.market || {price:100, hist:[100]}, hist = m.hist.concat([m.price]);
+    $("fut-price").textContent = m.price.toFixed(1);
+    var first = hist[0], ch = (m.price / first - 1) * 100;
+    $("fut-change").textContent = (ch >= 0 ? "+" : "\u2212") + Math.abs(ch).toFixed(1) + "% in " + Math.round((hist.length - 1) * 5 / 60) + " min";
+    $("fut-change").className = "fut-change " + (ch >= 0 ? "up" : "down");
+    $("fut-phase").textContent = info.label + " market";
+    var lo = Math.min.apply(null, hist.concat([95])), hi = Math.max.apply(null, hist.concat([105]));
+    $("fut-line").setAttribute("points", hist.map(function(v, i){
+      return (hist.length === 1 ? 100 : i / (hist.length - 1) * 100).toFixed(2) + "," + (38 - (v - lo) / (hi - lo) * 36).toFixed(2);
+    }).join(" "));
+    var mid = 38 - (100 - lo) / (hi - lo) * 36;
+    var ln = document.querySelector("#fut-chart line"); ln.setAttribute("y1", mid.toFixed(2)); ln.setAttribute("y2", mid.toFixed(2));
+    var p = s.position;
+    $("fut-controls").hidden = !!p;
+    $("fut-pos").hidden = !p;
+    if(p){
+      var val = G.positionValue(), pr = (val / p.stake - 1) * 100;
+      $("fut-pos-text").innerHTML = "";
+      var t = document.createTextNode((p.side === "long" ? "Long " : "Short ") + fmt(p.stake) + " from " + p.entry.toFixed(1) + ". Now worth ");
+      var b = el("b", null, fmt(val) + " (" + (pr >= 0 ? "+" : "\u2212") + Math.abs(pr).toFixed(1) + "%)");
+      $("fut-pos-text").appendChild(t); $("fut-pos-text").appendChild(b);
+    } else {
+      var stake = Math.floor(s.cheese * stakeFrac), can = stake >= 1000;   // a paused tab takes over on click, like every other button
+      $("fut-long").disabled = !can; $("fut-short").disabled = !can;
+      $("fut-long").setAttribute("aria-label", "Go long with " + fmt(stake) + " cheese");
+      $("fut-short").setAttribute("aria-label", "Go short with " + fmt(stake) + " cheese");
+    }
+    $("fut-sum").textContent = s.trades ? s.trades + (s.trades === 1 ? " trade, " : " trades, ") +
+      (s.tradePnl >= 0 ? "+" : "\u2212") + fmt(Math.abs(s.tradePnl)) + " overall" : "";
+  }
+
+  /* ---------- contracts ---------- */
+  var CT_TEXT = {
+    produce: function(c){ return "Make " + fmt(c.target) + " cheese in 3 minutes."; },
+    hire:    function(c){ return "Hire " + c.target + " rats in 2 minutes."; },
+    press:   function(c){ return "Press " + c.target + " times in a minute."; },
+    rate:    function(c){ return "Reach " + fmt(c.target, true) + " cheese a second within 5 minutes."; }
+  };
+  function rewardText(c){ return c.rewardKind === "boost" ? "Reward: +10% output for 10 minutes" : "Reward: " + fmt(c.reward) + " cheese"; }
+  var dealRows = [];
+  for(var di=0; di<3; di++){ (function(i){
+    var box = el("div","deal"); box.hidden = true;
+    var nm = el("div","nm"), ds = el("div","ds"), rw = el("div","rw"), foot = el("div","foot");
+    var b = el("button","buy"); b.type = "button"; b.textContent = "Take it on";
+    b.addEventListener("click", function(){ G.acceptContract(i); });
+    foot.appendChild(b); [nm, ds, rw, foot].forEach(function(x){ box.appendChild(x); });
+    $("deals").appendChild(box); dealRows.push({box:box, nm:nm, ds:ds, rw:rw, btn:b});
+  })(di); }
+  var contractRun = -1;
+  function renderContracts(){
+    var s = G.state, unlocked = G.contractsUnlocked();
+    $("contract-sec").hidden = !(unlocked || s.allTime >= G.contractUnlockAt / 2);
+    if($("contract-sec").hidden) return;
+    if(s.runs !== contractRun){ contractRun = s.runs; $("contract-report").hidden = true; }
+    $("contract-note").textContent = unlocked ? "Timed challenges sized to your current output. One at a time; failing costs nothing."
+      : "Contracts open once you\u2019ve earned " + fmt(G.contractUnlockAt) + " cheese in total.";
+    $("contract-sum").textContent = s.contractsDone ? s.contractsDone + " completed" : "";
+    var c = s.contract, now = Date.now();
+    $("contract-active").hidden = !c;
+    if(c){
+      var p = Math.min(1, G.contractProgress() / c.target);
+      $("contract-active-text").textContent = G.contractTypes[c.type].label + ": " + CT_TEXT[c.type](c) + " " +
+        Math.round(p * 100) + "% done, " + Math.max(0, Math.ceil((c.endsAt - now) / 1000)) + "s left. " + rewardText(c) + ".";
+      $("contract-bar").style.width = (p * 100).toFixed(1) + "%";
+    }
+    var cooling = now < s.contractCooldown;
+    dealRows.forEach(function(r, i){
+      var o = s.offers[i];
+      r.box.hidden = !unlocked || !o;
+      if(!o) return;
+      r.nm.textContent = G.contractTypes[o.type].label;
+      r.ds.textContent = CT_TEXT[o.type](o);
+      r.rw.textContent = rewardText(o);
+      r.btn.disabled = !!c || cooling;
+      r.btn.textContent = cooling && !c ? "Next in " + Math.ceil((s.contractCooldown - now) / 1000) + "s" : "Take it on";
+    });
+    G.takeContractReports().forEach(function(rep){
+      var box = $("contract-report");
+      box.hidden = false;
+      box.className = "consult-report" + (rep.done ? " good" : "");
+      box.textContent = rep.done ? G.contractTypes[rep.type].label + " complete. " + (rep.rewardKind === "boost" ? "+10% output for 10 minutes." : "+" + fmt(rep.reward) + " cheese.")
+        : G.contractTypes[rep.type].label + " ran out of time. No harm done.";
+    });
+  }
+
+  /* ---------- treasury bonds ---------- */
+  var bondFrac = 0.25, bondFracBtns = document.querySelectorAll("[data-bond]");
+  for(var bf=0; bf<bondFracBtns.length; bf++){
+    bondFracBtns[bf].addEventListener("click", function(){
+      bondFrac = Number(this.getAttribute("data-bond"));
+      for(var k=0;k<bondFracBtns.length;k++) bondFracBtns[k].setAttribute("aria-pressed", String(bondFracBtns[k] === this));
+      renderBonds();
+    });
+  }
+  var bondBtns = G.bondTerms.map(function(t, i){
+    var b = el("button","buy"); b.type = "button";
+    b.addEventListener("click", function(){ G.buyBond(i, bondFrac); });
+    $("bond-buttons").appendChild(b); return b;
+  });
+  function renderBonds(){
+    var s = G.state, unlocked = G.bondsUnlocked();
+    $("bond-sec").hidden = !(unlocked || s.allTime >= G.bondUnlockAt / 2);
+    if($("bond-sec").hidden) return;
+    $("bond-desk").hidden = !unlocked;
+    $("bond-note").textContent = unlocked
+      ? "Lock cheese away and get it back with interest. Up to " + G.maxBonds + " at a time, each up to 10 minutes of your output (" + fmt(G.bondCap()) + " now)."
+      : "The bond desk opens once you\u2019ve earned " + fmt(G.bondUnlockAt) + " cheese in total.";
+    var stake = G.bondStake(bondFrac), full = s.bonds.length >= G.maxBonds;
+    G.bondTerms.forEach(function(t, i){
+      bondBtns[i].textContent = t.minutes + " min, +" + Math.round(t.rate * 100) + "%";
+      bondBtns[i].disabled = full || stake < 100;
+      bondBtns[i].setAttribute("aria-label", "Buy a " + t.minutes + " minute bond with " + fmt(stake) + " cheese at " + Math.round(t.rate * 100) + "% interest");
+    });
+    var list = $("bond-list"); list.textContent = "";
+    s.bonds.forEach(function(b){
+      var row = el("div","bond-row");
+      row.appendChild(el("span", null, fmt(b.stake) + " at " + Math.round(b.rate * 100) + "%, pays " + fmt(b.stake * (1 + b.rate))));
+      row.appendChild(el("span", null, mmss(Math.max(0, (b.matures - Date.now()) / 1000))));
+      list.appendChild(row);
+    });
+    $("bond-sum").textContent = s.bondsRedeemed ? "+" + fmt(s.bondInterest) + " interest so far" : "";
+    G.takeBondReports().forEach(function(r){
+      var c = $("count").getBoundingClientRect();
+      toast({kind:"trade", label:"Bond matured", text:"+" + fmt(r.interest) + " interest"}, c.left + c.width / 2, c.top + c.height + 30);
+    });
+  }
+
+  /* ---------- consultants ---------- */
+  var firmRows = {};
+  function oddsText(f){
+    var total = 0; f.outcomes.forEach(function(o){ total += o.w; });
+    return f.outcomes.map(function(o){ return Math.round(o.w / total * 100) + "% " + o.label.toLowerCase(); }).join(", ");
+  }
+  G.consultants.forEach(function(f){
+    var box = el("div","firm");
+    box.appendChild(el("div","nm", f.name));
+    box.appendChild(el("div","ds", f.style));
+    box.appendChild(el("div","odds", oddsText(f)));
+    var work = el("div","work"); work.hidden = true; box.appendChild(work);
+    var foot = el("div","foot"); var fee = el("span","fee");
+    var b = el("button","buy"); b.type = "button"; b.textContent = "Hire";
+    b.addEventListener("click", function(){ G.hireConsultant(f.id); });
+    foot.appendChild(fee); foot.appendChild(b); box.appendChild(foot);
+    $("firms").appendChild(box);
+    firmRows[f.id] = {box:box, fee:fee, btn:b, work:work};
+  });
+  function reportText(r){
+    if(r.kind === "gain") return r.firm + ": " + r.label + ". +" + fmt(r.amount) + " cheese.";
+    if(r.kind === "nothing") return r.firm + ": " + r.label + ". Nothing changes.";
+    if(r.kind === "overrun") return r.firm + ": " + r.label + ". They billed another " + fmt(r.amount) + ".";
+    if(r.kind === "lose") return r.firm + ": " + r.label + ". " + fmt(r.amount) + " cheese gone" + (r.label === "Scandal" ? ", and it made the papers." : ".");
+    if(r.kind === "restructure") return r.firm + ": " + r.label + ". They let go " + r.count + " " +
+      (r.count === 1 ? ROLES[r.tier] : ROLES_PLURAL[r.tier]) + ".";
+    return r.firm + ": done.";
+  }
+  var reportRun = -1;
+  function renderConsultants(){
+    var s = G.state, unlocked = G.consultantsUnlocked();
+    // A report belongs to the company it was about: selling clears it.
+    if(s.runs !== reportRun){ reportRun = s.runs; $("consult-report").hidden = true; }
+    var show = unlocked || s.allTime >= G.consultUnlockAt / 2;
+    $("consult-sec").hidden = !show;
+    if(!show) return;
+    $("consult-note").textContent = unlocked
+      ? "Pay a fee, they work for a minute, then report back. One firm at a time. Fees are minutes of your current output."
+      : "Consultants take your calls once you\u2019ve earned " + fmt(G.consultUnlockAt) + " cheese in total.";
+    $("consult-sum").textContent = s.consultsHired ? s.consultsHired + " hired" : "";
+    $("firms").hidden = !unlocked;
+    G.consultants.forEach(function(f){
+      var r = firmRows[f.id], fee = G.consultantFee(f.id), mine = s.consult && s.consult.firm === f.id;
+      r.box.classList.toggle("working", !!mine);
+      r.work.hidden = !mine;
+      if(mine) r.work.textContent = "At work: " + Math.ceil(G.consultLeft()) + "s left";
+      r.fee.textContent = "Fee " + fmt(fee);
+      r.btn.disabled = !unlocked || !!s.consult || s.cheese < fee;
+      r.btn.setAttribute("aria-label", "Hire " + f.name + " for " + fmt(fee) + " cheese");
+    });
+    G.takeConsultReports().forEach(function(rep){
+      var box = $("consult-report"), good = rep.kind === "gain", text = reportText(rep);
+      box.hidden = false; box.textContent = text;
+      box.className = "consult-report" + (good ? " good" : rep.kind === "nothing" ? "" : " bad");
+      var c = $("count").getBoundingClientRect();
+      toast({kind:"consult", label: rep.label, text: text.slice(rep.firm.length + 2 + rep.label.length + 2)}, c.left + c.width / 2, c.top + c.height + 30);
+      if(window.Reginald){
+        if(rep.label === "Scandal") window.Reginald.react("scandal");
+        else if(rep.label === "Masterstroke") window.Reginald.react("masterstroke");
+        else if(rep.kind === "restructure") window.Reginald.react("restructure");
+      }
+    });
+  }
+
+  /* ---------- board decisions and hostile takeovers, brought by Reginald ---------- */
+  var R = window.Reginald;
+  var DEC_GAP = [300, 540], TAKE_GAP = [600, 1080];
+  var nextDecisionAt = Date.now() + rnd([120, 240]) * 1000, nextTakeoverAt = Date.now() + rnd(TAKE_GAP) * 1000;
+  var lastDecision = null;
+  function presentDecision(){
+    var pool = G.decisions.filter(function(x){ return x.id !== lastDecision; });
+    var dcs = pool[Math.floor(Math.random() * pool.length)];
+    lastDecision = dcs.id;
+    R.say(dcs.text, { ms: 30000, tip: true,
+      choices: dcs.options.map(function(o){ return { label: o.label, desc: o.desc }; }),
+      onChoose: function(i){
+        if(i < 0) return;
+        var res = G.decide(dcs.id, i);
+        if(!res) return;
+        var c = $("count").getBoundingClientRect(), bits = [];
+        if(res.cost) bits.push("\u2212" + fmt(res.cost) + " cheese");
+        if(res.lost) bits.push("lost " + res.lost + " " + (res.lost === 1 ? ROLES[res.tier] : ROLES_PLURAL[res.tier]));
+        toast({kind:"trade", label: res.label, text: bits.length ? bits.join(", ") : "Done."}, c.left + c.width / 2, c.top + c.height + 30);
+        if(G.takeGoldenSoon()) nextGoldAt = Date.now() + rnd([10, 50]) * 1000;
+        render();
+      }});
+  }
+  function presentTakeover(){
+    var o = G.makeOffer();
+    if(!o) return false;
+    var pct = Math.round((o.premium - 1) * 100);
+    R.say("A rival offers " + fmt(o.value) + " for the company, " + pct + "% above its value. They want an answer within " + o.seconds + " seconds.",
+      { ms: o.seconds * 1000, tip: true,
+        choices: [ { label: "Sell to them", desc: "+" + fmt(o.shares) + (o.shares === 1 ? " share" : " shares") + ", and this run ends" },
+                   { label: "Decline", desc: "Keep building" } ],
+        onChoose: function(i){
+          if(i !== 0){ G.declineTakeover(); return; }
+          var res = G.acceptTakeover();
+          render();
+          if(res){
+            var c = $("count").getBoundingClientRect();
+            toast({kind:"sale", label:"Taken over", amount:res.shares}, c.left + c.width / 2, c.top + c.height + 30);
+            setTimeout(function(){ R.react("takeover", true); }, 3000);
+          }
+        }});
+    return true;
+  }
+  setInterval(function(){
+    if(!R || document.visibilityState === "hidden" || !G.isActive() || R.busy()) return;
+    var now = Date.now();
+    if(now >= nextTakeoverAt){
+      if(G.takeoverPossible() && presentTakeover()){ nextTakeoverAt = now + rnd(TAKE_GAP) * 1000; nextDecisionAt = Math.max(nextDecisionAt, now + 60000); return; }
+      nextTakeoverAt = now + 120000;   // try again in a couple of minutes
+    }
+    if(now >= nextDecisionAt && G.decisionsUnlocked()){ presentDecision(); nextDecisionAt = now + rnd(DEC_GAP) * 1000; }
+  }, 1000);
+
+  function renderBoosts(){
+    var list = G.activeBoosts(), box = $("boosts");
+    box.hidden = !list.length;
+    if(!list.length) return;
+    box.textContent = "";
+    list.forEach(function(b){
+      var row = el("div","row"), pct = Math.round((b.mult - 1) * 100);
+      row.appendChild(el("span", null, "Board: " + (b.kind === "press" ? "presses \u00d7" + b.mult : "output " + (pct >= 0 ? "+" : "\u2212") + Math.abs(pct) + "%")));
+      row.appendChild(el("span", null, mmss((b.until - Date.now()) / 1000)));
+      box.appendChild(row);
+    });
   }
 
   /* ---------- buy mode ---------- */
@@ -907,8 +1416,13 @@ section{margin-bottom:34px}
     renderStaffUps();
     renderStaff();
     renderBuffs();
+    renderBoosts();
     renderRecruiter();
     renderCompany();
+    renderMarket();
+    renderContracts();
+    renderBonds();
+    renderConsultants();
     renderAchievements();
     renderStats();
   }
@@ -919,7 +1433,7 @@ section{margin-bottom:34px}
   G.start(render);
   $("bull-what").textContent = "Output \u00d7" + G.golden.bull.mult;
   $("paws-what").textContent = "Presses \u00d7" + G.golden.paws.mult;
-  setInterval(renderBuffs, 250);
+  setInterval(function(){ renderBuffs(); renderBoosts(); renderMarket(); renderContracts(); renderBonds(); if(G.state.consult) renderConsultants(); }, 250);
 })();
 </script>
 <script data-goatcounter="https://puranjay.goatcounter.com/count"

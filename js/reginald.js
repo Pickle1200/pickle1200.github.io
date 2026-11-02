@@ -157,6 +157,12 @@
     '#reginald .rg-quiet[hidden]{display:none}' +
     '#reginald .rg-link{display:inline-block;margin-top:9px;font-size:12px;color:var(--amber-deep);text-decoration:none;border-bottom:1px solid currentColor}' +
     '#reginald .rg-link[hidden]{display:none}' +
+    '#reginald .rg-choices{display:grid;gap:6px;margin-top:10px}' +
+    '#reginald .rg-choices[hidden]{display:none}' +
+    '#reginald .rg-choice{text-align:left;padding:7px 9px;border:1px solid var(--rule);background:var(--bg);color:var(--ink);cursor:pointer;font-family:var(--mono);font-size:12px;line-height:1.4}' +
+    '#reginald .rg-choice:hover{border-color:var(--amber)}' +
+    '#reginald .rg-choice b{display:block;font-weight:500;color:var(--amber-deep)}' +
+    '#reginald .rg-choice span{color:var(--ink-soft);font-size:11px}' +
     '#reginald button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}' +
     '#reginald .rg-rat{width:96px;flex:none}' +
     '#reginald .rg-rat svg{display:block;width:100%;height:auto}' +
@@ -175,7 +181,7 @@
     '}';
 
   /* ---------- build ---------- */
-  var root, textEl, quietBtn, undoBtn, linkEl;
+  var root, textEl, quietBtn, undoBtn, linkEl, choicesEl;
   function build() {
     var style = doc.createElement("style");
     style.textContent = CSS;
@@ -187,6 +193,7 @@
       '<div class="rg-bubble">' +
         '<div class="rg-text" role="status" aria-live="polite"></div>' +
         '<a class="rg-link" hidden></a>' +
+        '<div class="rg-choices" hidden></div>' +
         '<button type="button" class="rg-quiet" hidden>No more facts, please</button>' +
         '<button type="button" class="rg-undo rg-quiet" hidden>Undo</button>' +
         '<button type="button" class="rg-close" aria-label="Dismiss Sir Reginald">\u00d7</button>' +
@@ -197,6 +204,7 @@
     quietBtn = root.querySelector(".rg-quiet:not(.rg-undo)");
     undoBtn = root.querySelector(".rg-undo");
     linkEl = root.querySelector(".rg-link");
+    choicesEl = root.querySelector(".rg-choices");
     root.querySelector(".rg-close").addEventListener("click", dismiss);
     quietBtn.addEventListener("click", function () {
       G.state.reginald.factsOff = true;
@@ -221,6 +229,20 @@
     undoBtn.hidden = !opts.undo;
     linkEl.hidden = !opts.link;
     if (opts.link) { linkEl.href = opts.link.href; linkEl.textContent = opts.link.label; }
+    // Choices: buttons in the bubble; picking one (or the time running out) calls back once.
+    if (current && current.choices && current.onChoose && !current.chosen) { current.chosen = true; current.onChoose(-1); }
+    choicesEl.textContent = "";
+    choicesEl.hidden = !opts.choices;
+    if (opts.choices) {
+      opts.choices.forEach(function (c, i) {
+        var b = doc.createElement("button");
+        b.type = "button"; b.className = "rg-choice";
+        var t = doc.createElement("b"); t.textContent = c.label; b.appendChild(t);
+        if (c.desc) { var d = doc.createElement("span"); d.textContent = c.desc; b.appendChild(d); }
+        b.addEventListener("click", function () { choose(i); });
+        choicesEl.appendChild(b);
+      });
+    }
     current = opts;
     shownAt = Date.now();
     showing = true;
@@ -236,8 +258,17 @@
     if (!opts.stay) hideTimer = setTimeout(hide, opts.ms || LINE_MS);
   }
 
+  function choose(i) {
+    var c = current;
+    if (!c || !c.choices || c.chosen) return;
+    c.chosen = true;
+    hide();
+    if (c.onChoose) c.onChoose(i);
+  }
   function hide() {
     clearTimeout(hideTimer);
+    var c = current;
+    if (c && c.choices && !c.chosen) { c.chosen = true; current = null; if (c.onChoose) c.onChoose(-1); }
     showing = false;
     current = null;
     if (root) root.classList.remove("rg-show");
@@ -251,7 +282,7 @@
   }
 
   function dismiss() {
-    var wasFact = current && (current.fact || current.undo);
+    var wasFact = current && (current.fact || current.undo || current.choices || current.reaction);
     hide();
     if (!wasFact) finishTutorial();
   }
@@ -315,6 +346,7 @@
   setInterval(function () {
     var r = G.state.reginald, now = Date.now();
     if ((tutorialOn && !r.done) || r.factsOff || showing) return;
+    if (now - lastReactionAt < 20000) return;          // don't follow a reaction straight away
     if (G.isActive && !G.isActive()) return;
     if (doc.visibilityState === "hidden") return;
     if (now - lastActive > ACTIVE_WINDOW || now < nextFactAt) return;
@@ -354,6 +386,34 @@
     }, INTRO_DELAY);
   }
 
+  /* ---------- reactions to big moments, rate-limited so he never chatters ---------- */
+  var REACTIONS = {
+    firstSale:   ["Congratulations on the sale. Do try not to spend it all at once."],
+    sale:        ["Another sale. The lawyers are becoming quite fond of us.", "Sold again. I\u2019ll have the brass plaque updated."],
+    takeover:    ["Sold to the highest bidder. Very good. I\u2019ll fetch my coat."],
+    scandal:     ["A scandal. I shall be unavailable for comment.", "We\u2019re in the papers. Not the good pages."],
+    masterstroke:["A masterstroke. I\u2019ll take some of the credit, if nobody minds."],
+    restructure: ["Restructuring. Consultants are best admired from a distance."],
+    bigWin:      ["A fine trade. Do it again, but don\u2019t tell me how."],
+    bigLoss:     ["The market giveth. Today it mostly tooketh."],
+    chair:       ["A Chair of the Board. Finally, someone to blame."],
+    founder:     ["A Founder. They\u2019ll want a beanbag."],
+    banker:      ["A Central Banker. I believe that makes us a currency."],
+    golden:      ["Golden cheese. Click it before someone from accounts does."]
+  };
+  var lastReactionAt = 0, REACTION_GAP = 45000;
+  function busy() { return showing && current && current.choices && !current.chosen; }
+  function react(key, force) {
+    var lines = REACTIONS[key];
+    if (!lines || busy()) return false;
+    var now = Date.now();
+    if (!force && now - lastReactionAt < REACTION_GAP) return false;
+    lastReactionAt = now;
+    say(lines[Math.floor(Math.random() * lines.length)], { ms: 6000, tip: true, reaction: true });
+    return true;
+  }
+
   global.Reginald = { update: update, skip: skip, say: say, hide: hide, facts: FACTS,
-                      setSections: setSections, setTutorial: setTutorial, welcome: welcome };
+                      setSections: setSections, setTutorial: setTutorial, welcome: welcome,
+                      react: react, busy: busy, reactions: REACTIONS };
 })(window);
