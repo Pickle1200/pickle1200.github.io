@@ -13,7 +13,7 @@
   // The version of this code. Bump it on every release, together with the
   // ?v= on the script tags. An older tab that sees a newer version has run
   // stops saving and asks to be refreshed, so it can never clash with it.
-  var CODE_VERSION = 7;
+  var CODE_VERSION = 9;
   var CODE_KEY = "pk_cheese_code";
   var TICK_MS = 200;
   var AUTOSAVE_MS = 5000;
@@ -104,6 +104,44 @@
     }
   }
 
+  /* ---------- the Recruiter: an auto-buyer, hired once on /cheese ----------
+     Buys whatever pays for itself fastest, rats or staff upgrades, waiting for
+     the best option rather than wasting cheese on a worse one. One hire every
+     1.5 seconds so you can watch it work. */
+  var RECRUITER = { cost: 25000, everyMs: [0, 5000, 2000, 1500] };   // by level; level 3 also buys staff upgrades
+
+  /* ---------- rebirth: selling the company ----------
+     Selling resets the run and pays shares for all the cheese you have ever
+     earned: total shares = cube root of (all-time cheese / 1 million), so each
+     sale is worth waiting for. Every share earned boosts output by 5% for good,
+     and shares can also be spent in the permanent shop without losing that
+     boost. Modelled: first sale around 50 minutes for 10 shares; each later
+     run gets back to the previous total far faster (60, 38, 28, 22, 17 min). */
+  var SHARE_SCALE = 1e6;
+  var SHARE_BONUS = 0.05;
+  var SHOP = [
+    { id: "grip1",     cost: 2,   name: "Firm grip I",          desc: "Presses give three times as much.", press: 3 },
+    { id: "seed1",     cost: 3,   name: "Seed funding I",       desc: "Start every run with 5K cheese.", start: 5000 },
+    { id: "contacts1", cost: 8,   name: "Market contacts I",    desc: "Golden cheese turns up 30% more often.", golden: 1.3 },
+    { id: "grip2",     cost: 15,  name: "Firm grip II",         desc: "Presses give three times as much again.", press: 3, needs: "grip1" },
+    { id: "seed2",     cost: 20,  name: "Seed funding II",      desc: "Start every run with 500K cheese.", start: 500000, needs: "seed1" },
+    { id: "recruit1",  cost: 25,  name: "Recruiter I",          desc: "Hires the best-value rat for you, one every 5 seconds.", recruiter: 1 },
+    { id: "contacts2", cost: 30,  name: "Market contacts II",   desc: "Golden cheese turns up 30% more often again.", golden: 1.3, needs: "contacts1" },
+    { id: "retain",    cost: 40,  name: "Retention bonus",      desc: "Keep each tier\u2019s first staff upgrade when you sell." },
+    { id: "value1",    cost: 50,  name: "Shareholder value I",  desc: "Each share boosts output by 6% instead of 5%.", bonus: 0.01 },
+    { id: "recruit2",  cost: 60,  name: "Recruiter II",         desc: "The Recruiter hires every 2 seconds.", recruiter: 2, needs: "recruit1" },
+    { id: "seed3",     cost: 120, name: "Seed funding III",     desc: "Start every run with 50M cheese.", start: 50000000, needs: "seed2" },
+    { id: "recruit3",  cost: 150, name: "Recruiter III",        desc: "Every 1.5 seconds, and buys staff upgrades too.", recruiter: 3, needs: "recruit2" },
+    { id: "value2",    cost: 150, name: "Shareholder value II", desc: "Each share boosts output by 7%.", bonus: 0.01, needs: "value1" }
+  ];
+  function shopItem(id) { for (var i = 0; i < SHOP.length; i++) if (SHOP[i].id === id) return SHOP[i]; return null; }
+  function recruiterLevelOf(perma) {
+    var l = 0;
+    for (var i = 0; i < SHOP.length; i++) if (SHOP[i].recruiter && perma[SHOP[i].id]) l = Math.max(l, SHOP[i].recruiter);
+    return l;
+  }
+  function sharesFor(allTime) { return Math.floor(Math.cbrt(Math.max(0, allTime) / SHARE_SCALE) + 1e-9); }
+
   /* ---------- golden cheese bonuses (spawned by /cheese) ---------- */
   var GOLDEN = {
     windfall: { label: "Windfall" },
@@ -185,6 +223,11 @@
       staffUps: {},         // staff upgrade id -> true
       buffs: { prodMult: 1, prodUntil: 0, pressMult: 1, pressUntil: 0 },
       goldenClicks: 0,
+      recruiter: { hired: false, on: false },
+      allTime: 0,           // all cheese ever earned, across every run
+      runs: 0,              // times the company has been sold
+      sharesEarned: 0,
+      perma: {},            // permanent shop item id -> true
       savedAt: 0
     };
   }
@@ -227,6 +270,28 @@
       if (s.buffs.pressUntil > limit) s.buffs.pressUntil = 0;
     }
     s.goldenClicks = whole(d.goldenClicks);
+    s.allTime = Math.max(num(d.allTime), s.lifetime);
+    s.runs = whole(d.runs);
+    // Shares can never exceed what all-time cheese pays for.
+    s.sharesEarned = Math.min(whole(d.sharesEarned), sharesFor(s.allTime));
+    if (d.perma && typeof d.perma === "object") {
+      for (var pi = 0; pi < SHOP.length; pi++) {
+        var it = SHOP[pi];
+        if (d.perma[it.id] === true && (!it.needs || s.perma[it.needs])) s.perma[it.id] = true;
+      }
+    }
+    // And you can't own more than your shares paid for: drop the priciest extras.
+    var spentNow = function () { var t = 0; for (var k in s.perma) t += shopItem(k).cost; return t; };
+    for (var guard = 0; spentNow() > s.sharesEarned && guard < 50; guard++) {
+      var worst = null;
+      for (var k2 in s.perma) {
+        var dependents = SHOP.some(function (x) { return x.needs === k2 && s.perma[x.id]; });
+        if (!dependents && (!worst || shopItem(k2).cost > shopItem(worst).cost)) worst = k2;
+      }
+      delete s.perma[worst];
+    }
+    s.recruiter.hired = recruiterLevelOf(s.perma) > 0;
+    s.recruiter.on = s.recruiter.hired && !(d.recruiter && d.recruiter.on === false);
     if (d.reginald && typeof d.reginald === "object") {
       s.reginald.done = d.reginald.done === true;
       s.reginald.factsOff = d.reginald.factsOff === true;
@@ -448,6 +513,7 @@
     if (!(amount > 0)) return;
     state.cheese += amount;
     state.lifetime += amount;
+    state.allTime += amount;
     dirty = true;
   }
 
@@ -468,7 +534,8 @@
   // A tier is revealed once you own one, or once you've earned half its
   // first price in total. Until then pages show it greyed out, as "???".
   function tierRevealed(tier) {
-    return tier === 0 || state.owned[tier] > 0 || state.lifetime >= TIERS[tier].cost / 2;
+    // All-time cheese, so a tier revealed in an earlier run stays revealed.
+    return tier === 0 || state.owned[tier] > 0 || state.allTime >= TIERS[tier].cost / 2;
   }
   function revealAt(tier) { return TIERS[tier].cost / 2; }
 
@@ -480,7 +547,75 @@
   }
 
   // What one rat of this tier currently makes per second (before golden bonuses).
-  function rateOf(tier) { return TIERS[tier].rate * multiplierOf(tier) * staffUpMultOf(tier); }
+  function rateOf(tier) { return TIERS[tier].rate * multiplierOf(tier) * staffUpMultOf(tier) * shareMult(); }
+
+  /* ---------- shares and the permanent shop ---------- */
+  function owns(id) { return state.perma[id] === true; }
+  function perShare() {
+    var b = SHARE_BONUS;
+    for (var i = 0; i < SHOP.length; i++) if (SHOP[i].bonus && owns(SHOP[i].id)) b += SHOP[i].bonus;
+    return b;
+  }
+  function shareMult() { return 1 + perShare() * state.sharesEarned; }
+  function sharesSpent() { var t = 0; for (var k in state.perma) t += shopItem(k).cost; return t; }
+  function sharesFree() { return state.sharesEarned - sharesSpent(); }
+  function pendingShares() { return Math.max(0, sharesFor(state.allTime) - state.sharesEarned); }
+  // All-time cheese still needed for one more share than a sale would pay now.
+  function cheeseToNextShare() {
+    var next = sharesFor(state.allTime) + 1;
+    return Math.max(0, SHARE_SCALE * next * next * next - state.allTime);
+  }
+  function pressMult() {
+    var m = 1;
+    for (var i = 0; i < SHOP.length; i++) if (SHOP[i].press && owns(SHOP[i].id)) m *= SHOP[i].press;
+    return m;
+  }
+  function startCheese() {
+    var c = 0;
+    for (var i = 0; i < SHOP.length; i++) if (SHOP[i].start && owns(SHOP[i].id)) c = Math.max(c, SHOP[i].start);
+    return c;
+  }
+  // Golden cheese gaps are divided by this.
+  function goldenFrequency() {
+    var f = 1;
+    for (var i = 0; i < SHOP.length; i++) if (SHOP[i].golden && owns(SHOP[i].id)) f *= SHOP[i].golden;
+    return f;
+  }
+  function recruiterLevel() { return recruiterLevelOf(state.perma); }
+  function shopAvailable(id) {
+    var it = shopItem(id);
+    return !!it && !owns(id) && (!it.needs || owns(it.needs));
+  }
+  function buyPerma(id) {
+    if (!active) { claim(); return false; }
+    var it = shopItem(id);
+    if (!it || !shopAvailable(id) || sharesFree() < it.cost) return false;
+    state.perma[id] = true;
+    if (it.recruiter && it.recruiter === 1) { state.recruiter.hired = true; state.recruiter.on = true; }
+    dirty = true; save(); onChange();
+    return true;
+  }
+
+  // Sell the company: bank the shares, start a fresh run.
+  function sell() {
+    if (!active) { claim(); return null; }
+    var gained = pendingShares();
+    if (gained < 1) return null;
+    state.sharesEarned += gained;
+    state.runs++;
+    var start = startCheese();
+    state.cheese = start;
+    state.lifetime = start;
+    state.owned = TIERS.map(function () { return 0; });
+    state.upgrades = {};
+    var kept = {};
+    if (owns("retain")) for (var k in state.staffUps) if (/_0$/.test(k)) kept[k] = true;
+    state.staffUps = kept;
+    state.buffs = { prodMult: 1, prodUntil: 0, pressMult: 1, pressUntil: 0 };
+    lastHire = 0;
+    dirty = true; save(); onChange();
+    return { shares: gained, total: state.sharesEarned, mult: shareMult() };
+  }
 
   function buffActive(kind) {
     var now = Date.now();
@@ -503,7 +638,7 @@
 
   /* ---------- pressing ---------- */
   function perPress() {
-    var v = BASE_PRESS, share = 0;
+    var v = BASE_PRESS * pressMult(), share = 0;
     for (var i = 0; i < UPGRADES.length; i++) {
       var u = UPGRADES[i];
       if (!state.upgrades[u.id]) continue;
@@ -547,6 +682,15 @@
     else k = mode;
     var c = costOfMany(tier, k);
     return { count: k, cost: c, affordable: state.cheese >= c };
+  }
+
+  function buyOne(tier) {
+    var c = costOf(tier);
+    if (!tierRevealed(tier) || state.cheese < c) return false;
+    state.cheese -= c;
+    state.owned[tier]++;
+    dirty = true;
+    return true;
   }
 
   function buy(tier) {
@@ -602,6 +746,71 @@
     save();
     onChange();
     return true;
+  }
+
+  /* ---------- the Recruiter ---------- */
+  // Output gained by one more rat of a tier, counting any milestone it reaches.
+  function gainFromRat(tier) {
+    var n = state.owned[tier], per = TIERS[tier].rate * staffUpMultOf(tier) * shareMult();
+    var m0 = 1, m1 = 1;
+    for (var i = 0; i < MILESTONES.length; i++) { if (n >= MILESTONES[i]) m0 *= 2; if (n + 1 >= MILESTONES[i]) m1 *= 2; }
+    return per * ((n + 1) * m1 - n * m0);
+  }
+  // Every option the Recruiter considers, best first: lowest wait plus payback.
+  function recruiterOptions() {
+    var opts = [], rate = baseRate() + 0.001, i;
+    for (i = 0; i < TIERS.length; i++) {
+      if (!tierRevealed(i)) continue;
+      var c = costOf(i), g = gainFromRat(i);
+      if (g > 0) opts.push({ type: "rat", tier: i, cost: c, gain: g });
+    }
+    for (i = 0; i < STAFF_UPGRADES.length; i++) {
+      var u = STAFF_UPGRADES[i];
+      if (recruiterLevel() < 3) break;   // only Recruiter III buys staff upgrades
+      if (!staffUpAvailable(u.id)) continue;
+      var gu = rateOf(u.tier) * state.owned[u.tier];     // doubling adds the tier's current output
+      if (gu > 0) opts.push({ type: "staff", id: u.id, tier: u.tier, name: u.name, cost: u.cost, gain: gu });
+    }
+    opts.forEach(function (o) {
+      o.payback = o.cost / o.gain;
+      o.wait = Math.max(0, (o.cost - state.cheese) / rate);
+      o.score = o.wait + o.payback;
+    });
+    opts.sort(function (a, b) { return a.score - b.score; });
+    return opts;
+  }
+  function recruiterNext() { return recruiterOptions()[0] || null; }
+
+  function hireRecruiter() {
+    if (!active) { claim(); return false; }
+    if (!RECRUITER_FOR_SALE || state.recruiter.hired || state.cheese < RECRUITER.cost) return false;
+    state.cheese -= RECRUITER.cost;
+    state.recruiter.hired = true;
+    state.recruiter.on = true;
+    dirty = true; save(); onChange();
+    return true;
+  }
+  // The Recruiter comes from the permanent shop, never for cheese.
+  var RECRUITER_FOR_SALE = false;
+  function recruiterVisible() { return state.recruiter.hired || (RECRUITER_FOR_SALE && state.lifetime >= RECRUITER.cost / 2); }
+  function setRecruiter(on) {
+    if (!active) { claim(); return; }
+    if (!state.recruiter.hired) return;
+    state.recruiter.on = on === true;
+    dirty = true; save(); onChange();
+  }
+
+  var lastHire = 0, recruiterHires = 0;
+  function recruiterStep() {
+    if (!active || !state.recruiter.on) return;
+    var now = Date.now();
+    var lvl = recruiterLevel();
+    if (lvl < 1 || now - lastHire < RECRUITER.everyMs[lvl]) return;
+    var best = recruiterNext();
+    if (!best || state.cheese < best.cost) return;      // wait for the best option
+    var done = best.type === "rat" ? buyOne(best.tier)
+      : (state.cheese -= best.cost, state.staffUps[best.id] = true, dirty = true, true);
+    if (done) { lastHire = now; recruiterHires++; onChange(); }
   }
 
   /* ---------- golden cheese ---------- */
@@ -662,6 +871,7 @@
     if (dt > MAX_STEP_SECONDS) dt = MAX_STEP_SECONDS;
     var r = totalRate();
     if (r > 0) { earn(r * dt); onChange(); }
+    recruiterStep();
   }
 
   function save(force) {
@@ -740,7 +950,28 @@
     hasStaffUp: hasStaffUp,
     staffUpAvailable: staffUpAvailable,
     buyStaffUp: buyStaffUp,
+    recruiter: RECRUITER,
+    recruiterNext: recruiterNext,
+    recruiterOptions: recruiterOptions,
+    recruiterVisible: recruiterVisible,
+    hireRecruiter: hireRecruiter,
+    setRecruiter: setRecruiter,
+    gainFromRat: gainFromRat,
     claimGolden: claimGolden,
+    shop: SHOP,
+    sharesFor: sharesFor,
+    shareMult: shareMult,
+    perShare: perShare,
+    sharesFree: sharesFree,
+    sharesSpent: sharesSpent,
+    pendingShares: pendingShares,
+    cheeseToNextShare: cheeseToNextShare,
+    goldenFrequency: goldenFrequency,
+    recruiterLevel: recruiterLevel,
+    owns: owns,
+    shopAvailable: shopAvailable,
+    buyPerma: buyPerma,
+    sell: sell,
     golden: GOLDEN,
     buffActive: buffActive,
     buffLeft: buffLeft,

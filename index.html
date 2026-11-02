@@ -316,8 +316,8 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 </div>
 
 <!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
-<script src="js/cheese-core.js?v=7"></script>
-<script src="js/reginald.js?v=7"></script>
+<script src="js/cheese-core.js?v=9"></script>
+<script src="js/reginald.js?v=9"></script>
 <script>
 (function(){
   "use strict";
@@ -449,7 +449,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
       rows[i].btn.disabled = !quote.affordable;
       rows[i].btn.setAttribute("aria-label", "Hire " + quote.count + " " + rows[i].name + " for " + fmt(c) + " cheese");
     }
-    sumEl.textContent = hired + " of " + rows.length + " hired";
+    sumEl.textContent = hired + " of " + rows.length + " hired" + (s.recruiter && s.recruiter.on ? ", recruiter on" : "");
 
     for(var m=0;m<modeBtns.length;m++){
       modeBtns[m].setAttribute("aria-pressed", String(Number(modeBtns[m].getAttribute("data-mode")) === s.buyMode));

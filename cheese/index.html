@@ -126,6 +126,36 @@ section{margin-bottom:34px}
 .supg .ds{font-family:var(--serif);font-size:12.5px;color:var(--ink-mid);line-height:1.45}
 .supg-next{font-size:12px;color:var(--ink-soft);border:1px dashed var(--rule);padding:10px 14px}
 
+/* ---------- the company: selling and perks ---------- */
+.company{border:1px solid var(--amber);background:var(--panel);padding:16px}
+.company .big{font-size:22px;font-weight:500;letter-spacing:-0.02em}
+.company .muted{font-size:12px;color:var(--ink-soft);margin-top:4px;line-height:1.5}
+.company .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.sell{font-size:12px;font-weight:600;letter-spacing:.04em;padding:8px 14px;cursor:pointer;background:var(--amber);border:1px solid var(--amber);color:#14120E}
+.sell:hover:not(:disabled){background:var(--amber-deep)}
+.sell:disabled{opacity:.35;cursor:default}
+.sell.confirm{background:#C0392B;border-color:#C0392B;color:var(--ink)}
+.linkish{font-size:12px;background:none;border:0;color:var(--ink-soft);cursor:pointer;border-bottom:1px solid var(--ink-soft);padding:0 0 1px}
+.warn{font-size:12px;line-height:1.5;margin-top:10px;color:var(--ink)}
+.perks{display:grid;gap:8px;margin-top:14px}
+@media (min-width:560px){.perks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.perk{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid var(--rule);padding:10px 12px}
+.perk .nm{font-weight:500;font-size:13px}
+.perk .ds{font-size:12px;color:var(--ink-mid);margin-top:2px;line-height:1.4}
+.perk.owned{opacity:.55}
+.shares-line{margin-top:10px;font-size:11px;color:var(--ink-soft)}
+.shares-line b{color:var(--amber-deep);font-weight:500}
+
+/* ---------- the Recruiter ---------- */
+.recruiter{margin-top:14px;border:1px solid var(--rule);padding:12px}
+.recruiter[hidden]{display:none}
+.recruiter .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.recruiter .nm{font-weight:500;font-size:13px}
+.recruiter .ds{font-family:var(--serif);font-size:12.5px;color:var(--ink-mid);line-height:1.45;margin-top:4px}
+.recruiter .next{font-size:11px;color:var(--ink-soft);margin-top:8px;line-height:1.5}
+.switch{font-size:11px;padding:4px 10px;cursor:pointer;border:1px solid var(--rule);background:transparent;color:var(--ink-soft);min-width:52px}
+.switch[aria-pressed="true"]{border-color:var(--amber);color:#14120E;background:var(--amber)}
+
 /* ---------- golden cheese and bonuses ---------- */
 .golden{position:fixed;z-index:40;width:64px;height:64px;padding:0;border:0;background:none;cursor:pointer;
   animation:g-in .4s ease-out, g-bob 2.2s ease-in-out .4s infinite;-webkit-tap-highlight-color:transparent}
@@ -197,6 +227,18 @@ section{margin-bottom:34px}
           <div><b id="per-press">1</b>per press</div>
         </div>
 
+        <div class="shares-line" id="shares-line" hidden></div>
+
+        <div class="recruiter" id="recruiter" hidden>
+          <div class="row">
+            <span class="nm" id="rec-name">Recruiter</span>
+            <button type="button" class="buy" id="rec-hire"></button>
+            <button type="button" class="switch" id="rec-switch" aria-pressed="false" hidden>Off</button>
+          </div>
+          <p class="ds" id="rec-desc">Hires the best-value staff and upgrades for you, one every 1.5 seconds.</p>
+          <p class="next" id="rec-next" hidden></p>
+        </div>
+
         <div class="buff" id="buff-bull" hidden role="status">
           <div class="row"><b>Bull run</b><span id="bull-left"></span></div>
           <div class="row"><span id="bull-what"></span></div>
@@ -217,6 +259,24 @@ section{margin-bottom:34px}
     </aside>
 
     <main>
+      <section id="company-sec" hidden>
+        <div class="sec-label"><b>Your company</b><span id="runs-sum"></span></div>
+        <div class="company">
+          <div class="big" id="sell-headline"></div>
+          <p class="muted" id="sell-detail"></p>
+          <div class="actions">
+            <button type="button" class="sell" id="sell"></button>
+            <button type="button" class="linkish" id="sell-cancel" hidden>Not yet</button>
+          </div>
+          <p class="warn" id="sell-warn" hidden>Selling resets this run: your cheese, staff and upgrades go.
+          You keep your shares, perks, unlocked sections and stats.</p>
+        </div>
+        <div id="perks-wrap" hidden>
+          <div class="sec-label" style="margin-top:22px"><b>Shareholder perks</b><span id="perks-sum"></span></div>
+          <div class="perks" id="perks"></div>
+        </div>
+      </section>
+
       <section id="upgrades-sec" hidden>
         <div class="sec-label"><b>Press upgrades</b><span id="upg-sum"></span></div>
         <div class="upgrades" id="upgrades"></div>
@@ -244,8 +304,8 @@ section{margin-bottom:34px}
 </div>
 
 <!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
-<script src="../js/cheese-core.js?v=7"></script>
-<script src="../js/reginald.js?v=7"></script>
+<script src="../js/cheese-core.js?v=9"></script>
+<script src="../js/reginald.js?v=9"></script>
 <script>
 (function(){
   "use strict";
@@ -512,7 +572,7 @@ section{margin-bottom:34px}
   function removeGolden(fade){
     clearTimeout(goldTimer);
     var g = golden; golden = null;
-    nextGoldAt = Date.now() + rnd(GOLD_GAP) * 1000;
+    nextGoldAt = Date.now() + rnd(GOLD_GAP) * 1000 / G.goldenFrequency();
     if(!g) return;
     if(fade){ g.classList.add("leaving"); setTimeout(function(){ if(g.parentNode) g.parentNode.removeChild(g); }, 600); }
     else if(g.parentNode) g.parentNode.removeChild(g);
@@ -521,7 +581,8 @@ section{margin-bottom:34px}
     var t = el("div","toast");
     var strong = el("b", null, res.label + "!");
     t.appendChild(strong);
-    t.appendChild(document.createTextNode(res.kind === "windfall" ? " +" + fmt(res.amount) + " cheese"
+    t.appendChild(document.createTextNode(res.kind === "sale" ? " +" + fmt(res.amount) + (res.amount === 1 ? " share" : " shares")
+      : res.kind === "windfall" ? " +" + fmt(res.amount) + " cheese"
       : res.kind === "bull" ? " Output \u00d7" + res.mult + " for " + res.seconds + "s"
       : " Presses \u00d7" + res.mult + " for " + res.seconds + "s"));
     t.setAttribute("role","status");
@@ -550,6 +611,125 @@ section{margin-bottom:34px}
     $("rate").classList.toggle("boosted", G.buffActive("bull"));
     $("per-press").classList.toggle("boosted", G.buffActive("paws"));
   }
+
+  /* ---------- the Recruiter ---------- */
+  $("rec-hire").addEventListener("click", function(){ G.hireRecruiter(); });
+  $("rec-switch").addEventListener("click", function(){ G.setRecruiter(!G.state.recruiter.on); });
+  function renderRecruiter(){
+    var r = G.state.recruiter, box = $("recruiter");
+    box.hidden = !G.recruiterVisible();
+    if(box.hidden) return;
+    $("rec-hire").hidden = r.hired;
+    $("rec-switch").hidden = !r.hired;
+    if(!r.hired){
+      $("rec-hire").textContent = fmt(G.recruiter.cost);
+      $("rec-hire").disabled = G.state.cheese < G.recruiter.cost;
+      $("rec-hire").setAttribute("aria-label", "Hire the Recruiter for " + fmt(G.recruiter.cost) + " cheese");
+      $("rec-next").hidden = true;
+      return;
+    }
+    $("rec-name").textContent = "Recruiter " + ["", "I", "II", "III"][G.recruiterLevel()];
+    $("rec-switch").setAttribute("aria-pressed", String(r.on));
+    $("rec-switch").textContent = r.on ? "On" : "Off";
+    $("rec-switch").setAttribute("aria-label", "Recruiter " + (r.on ? "on, click to pause" : "off, click to turn on"));
+    $("rec-desc").hidden = true;
+    var next = $("rec-next"), best = r.on ? G.recruiterNext() : null;
+    next.hidden = false;
+    if(!r.on){ next.textContent = "Paused. Your cheese is all yours."; return; }
+    if(!best){ next.textContent = "Looking for someone worth hiring."; return; }
+    var what = best.type === "rat" ? "1 " + ROLES[best.tier] : best.name;
+    var wait = best.cost <= G.state.cheese ? "now" : "in " + fmtTime(best.wait);
+    next.textContent = "Next: " + what + " for " + fmt(best.cost) + ", " + wait + ".";
+  }
+  function fmtTime(sec){
+    if(sec < 60) return Math.ceil(sec) + "s";
+    if(sec < 3600) return Math.ceil(sec / 60) + " min";
+    var h = sec / 3600;
+    return (h < 10 ? h.toFixed(1) : Math.round(h)) + " hours";
+  }
+
+  /* ---------- your company: sell for shares, spend them on perks ---------- */
+  var confirming = false, confirmTimer = null;
+  function pct(x){ return Math.round(x * 100) + "%"; }
+  function renderCompany(){
+    var s = G.state, pending = G.pendingShares(), earned = s.sharesEarned;
+    var show = earned > 0 || s.allTime >= 250000;
+    $("company-sec").hidden = !show;
+    var line = $("shares-line");
+    line.hidden = earned === 0;
+    if(earned) line.innerHTML = "Shares <b>" + fmt(earned) + "</b>, output <b>+" + pct(G.shareMult() - 1) + "</b>";
+    if(!show) return;
+
+    $("runs-sum").textContent = s.runs ? "Sold " + s.runs + (s.runs === 1 ? " time" : " times") : "";
+    if(pending >= 1){
+      $("sell-headline").textContent = "Sell for " + fmt(pending) + (pending === 1 ? " share" : " shares");
+      var after = 1 + G.perShare() * (earned + pending);
+      $("sell-detail").textContent = "Output would go from +" + pct(G.shareMult() - 1) + " to +" + pct(after - 1) +
+        " for good. " + fmt(G.cheeseToNextShare()) + " more cheese earned adds another share.";
+    } else {
+      $("sell-headline").textContent = earned ? "Not worth selling yet" : "Sell the company for shares";
+      $("sell-detail").textContent = "Earn " + fmt(G.cheeseToNextShare()) + " more cheese in total for " +
+        (earned ? "your next share." : "your first share. Each one boosts output by " + pct(G.perShare()) + " for good.");
+    }
+    if(pending < 1 && confirming){ confirming = false; clearTimeout(confirmTimer); }
+    var btn = $("sell");
+    btn.disabled = pending < 1;
+    btn.textContent = confirming ? "Confirm sale" : "Sell the company";
+    btn.classList.toggle("confirm", confirming);
+    $("sell-cancel").hidden = !confirming;
+    $("sell-warn").hidden = !confirming;
+    $("perks-wrap").hidden = earned === 0;
+    if(earned) renderPerks();
+  }
+  var perkRows = {};
+  function renderPerks(){
+    var free = G.sharesFree();
+    G.shop.forEach(function(it){
+      var showIt = G.owns(it.id) || G.shopAvailable(it.id);
+      var row = perkRows[it.id];
+      if(!showIt){ if(row) row.box.hidden = true; return; }
+      if(!row){
+        var box = el("div","perk");
+        var info = el("div");
+        info.appendChild(el("div","nm", it.name));
+        info.appendChild(el("div","ds", it.desc));
+        var b = el("button","buy"); b.type = "button";
+        b.addEventListener("click", function(){ G.buyPerma(it.id); });
+        box.appendChild(info); box.appendChild(b);
+        $("perks").appendChild(box);
+        row = perkRows[it.id] = {box:box, btn:b};
+      }
+      row.box.hidden = false;
+      if(G.owns(it.id)){
+        row.box.classList.add("owned");
+        row.btn.disabled = true;
+        row.btn.textContent = "Owned";
+        row.btn.removeAttribute("aria-label");
+      } else {
+        row.btn.textContent = it.cost + (it.cost === 1 ? " share" : " shares");
+        row.btn.disabled = free < it.cost;
+        row.btn.setAttribute("aria-label", "Buy " + it.name + " for " + it.cost + " shares");
+      }
+    });
+    $("perks-sum").textContent = fmt(free) + " to spend";
+  }
+  function cancelSell(){ confirming = false; clearTimeout(confirmTimer); render(); }
+  $("sell").addEventListener("click", function(){
+    if(!confirming){
+      confirming = true; clearTimeout(confirmTimer);
+      confirmTimer = setTimeout(cancelSell, 10000);   // the confirm step times out on its own
+      render(); return;
+    }
+    confirming = false; clearTimeout(confirmTimer);
+    var res = G.sell();
+    render();
+    if(res){
+      var r = $("count").getBoundingClientRect();
+      toast({kind:"sale", label:"Sold", amount:res.shares}, r.left + r.width / 2, r.top + r.height + 30);
+      if(window.Reginald) window.Reginald.say("Congratulations on the sale. Do try not to spend it all at once.", {ms: 6000, tip: true});
+    }
+  });
+  $("sell-cancel").addEventListener("click", cancelSell);
 
   /* ---------- buy mode ---------- */
   var modeBtns = document.querySelectorAll(".buymode button");
@@ -583,6 +763,8 @@ section{margin-bottom:34px}
     renderStaffUps();
     renderStaff();
     renderBuffs();
+    renderRecruiter();
+    renderCompany();
   }
 
   // Reginald only does facts here; his tutorial lives on the main page.
