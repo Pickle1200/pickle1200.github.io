@@ -4,7 +4,7 @@ My personal site. It's a portfolio with a small idle game built into it: you pre
 
 The full version of the game, with a leaderboard, lives at [puranjaykumar.com/cheese](https://puranjaykumar.com/cheese/).
 
-The site is designed by me. Most of the code was written with Claude, Anthropic's AI model, working from my decisions on the design, the economy and how each feature should behave.
+The site is designed by me with assistance by best bud Claude.
 
 ## How it's put together
 
