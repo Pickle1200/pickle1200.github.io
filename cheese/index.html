@@ -126,6 +126,20 @@ section{margin-bottom:34px}
 .supg .ds{font-family:var(--serif);font-size:12.5px;color:var(--ink-mid);line-height:1.45}
 .supg-next{font-size:12px;color:var(--ink-soft);border:1px dashed var(--rule);padding:10px 14px}
 
+/* ---------- achievements and stats ---------- */
+.achs{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.ach{border:1px solid var(--rule);padding:9px 11px;min-height:64px}
+.ach .nm{font-weight:500;font-size:12.5px}
+.ach .ds{font-size:11px;color:var(--ink-soft);margin-top:3px;line-height:1.4}
+.ach.got{border-color:var(--amber);background:var(--panel)}
+.ach.got .nm{color:var(--amber-deep)}
+.ach:not(.got){opacity:.55}
+.stats{display:grid;gap:0 24px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.stat{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--rule);font-size:12.5px}
+.stat span{color:var(--ink-soft)}
+.stat b{font-weight:500;font-variant-numeric:tabular-nums;text-align:right}
+.toast.ach-toast{top:84px;left:50%}
+
 /* ---------- the company: selling and perks ---------- */
 .company{border:1px solid var(--amber);background:var(--panel);padding:16px}
 .company .big{font-size:22px;font-weight:500;letter-spacing:-0.02em}
@@ -299,13 +313,23 @@ section{margin-bottom:34px}
         </div>
         <div class="staff" id="staff"></div>
       </section>
+
+      <section>
+        <div class="sec-label"><b>Achievements</b><span id="ach-sum"></span></div>
+        <div class="achs" id="achs"></div>
+      </section>
+
+      <section>
+        <div class="sec-label"><b>Stats</b></div>
+        <div class="stats" id="stats"></div>
+      </section>
     </main>
   </div>
 </div>
 
 <!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
-<script src="../js/cheese-core.js?v=9"></script>
-<script src="../js/reginald.js?v=9"></script>
+<script src="../js/cheese-core.js?v=10"></script>
+<script src="../js/reginald.js?v=10"></script>
 <script>
 (function(){
   "use strict";
@@ -731,6 +755,75 @@ section{margin-bottom:34px}
   });
   $("sell-cancel").addEventListener("click", cancelSell);
 
+  /* ---------- achievements ---------- */
+  var achRows = {};
+  G.achievements.forEach(function(a){
+    var box = el("div","ach");
+    var nm = el("div","nm"), ds = el("div","ds");
+    box.appendChild(nm); box.appendChild(ds);
+    $("achs").appendChild(box);
+    achRows[a.id] = {box:box, nm:nm, ds:ds, got:null};
+  });
+  function renderAchievements(){
+    G.achievements.forEach(function(a){
+      var r = achRows[a.id], got = G.hasAchievement(a.id);
+      if(r.got === got) return;
+      r.got = got;
+      r.box.classList.toggle("got", got);
+      var hide = a.secret && !got;
+      r.nm.textContent = hide ? "???" : a.name;
+      r.ds.textContent = hide ? "A secret." : a.desc;
+      r.box.setAttribute("aria-label", hide ? "Secret achievement, not yet earned"
+        : a.name + ", " + (got ? "earned" : "not yet earned") + ". " + a.desc);
+    });
+    $("ach-sum").textContent = G.achievementCount() + " of " + G.achievements.length +
+      ", output +" + G.achievementCount() + "%";
+    var fresh = G.takeNewAchievements();
+    fresh.forEach(function(a, k){ setTimeout(function(){ achToast(a); }, k * 900); });
+  }
+  function achToast(a){
+    var t = el("div","toast ach-toast");
+    t.appendChild(el("b", null, "Achievement: "));
+    t.appendChild(document.createTextNode(a.name + " (+1% output)"));
+    t.setAttribute("role","status");
+    document.body.appendChild(t);
+    setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 2700);
+  }
+
+  /* ---------- stats ---------- */
+  var STATS = [
+    ["Cheese this run",          function(s){ return fmt(s.lifetime); }],
+    ["Cheese all time",          function(s){ return fmt(s.allTime); }],
+    ["Best output",              function(s){ return fmt(s.bestRate, true) + "/s"; }],
+    ["Presses",                  function(s){ return fmt(s.clicks); }],
+    ["Cheese from pressing",     function(s){ return fmt(s.pressCheese); }],
+    ["Rats hired",               function(s){ return fmt(s.hired); }],
+    ["Golden cheese clicked",    function(s){ return fmt(s.goldenClicks); }],
+    ["Times sold",               function(s){ return fmt(s.runs); }],
+    ["Shares earned",            function(s){ return fmt(s.sharesEarned); }],
+    ["Time this run",            function(s){ return fmtDuration(s.runSeconds); }],
+    ["Time played",              function(s){ return fmtDuration(s.playSeconds); }],
+    ["Output bonus",             function(){ return "\u00d7" + (G.shareMult() * G.achievementMult()).toFixed(2); }]
+  ];
+  var statCells = STATS.map(function(st){
+    var row = el("div","stat"); row.appendChild(el("span", null, st[0]));
+    var v = el("b"); row.appendChild(v); $("stats").appendChild(row); return v;
+  });
+  function fmtDuration(sec){
+    sec = Math.floor(sec);
+    var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), x = sec % 60;
+    if(h) return h + "h " + m + "m";
+    if(m) return m + "m " + x + "s";
+    return x + "s";
+  }
+  function renderStats(){
+    var s = G.state;
+    for(var i=0;i<STATS.length;i++){
+      var v = STATS[i][1](s);
+      if(statCells[i].textContent !== v) statCells[i].textContent = v;
+    }
+  }
+
   /* ---------- buy mode ---------- */
   var modeBtns = document.querySelectorAll(".buymode button");
   for(var mb=0;mb<modeBtns.length;mb++){
@@ -765,6 +858,8 @@ section{margin-bottom:34px}
     renderBuffs();
     renderRecruiter();
     renderCompany();
+    renderAchievements();
+    renderStats();
   }
 
   // Reginald only does facts here; his tutorial lives on the main page.

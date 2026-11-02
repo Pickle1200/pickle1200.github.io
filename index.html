@@ -316,8 +316,8 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 </div>
 
 <!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
-<script src="js/cheese-core.js?v=9"></script>
-<script src="js/reginald.js?v=9"></script>
+<script src="js/cheese-core.js?v=10"></script>
+<script src="js/reginald.js?v=10"></script>
 <script>
 (function(){
   "use strict";
@@ -455,6 +455,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
       modeBtns[m].setAttribute("aria-pressed", String(Number(modeBtns[m].getAttribute("data-mode")) === s.buyMode));
     }
     renderUpgrades();
+    if(G.takeNewAchievements) G.takeNewAchievements();   // recorded quietly here; announced on /cheese
     if(window.Reginald) window.Reginald.update();
   }
 

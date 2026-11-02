@@ -13,7 +13,7 @@
   // The version of this code. Bump it on every release, together with the
   // ?v= on the script tags. An older tab that sees a newer version has run
   // stops saving and asks to be refreshed, so it can never clash with it.
-  var CODE_VERSION = 9;
+  var CODE_VERSION = 10;
   var CODE_KEY = "pk_cheese_code";
   var TICK_MS = 200;
   var AUTOSAVE_MS = 5000;
@@ -134,6 +134,47 @@
     { id: "recruit3",  cost: 150, name: "Recruiter III",        desc: "Every 1.5 seconds, and buys staff upgrades too.", recruiter: 3, needs: "recruit2" },
     { id: "value2",    cost: 150, name: "Shareholder value II", desc: "Each share boosts output by 7%.", bonus: 0.01, needs: "value1" }
   ];
+  /* ---------- achievements: +1% output each, kept for good ---------- */
+  var ACH_BONUS = 0.01;
+  function totalOwned(st) { var t = 0; for (var i = 0; i < st.owned.length; i++) t += st.owned[i]; return t; }
+  var ACHIEVEMENTS = [
+    // cheese earned, all time
+    { id: "c1", name: "First wedge",        desc: "Earn 100 cheese.",              test: function (st) { return st.allTime >= 100; } },
+    { id: "c2", name: "Small cheese",       desc: "Earn 10K cheese.",              test: function (st) { return st.allTime >= 1e4; } },
+    { id: "c3", name: "Big cheese",         desc: "Earn 1M cheese.",               test: function (st) { return st.allTime >= 1e6; } },
+    { id: "c4", name: "Cheese baron",       desc: "Earn 1B cheese.",               test: function (st) { return st.allTime >= 1e9; } },
+    { id: "c5", name: "Cheese magnate",     desc: "Earn 1T cheese.",               test: function (st) { return st.allTime >= 1e12; } },
+    { id: "c6", name: "Too big to fail",    desc: "Earn 1e15 cheese.",             test: function (st) { return st.allTime >= 1e15; } },
+    // output
+    { id: "r1", name: "Passive income",     desc: "Make 10 cheese a second.",      test: function (st) { return st.bestRate >= 10; } },
+    { id: "r2", name: "Cash cow",           desc: "Make 1K cheese a second.",      test: function (st) { return st.bestRate >= 1e3; } },
+    { id: "r3", name: "Money printer",      desc: "Make 1M cheese a second.",      test: function (st) { return st.bestRate >= 1e6; } },
+    { id: "r4", name: "Quantitative easing", desc: "Make 1B cheese a second.",     test: function (st) { return st.bestRate >= 1e9; } },
+    // pressing
+    { id: "p1", name: "Hands-on",           desc: "Press 100 times.",              test: function (st) { return st.clicks >= 100; } },
+    { id: "p2", name: "Repetitive strain",  desc: "Press 1,000 times.",            test: function (st) { return st.clicks >= 1000; } },
+    { id: "p3", name: "Day trader",         desc: "Press 10,000 times.",           test: function (st) { return st.clicks >= 10000; } },
+    // staff and upgrades
+    { id: "h1", name: "Now hiring",         desc: "Hire your first rat.",          test: function (st) { return st.hired >= 1; } },
+    { id: "h2", name: "Milestone",          desc: "Own 10 of one kind of rat.",    test: function (st) { return Math.max.apply(null, st.owned) >= 10; } },
+    { id: "h3", name: "Full house",         desc: "Own at least one of every rat.", test: function (st) { return st.owned.every(function (n) { return n > 0; }); } },
+    { id: "h4", name: "Headcount",          desc: "Own 100 rats at once.",         test: function (st) { return totalOwned(st) >= 100; } },
+    { id: "h5", name: "Bulk discount",      desc: "Own 100 of one kind of rat.",   test: function (st) { return Math.max.apply(null, st.owned) >= 100; } },
+    { id: "u1", name: "Investing in people", desc: "Buy a staff upgrade.",         test: function (st) { return Object.keys(st.staffUps).length >= 1; } },
+    { id: "u2", name: "Fully kitted",       desc: "Own every press upgrade in one run.", test: function (st) { return Object.keys(st.upgrades).length >= UPGRADES.length; } },
+    { id: "g1", name: "Gold standard",      desc: "Click a golden cheese.",        test: function (st) { return st.goldenClicks >= 1; } },
+    { id: "g2", name: "Gold rush",          desc: "Click 25 golden cheeses.",      test: function (st) { return st.goldenClicks >= 25; } },
+    // the company
+    { id: "s1", name: "Exit strategy",      desc: "Sell the company.",             test: function (st) { return st.runs >= 1; } },
+    { id: "s2", name: "Serial entrepreneur", desc: "Sell the company 5 times.",    test: function (st) { return st.runs >= 5; } },
+    { id: "s3", name: "Major shareholder",  desc: "Earn 50 shares.",               test: function (st) { return st.sharesEarned >= 50; } },
+    { id: "s4", name: "Automated",          desc: "Bring in the Recruiter.",       test: function (st) { return st.perma.recruit1 === true; } },
+    // the portfolio, and a secret
+    { id: "x1", name: "Due diligence",      desc: "Open every section of the portfolio.", test: function (st) { return ["b-about", "b-projects", "b-games", "b-cv", "b-hidden"].every(function (b) { return st.unlocked[b]; }); } },
+    { id: "x2", name: "Night owl",          desc: "Play between 2am and 4am.", secret: true,
+      test: function () { var h = new Date().getHours(); return h >= 2 && h < 4; } }
+  ];
+
   function shopItem(id) { for (var i = 0; i < SHOP.length; i++) if (SHOP[i].id === id) return SHOP[i]; return null; }
   function recruiterLevelOf(perma) {
     var l = 0;
@@ -228,6 +269,12 @@
       runs: 0,              // times the company has been sold
       sharesEarned: 0,
       perma: {},            // permanent shop item id -> true
+      achievements: {},     // achievement id -> time earned
+      bestRate: 0,          // highest cheese per second ever reached
+      hired: 0,             // rats hired, all time
+      pressCheese: 0,       // cheese earned by pressing, all time
+      playSeconds: 0,       // time spent playing with the page open
+      runSeconds: 0,        // time spent in this run
       savedAt: 0
     };
   }
@@ -291,6 +338,17 @@
       delete s.perma[worst];
     }
     s.recruiter.hired = recruiterLevelOf(s.perma) > 0;
+    if (d.achievements && typeof d.achievements === "object") {
+      for (var ai = 0; ai < ACHIEVEMENTS.length; ai++) {
+        var at = d.achievements[ACHIEVEMENTS[ai].id];
+        if (typeof at === "number" && isFinite(at) && at > 0) s.achievements[ACHIEVEMENTS[ai].id] = at;
+      }
+    }
+    s.bestRate = num(d.bestRate);
+    s.hired = whole(d.hired);
+    s.pressCheese = Math.min(num(d.pressCheese), s.allTime);
+    s.playSeconds = num(d.playSeconds);
+    s.runSeconds = Math.min(num(d.runSeconds), s.playSeconds);
     s.recruiter.on = s.recruiter.hired && !(d.recruiter && d.recruiter.on === false);
     if (d.reginald && typeof d.reginald === "object") {
       s.reginald.done = d.reginald.done === true;
@@ -547,7 +605,24 @@
   }
 
   // What one rat of this tier currently makes per second (before golden bonuses).
-  function rateOf(tier) { return TIERS[tier].rate * multiplierOf(tier) * staffUpMultOf(tier) * shareMult(); }
+  function rateOf(tier) { return TIERS[tier].rate * multiplierOf(tier) * staffUpMultOf(tier) * shareMult() * achievementMult(); }
+
+  /* ---------- achievements ---------- */
+  function achievementCount() { var n = 0; for (var k in state.achievements) n++; return n; }
+  function achievementMult() { return 1 + ACH_BONUS * achievementCount(); }
+  function hasAchievement(id) { return !!state.achievements[id]; }
+  var newAchievements = [];
+  function checkAchievements() {
+    for (var i = 0; i < ACHIEVEMENTS.length; i++) {
+      var a = ACHIEVEMENTS[i];
+      if (state.achievements[a.id]) continue;
+      var got = false;
+      try { got = a.test(state); } catch (e) {}
+      if (got) { state.achievements[a.id] = Date.now(); newAchievements.push(a); dirty = true; }
+    }
+  }
+  // The page collects newly earned ones to announce them.
+  function takeNewAchievements() { var out = newAchievements; newAchievements = []; return out; }
 
   /* ---------- shares and the permanent shop ---------- */
   function owns(id) { return state.perma[id] === true; }
@@ -612,7 +687,9 @@
     if (owns("retain")) for (var k in state.staffUps) if (/_0$/.test(k)) kept[k] = true;
     state.staffUps = kept;
     state.buffs = { prodMult: 1, prodUntil: 0, pressMult: 1, pressUntil: 0 };
+    state.runSeconds = 0;
     lastHire = 0;
+    checkAchievements();
     dirty = true; save(); onChange();
     return { shares: gained, total: state.sharesEarned, mult: shareMult() };
   }
@@ -651,8 +728,11 @@
 
   function press() {
     if (!active) { claim(); return; }
-    earn(perPress());
+    var v = perPress();
+    earn(v);
+    state.pressCheese += v;
     state.clicks++;
+    checkAchievements();
     onChange();
   }
 
@@ -689,6 +769,7 @@
     if (!tierRevealed(tier) || state.cheese < c) return false;
     state.cheese -= c;
     state.owned[tier]++;
+    state.hired++;
     dirty = true;
     return true;
   }
@@ -701,6 +782,8 @@
     state.cheese -= q.cost;
     if (state.cheese < 0) state.cheese = 0;
     state.owned[tier] += q.count;
+    state.hired += q.count;
+    checkAchievements();
     dirty = true;
     save();               // purchases are worth saving straight away
     onChange();
@@ -751,7 +834,7 @@
   /* ---------- the Recruiter ---------- */
   // Output gained by one more rat of a tier, counting any milestone it reaches.
   function gainFromRat(tier) {
-    var n = state.owned[tier], per = TIERS[tier].rate * staffUpMultOf(tier) * shareMult();
+    var n = state.owned[tier], per = TIERS[tier].rate * staffUpMultOf(tier) * shareMult() * achievementMult();
     var m0 = 1, m1 = 1;
     for (var i = 0; i < MILESTONES.length; i++) { if (n >= MILESTONES[i]) m0 *= 2; if (n + 1 >= MILESTONES[i]) m1 *= 2; }
     return per * ((n + 1) * m1 - n * m0);
@@ -870,8 +953,14 @@
     if (!active || dt <= 0) return;
     if (dt > MAX_STEP_SECONDS) dt = MAX_STEP_SECONDS;
     var r = totalRate();
+    if (r > state.bestRate) state.bestRate = r;
+    if (!global.document || global.document.visibilityState !== "hidden") {
+      state.playSeconds += dt;
+      state.runSeconds += dt;
+    }
     if (r > 0) { earn(r * dt); onChange(); }
     recruiterStep();
+    checkAchievements();
   }
 
   function save(force) {
@@ -959,6 +1048,11 @@
     gainFromRat: gainFromRat,
     claimGolden: claimGolden,
     shop: SHOP,
+    achievements: ACHIEVEMENTS,
+    hasAchievement: hasAchievement,
+    achievementCount: achievementCount,
+    achievementMult: achievementMult,
+    takeNewAchievements: takeNewAchievements,
     sharesFor: sharesFor,
     shareMult: shareMult,
     perShare: perShare,
