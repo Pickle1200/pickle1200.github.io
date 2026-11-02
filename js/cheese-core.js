@@ -13,7 +13,7 @@
   // The version of this code. Bump it on every release, together with the
   // ?v= on the script tags. An older tab that sees a newer version has run
   // stops saving and asks to be refreshed, so it can never clash with it.
-  var CODE_VERSION = 10;
+  var CODE_VERSION = 12;
   var CODE_KEY = "pk_cheese_code";
   var TICK_MS = 200;
   var AUTOSAVE_MS = 5000;

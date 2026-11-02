@@ -30,6 +30,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:14p
 a{color:inherit}
 button{font-family:var(--mono)}
 :focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
 
 /* ---------- top bar ---------- */
 .top{display:flex;justify-content:space-between;align-items:baseline;gap:20px;padding:26px 0 20px;border-bottom:1px solid var(--rule);margin-bottom:30px}
@@ -125,6 +126,24 @@ section{margin-bottom:34px}
 .supg .eff{font-size:11px;color:var(--amber-deep)}
 .supg .ds{font-family:var(--serif);font-size:12.5px;color:var(--ink-mid);line-height:1.45}
 .supg-next{font-size:12px;color:var(--ink-soft);border:1px dashed var(--rule);padding:10px 14px}
+
+/* ---------- leaderboard ---------- */
+.lb-intro{font-size:12.5px;color:var(--ink-mid);line-height:1.5;margin-bottom:10px}
+.lb-me{border:1px solid var(--rule);padding:12px 14px;margin-bottom:12px;font-size:12.5px}
+.lb-me b{color:var(--amber-deep);font-weight:500}
+.lb-me .note{color:var(--ink-soft);margin-top:6px;font-size:12px}
+.lb-me form{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.lb-me input{font:inherit;font-size:12.5px;padding:6px 9px;background:var(--bg);color:var(--ink);border:1px solid var(--rule);min-width:0;flex:1 1 160px}
+.lb-me input:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+.lb-msg{font-size:12px;color:var(--amber-deep);margin-top:6px;min-height:1em}
+.lb-row{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;padding:7px 0;border-bottom:1px solid var(--rule);font-size:13px;font-variant-numeric:tabular-nums}
+.lb-row.me{color:var(--amber-deep)}
+.lb-rank{color:var(--ink-soft)}
+.lb-row.me .lb-rank{color:var(--amber-deep)}
+.lb-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-gap{text-align:center;color:var(--ink-soft);padding:2px 0}
+.lb-empty{font-size:12.5px;color:var(--ink-soft);padding:8px 0}
+.lb-foot{margin-top:10px}
 
 /* ---------- achievements and stats ---------- */
 .achs{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
@@ -314,6 +333,28 @@ section{margin-bottom:34px}
         <div class="staff" id="staff"></div>
       </section>
 
+      <section id="lb-sec" hidden>
+        <div class="sec-label"><b>Leaderboard</b><span>All-time cheese</span></div>
+        <div id="lb-join-box">
+          <p class="lb-intro">See how your all-time cheese compares. You’ll appear under a cheese name,
+          and can ask for your own. Nothing personal is stored.</p>
+          <button type="button" class="buy" id="lb-join">Join the leaderboard</button>
+          <p class="lb-msg" id="lb-status" hidden></p>
+        </div>
+        <div class="lb-me" id="lb-me-box" hidden>
+          You’re on the board as <b id="lb-me-name"></b>.
+          <p class="note" id="lb-me-note" hidden></p>
+          <form id="lb-name-form" novalidate>
+            <label class="sr-only" for="lb-name-input">Your name</label>
+            <input id="lb-name-input" maxlength="20" placeholder="Ask for your own name" autocomplete="off">
+            <button type="submit" class="buy">Request</button>
+          </form>
+          <p class="lb-msg" id="lb-name-msg" aria-live="polite"></p>
+        </div>
+        <div id="lb-list"></div>
+        <p class="lb-foot" id="lb-leave-wrap"><button type="button" class="linkish" id="lb-leave">Leave the leaderboard</button></p>
+      </section>
+
       <section>
         <div class="sec-label"><b>Achievements</b><span id="ach-sum"></span></div>
         <div class="achs" id="achs"></div>
@@ -328,8 +369,9 @@ section{margin-bottom:34px}
 </div>
 
 <!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
-<script src="../js/cheese-core.js?v=10"></script>
-<script src="../js/reginald.js?v=10"></script>
+<script src="../js/cheese-core.js?v=12"></script>
+<script src="../js/reginald.js?v=12"></script>
+<script src="../js/leaderboard.js?v=12" defer></script>
 <script>
 (function(){
   "use strict";
