@@ -53,9 +53,10 @@
     { id: "upgrade",
       when: function () { return G.upgradeVisible(G.upgrades[0].id); },
       text: "An upgrade has appeared, just above the staff. Worth a look." },
-    { id: "allopen", end: true,
+    { id: "allopen", end: true, ms: 15000,
       when: lastSection,
-      text: "That\u2019s every section reached. The rest is simply cheese. Stay as long as you like." }
+      text: "That\u2019s every section reached. There\u2019s a fuller game, with a leaderboard, through here.",
+      link: { href: "/cheese/", label: "Play the full game" } }
   ];
 
   /* ---------- facts: all true, checked before writing ---------- */
@@ -154,6 +155,8 @@
     '#reginald .rg-quiet{display:block;margin-top:9px;padding:0;border:0;background:none;cursor:pointer;' +
       'font-family:var(--mono);font-size:11px;color:var(--amber-deep);border-bottom:1px solid currentColor}' +
     '#reginald .rg-quiet[hidden]{display:none}' +
+    '#reginald .rg-link{display:inline-block;margin-top:9px;font-size:12px;color:var(--amber-deep);text-decoration:none;border-bottom:1px solid currentColor}' +
+    '#reginald .rg-link[hidden]{display:none}' +
     '#reginald button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}' +
     '#reginald .rg-rat{width:96px;flex:none}' +
     '#reginald .rg-rat svg{display:block;width:100%;height:auto}' +
@@ -172,7 +175,7 @@
     '}';
 
   /* ---------- build ---------- */
-  var root, textEl, quietBtn, undoBtn;
+  var root, textEl, quietBtn, undoBtn, linkEl;
   function build() {
     var style = doc.createElement("style");
     style.textContent = CSS;
@@ -183,6 +186,7 @@
     root.innerHTML =
       '<div class="rg-bubble">' +
         '<div class="rg-text" role="status" aria-live="polite"></div>' +
+        '<a class="rg-link" hidden></a>' +
         '<button type="button" class="rg-quiet" hidden>No more facts, please</button>' +
         '<button type="button" class="rg-undo rg-quiet" hidden>Undo</button>' +
         '<button type="button" class="rg-close" aria-label="Dismiss Sir Reginald">\u00d7</button>' +
@@ -192,6 +196,7 @@
     textEl = root.querySelector(".rg-text");
     quietBtn = root.querySelector(".rg-quiet:not(.rg-undo)");
     undoBtn = root.querySelector(".rg-undo");
+    linkEl = root.querySelector(".rg-link");
     root.querySelector(".rg-close").addEventListener("click", dismiss);
     quietBtn.addEventListener("click", function () {
       G.state.reginald.factsOff = true;
@@ -214,6 +219,8 @@
     textEl.textContent = text;
     quietBtn.hidden = !opts.fact;
     undoBtn.hidden = !opts.undo;
+    linkEl.hidden = !opts.link;
+    if (opts.link) { linkEl.href = opts.link.href; linkEl.textContent = opts.link.label; }
     current = opts;
     shownAt = Date.now();
     showing = true;
@@ -276,7 +283,7 @@
     if (pick === -1) return;
     for (var j = 0; j <= pick; j++) if (!seen(STEPS[j].id)) r.seen.push(STEPS[j].id);
     var step = STEPS[pick];
-    say(step.text, { stay: step.stay, tip: step.tip });
+    say(step.text, { stay: step.stay, tip: step.tip, link: step.link, ms: step.ms });
     if (step.end) finishTutorial(); else G.save();
   }
 
@@ -332,6 +339,21 @@
     if (!tutorialOn) nextFactAt = Date.now() + FIRST_FACT_AFTER;
   }
 
+  // On /cheese: one line of welcome for people who arrive there directly,
+  // shown once, since the main page's tutorial won't have reached them.
+  function welcome() {
+    if (seen("cheese")) return;
+    setTimeout(function () {
+      // Read the save now, not earlier: taking over as the active tab loads a fresh copy.
+      var r = G.state.reginald;
+      if (seen("cheese") || r.seen.length >= 50) return;
+      r.seen.push("cheese");
+      G.save();
+      say("Good evening. Sir Reginald, proprietor. Tap the cheese, hire some staff, and the rest follows. " +
+          "The portfolio is top right, should you want it.", { tip: true, ms: 12000 });
+    }, INTRO_DELAY);
+  }
+
   global.Reginald = { update: update, skip: skip, say: say, hide: hide, facts: FACTS,
-                      setSections: setSections, setTutorial: setTutorial };
+                      setSections: setSections, setTutorial: setTutorial, welcome: welcome };
 })(window);

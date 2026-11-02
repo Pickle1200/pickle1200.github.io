@@ -4,9 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cheese · Puranjay Kumar</title>
-<meta name="description" content="The full cheese game from puranjaykumar.com.">
-<!-- Hidden from search engines until the page is linked from the main site -->
-<meta name="robots" content="noindex">
+<meta name="description" content="Hire rats, sell the company, top the leaderboard. A small idle game by Puranjay Kumar.">
+<link rel="canonical" href="https://puranjaykumar.com/cheese/">
+<!-- Link previews on LinkedIn and elsewhere -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://puranjaykumar.com/cheese/">
+<meta property="og:title" content="Cheese, a game by Puranjay Kumar">
+<meta property="og:description" content="Hire rats. Sell the company. Top the leaderboard.">
+<meta property="og:image" content="https://puranjaykumar.com/cheese/preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta property="og:image:alt" content="Cheese: a wedge of cheese and Sir Reginald, a rat in a top hat">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -369,9 +378,9 @@ section{margin-bottom:34px}
 </div>
 
 <!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
-<script src="../js/cheese-core.js?v=12"></script>
-<script src="../js/reginald.js?v=12"></script>
-<script src="../js/leaderboard.js?v=12" defer></script>
+<script src="../js/cheese-core.js?v=13"></script>
+<script src="../js/reginald.js?v=13"></script>
+<script src="../js/leaderboard.js?v=13" defer></script>
 <script>
 (function(){
   "use strict";
@@ -905,7 +914,7 @@ section{margin-bottom:34px}
   }
 
   // Reginald only does facts here; his tutorial lives on the main page.
-  if(window.Reginald) window.Reginald.setTutorial(false);
+  if(window.Reginald){ window.Reginald.setTutorial(false); window.Reginald.welcome(); }
 
   G.start(render);
   $("bull-what").textContent = "Output \u00d7" + G.golden.bull.mult;

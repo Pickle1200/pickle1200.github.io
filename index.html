@@ -77,6 +77,8 @@ body{
 
 .hint{font-size:11px;color:var(--ink-soft);margin-bottom:32px;line-height:1.5}
 .hint.outdated{color:var(--amber-deep);margin-bottom:10px}
+.full-game{margin:-22px 0 34px}
+.full-game a{color:var(--amber-deep)}
 .hint.outdated .skip{margin-left:8px;color:var(--amber-deep);border-color:var(--amber-deep)}
 
 /* ---------- holdings table ---------- */
@@ -225,6 +227,8 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     </thead>
     <tbody id="roster"></tbody>
   </table>
+  <p class="hint full-game" id="full-game" hidden>More staff, upgrades and a leaderboard in
+  <a href="/cheese/">the full game</a>.</p>
 
   <div class="block locked" id="b-about">
     <div class="lockbar"><span>About</span><span class="need" data-need="10">10 cheese</span></div>
@@ -316,8 +320,8 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 </div>
 
 <!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
-<script src="js/cheese-core.js?v=12"></script>
-<script src="js/reginald.js?v=12"></script>
+<script src="js/cheese-core.js?v=13"></script>
+<script src="js/reginald.js?v=13"></script>
 <script>
 (function(){
   "use strict";
@@ -414,6 +418,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 
     $("per-press").textContent = "+" + fmt(G.perPress(), true) + " per press";
     $("outdated").hidden = !G.isOutdated();
+    $("full-game").hidden = !(s.allTime >= 10);   // once they've started playing
 
     var hired = 0;
     for(var i=0;i<rows.length;i++){
