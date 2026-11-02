@@ -13,7 +13,7 @@
   // The version of this code. Bump it on every release, together with the
   // ?v= on the script tags. An older tab that sees a newer version has run
   // stops saving and asks to be refreshed, so it can never clash with it.
-  var CODE_VERSION = 13;
+  var CODE_VERSION = 14;
   var CODE_KEY = "pk_cheese_code";
   var TICK_MS = 200;
   var AUTOSAVE_MS = 5000;
@@ -170,7 +170,7 @@
     { id: "s3", name: "Major shareholder",  desc: "Earn 50 shares.",               test: function (st) { return st.sharesEarned >= 50; } },
     { id: "s4", name: "Automated",          desc: "Bring in the Recruiter.",       test: function (st) { return st.perma.recruit1 === true; } },
     // the portfolio, and a secret
-    { id: "x1", name: "Due diligence",      desc: "Open every section of the portfolio.", test: function (st) { return ["b-about", "b-projects", "b-games", "b-cv", "b-hidden"].every(function (b) { return st.unlocked[b]; }); } },
+    { id: "x1", name: "Due diligence",      desc: "Open every section of the portfolio.", test: function (st) { return ["b-about", "b-now", "b-projects", "b-games", "b-cv", "b-hidden"].every(function (b) { return st.unlocked[b]; }); } },
     { id: "x2", name: "Night owl",          desc: "Play between 2am and 4am.", secret: true,
       test: function () { var h = new Date().getHours(); return h >= 2 && h < 4; } }
   ];
