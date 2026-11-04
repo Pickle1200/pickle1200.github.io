@@ -13,7 +13,7 @@
   // The version of this code. Bump it on every release, together with the
   // ?v= on the script tags. An older tab that sees a newer version has run
   // stops saving and asks to be refreshed, so it can never clash with it.
-  var CODE_VERSION = 23;
+  var CODE_VERSION = 30;
   var CODE_KEY = "pk_cheese_code";
   var TICK_MS = 200;
   var AUTOSAVE_MS = 5000;
@@ -60,7 +60,7 @@
       desc: "Presses give twice as much. Productivity up 100%. Morale unchanged." },
     { id: "tap2", cost: 1500,      press: 2,   name: "Ergonomic lever",
       desc: "Twice as much again. Signed off by health and safety, eventually." },
-    { id: "tap3", cost: 20000,     share: 0.01, name: "Performance-related pay",
+    { id: "tap3", cost: 20000,     share: 0.01, name: "Performance pay",
       desc: "Each press also earns 1% of your cheese per second." },
     { id: "tap4", cost: 1000000,   share: 0.02, name: "Bonus season",
       desc: "Each press earns a further 2% of your cheese per second." },
@@ -89,7 +89,7 @@
      ["Client lunch", "Expensed."],
      ["Deal team", "Associates can now delegate."],
      ["Promotion chat", "Not this year, but soon."]],
-    [["Noise-cancelling headset", "Hears only cheese."],
+    [["Noise cancelling headset", "Hears only cheese."],
      ["Second phone", "One for clients, one for cheese."],
      ["Corner desk", "Natural light. Output doubles."],
      ["Golf membership", "Most of the work happens on the ninth hole."]],
@@ -155,7 +155,7 @@
     { id: "contacts1", cost: 8,   name: "Market contacts I",    desc: "Golden cheese turns up 30% more often.", golden: 1.3 },
     { id: "grip2",     cost: 15,  name: "Firm grip II",         desc: "Presses give three times as much again.", press: 3, needs: "grip1" },
     { id: "seed2",     cost: 20,  name: "Seed funding II",      desc: "Start every run with 500K cheese.", start: 500000, needs: "seed1" },
-    { id: "recruit1",  cost: 25,  name: "Recruiter I",          desc: "Hires the best-value rat for you, one every 5 seconds.", recruiter: 1 },
+    { id: "recruit1",  cost: 25,  name: "Recruiter I",          desc: "Hires the best value rat for you, one every 5 seconds.", recruiter: 1 },
     { id: "contacts2", cost: 30,  name: "Market contacts II",   desc: "Golden cheese turns up 30% more often again.", golden: 1.3, needs: "contacts1" },
     { id: "retain",    cost: 40,  name: "Retention bonus",      desc: "Keep each tier\u2019s first staff upgrade when you sell." },
     { id: "value1",    cost: 50,  name: "Shareholder value I",  desc: "Each share boosts output by 6% instead of 5%.", bonus: 0.01 },
@@ -170,7 +170,8 @@
     { id: "search",    cost: 35,  name: "Executive search",     desc: "Start every run with 10 Interns and 5 Analysts." },
     { id: "rainmaker", cost: 40,  name: "Rainmaker",            desc: "Contract rewards are 50% bigger." },
     { id: "retainer",  cost: 45,  name: "Big Four retainer",    desc: "Consultants\u2019 bad outcomes are half as likely." },
-    { id: "bulk",      cost: 70,  name: "Bulk buyer",           desc: "Staff upgrades cost 25% less." }
+    { id: "bulk",      cost: 70,  name: "Bulk buyer",           desc: "Staff upgrades cost 25% less." },
+    { id: "risk",      cost: 20,  name: "Risk desk",            desc: "Suggests a futures stake using half Kelly, with the numbers behind it." }
   ];
   /* ---------- going public ----------
      From 150 shares you can list the company: it is sold as normal, then your
@@ -197,7 +198,7 @@
     { id: "r3", name: "Money printer",      desc: "Make 1M cheese a second.",      test: function (st) { return st.bestRate >= 1e6; } },
     { id: "r4", name: "Quantitative easing", desc: "Make 1B cheese a second.",     test: function (st) { return st.bestRate >= 1e9; } },
     // pressing
-    { id: "p1", name: "Hands-on",           desc: "Press 100 times.",              test: function (st) { return st.clicks >= 100; } },
+    { id: "p1", name: "Elbow grease",       desc: "Press 100 times.",              test: function (st) { return st.clicks >= 100; } },
     { id: "p2", name: "Repetitive strain",  desc: "Press 1,000 times.",            test: function (st) { return st.clicks >= 1000; } },
     { id: "p3", name: "Day trader",         desc: "Press 10,000 times.",           test: function (st) { return st.clicks >= 10000; } },
     // staff and upgrades
@@ -220,9 +221,13 @@
     { id: "b1", name: "Chairing the meeting", desc: "Make 10 board decisions.",   test: function (st) { return st.decisions >= 10; } },
     { id: "b2", name: "Hostile takeover",   desc: "Accept a takeover offer.",      test: function (st) { return st.takeovers >= 1; } },
     { id: "i1", name: "Ring the bell",      desc: "Take the company public.",      test: function (st) { return st.ipos >= 1; } },
+    { id: "q1", name: "Quant ready",        desc: "Answer 20 of Reginald\u2019s questions correctly.", test: function (st) { return st.qCorrect >= 20; } },
+    { id: "q2", name: "Perfect ten",        desc: "Answer 10 questions in a row correctly.", test: function (st) { return st.qBest >= 10; } },
     { id: "c7", name: "Contractor",         desc: "Complete 10 contracts.",       test: function (st) { return st.contractsDone >= 10; } },
-    { id: "c8", name: "Gilt-edged",         desc: "Cash in 10 bonds.",             test: function (st) { return st.bondsRedeemed >= 10; } },
+    { id: "c8", name: "Safe as houses",     desc: "Cash in 10 bonds.",             test: function (st) { return st.bondsRedeemed >= 10; } },
     { id: "c9", name: "Career ladder",      desc: "Make 25 promotions.",           test: function (st) { return st.promotions >= 25; } },
+    { id: "m3", name: "Market maker",       desc: "Make 500 trades on your desk.", test: function (st) { return st.mmTrades >= 500; } },
+    { id: "m4", name: "In the money",       desc: "Have an option pay out three times its premium.", test: function (st) { return st.inTheMoney === true; } },
     { id: "m1", name: "Bought the dip",     desc: "Profit on a long opened in a bear market.", test: function (st) { return st.boughtDip === true; } },
     { id: "m2", name: "The big short",      desc: "Make 50% on a short.",          test: function (st) { return st.bigShort === true; } },
     { id: "t1", name: "Taking the chair",   desc: "Hire a Chair of the Board.",    test: function (st) { return st.owned[8] > 0; } },
@@ -286,13 +291,27 @@
   var PHASE_MIN_S = 180, PHASE_MAX_S = 360, PRICE_PULL = 0.004, PRICE_NOISE = 0.006;
   var PRICE_MIN = 50, PRICE_MAX = 200, HIST_EVERY_S = 5, HIST_LEN = 72;
   var FUTURES_UNLOCK = 5e6, FUTURES_STAKES = [0.1, 0.25, 0.5], FUTURES_MIN_STAKE = 1000;
+  /* ---------- market making and options (on the Markets tab) ----------
+     Market making: put in capital (capped at 10 minutes of output, like bonds),
+     pick a spread, and simulated traders buy and sell from you each second. A
+     quarter of traders in bull and bear markets are informed: they trade the
+     way the price is about to move, and you lose on them. Inventory is capped
+     at 10 lots either way (a lot is a tenth of your capital). Modelled: about
+     85% of a lot every 5 minutes in a flat market with a sensible spread, far
+     less with tight spreads in a trend; leaning your quotes always helps.
+     Options: priced by Black and Scholes using the spread the price really
+     has and a forward that includes the pull back towards 100 and most of the
+     market phase's drift, so they're close to fair; the edge is small. You can never lose more than the premium. */
+  var MM_UNLOCK = 2e7, MM_LOTS = 10, MM_INFORMED = 0.25;
+  var MM_SPREADS = { tight: { half: 0.002, rate: 1.2 }, normal: { half: 0.005, rate: 0.6 }, wide: { half: 0.012, rate: 0.25 } };
+  var OPT_UNLOCK = 5e7, OPT_MAX = 2, OPT_TERMS = [120, 300], OPT_STRIKES = [-0.05, 0, 0.05], OPT_CAP_X = 20;
   function freshMarket() { return { phase: "flat", until: Date.now() + PHASE_MIN_S * 1000, price: 100, hist: [100], histT: 0 }; }
 
   /* ---------- board decisions and hostile takeovers (offered on /cheese) ----------
      Costs are minutes of output at the time. Options are roughly balanced:
      the choice is about what suits the moment, not spotting the trap. */
   var DECISIONS = [
-    { id: "fourday", text: "The board proposes a four-day week.", options: [
+    { id: "fourday", text: "The board proposes a four day week.", options: [
       { label: "Trial it", desc: "+30% output for 3 minutes, then \u221220% for 3",
         boosts: [ { kind: "prod", mult: 1.3, start: 0, len: 180 }, { kind: "prod", mult: 0.8, start: 180, len: 180 } ] },
       { label: "Keep five days", desc: "+5% output for 6 minutes", boosts: [ { kind: "prod", mult: 1.05, start: 0, len: 360 } ] } ] },
@@ -306,7 +325,7 @@
     { id: "dog", text: "Someone wants to bring in an office dog.", options: [
       { label: "Approve", desc: "Presses \u00d72 for 5 minutes", boosts: [ { kind: "press", mult: 2, start: 0, len: 300 } ] },
       { label: "Reject", desc: "+3% output for 10 minutes. Productivity, apparently", boosts: [ { kind: "prod", mult: 1.03, start: 0, len: 600 } ] } ] },
-    { id: "teambuild", text: "Team-building weekend: paintball or a pub quiz?", options: [
+    { id: "teambuild", text: "A team building weekend: paintball or a pub quiz?", options: [
       { label: "Paintball", desc: "Costs 2 minutes of output, then +12% output for 20 minutes", cost: 2,
         boosts: [ { kind: "prod", mult: 1.12, start: 0, len: 1200 } ] },
       { label: "Pub quiz", desc: "+5% output for 10 minutes", boosts: [ { kind: "prod", mult: 1.05, start: 0, len: 600 } ] } ] },
@@ -351,23 +370,23 @@
     ["Trevor",   "High variance. Currently in drawdown."],
     ["Janet",    "Compounds quietly. Has never appeared on a leaderboard."],
     ["Keith",    "Bought at the top. Remains bullish."],
-    ["Denise",   "Risk-adjusted returns better than they appear."],
+    ["Denise",   "Better returns than they look, once you adjust for risk."],
     ["Nigel",    "Insists the fundamentals are unchanged."],
     ["Pauline",  "Long duration. Sensitive to rates."],
     ["Clive",    "Was told cheese production is a solved problem."],
     ["Maureen",  "Illiquid. Cannot be sold."],
     ["Barry",    "Underperforms the benchmark. Charges fees regardless."],
     ["Yvonne",   "Uncorrelated, allegedly."],
-    ["Graham",   "Has a five-year plan. It is year six."],
+    ["Graham",   "Has a plan for the next five years. It is year six."],
     ["Linda",    "Diversified across three types of cheddar."],
-    ["Roger",    "Mean-reverting. Usually to lunch."],
+    ["Roger",    "Always reverts to the mean. Usually at lunch."],
     ["Sandra",   "Fully hedged. Against what, she will not say."],
     ["Pamela",   "Backtested beautifully. Not seen since going live."],
     ["Stuart",   "Leverage described by HR as a concern."],
     ["Carol",    "Only trades on Tuesdays. Nobody has asked why."],
     ["Geoffrey", "Refers to the 1987 crash as a personal experience."],
     ["Wendy",    "Sharpe ratio of 3. Sample size of 2."],
-    ["Neil",     "Stop-loss set at zero. An optimist."],
+    ["Neil",     "Set his stop loss at zero. An optimist."],
     ["Dennis",   "Overfit. Extremely confident about it."],
     ["Gordon",   "Believes in efficient markets, except this one."],
     ["Doreen",   "Market neutral. Also neutral on most things."],
@@ -426,6 +445,12 @@
       trades: 0,
       boughtDip: false,
       bigShort: false,
+      desk: null,           // market making: { cap, cash, inv, spread, lean, trades }
+      mmTrades: 0,
+      mmPnl: 0,
+      options: [],          // { kind, strike, qty, premium, expires }
+      optPnl: 0,
+      inTheMoney: false,
       boosts: [],           // temporary effects from board decisions: { kind, mult, from, until }
       decisions: 0,
       takeovers: 0,
@@ -443,6 +468,12 @@
       perkCredit: 0,        // shares already spent on perks before a listing (perks stay)
       ipos: 0,
       runsSinceIpo: 0,      // sales since the last listing (what the leaderboard checks against shares)
+      settings: { reactions: true, questions: true, numbers: "short" },
+      qSeen: [],            // question ids already asked this cycle through the bank
+      qAnswered: 0,
+      qCorrect: 0,
+      qStreak: 0,
+      qBest: 0,
       consultsHired: 0,
       scandals: 0,
       perma: {},            // permanent shop item id -> true
@@ -598,9 +629,39 @@
     s.stock = stockFor(s.listed);
     s.perkCredit = Math.min(whole(d.perkCredit), s.listed);
     s.ipos = whole(d.ipos);
+    if (d.settings && typeof d.settings === "object") {
+      s.settings.reactions = d.settings.reactions !== false;
+      s.settings.questions = d.settings.questions !== false;
+      s.settings.numbers = d.settings.numbers === "sci" ? "sci" : "short";
+    }
+    if (Object.prototype.toString.call(d.qSeen) === "[object Array]") {
+      for (var qi = 0; qi < d.qSeen.length && s.qSeen.length < 200; qi++) if (typeof d.qSeen[qi] === "string" && d.qSeen[qi].length <= 8) s.qSeen.push(d.qSeen[qi]);
+    }
+    s.qAnswered = whole(d.qAnswered);
+    s.qCorrect = Math.min(whole(d.qCorrect), s.qAnswered);
+    s.qStreak = Math.min(whole(d.qStreak), s.qCorrect);
+    s.qBest = Math.min(Math.max(whole(d.qBest), s.qStreak), s.qCorrect);
     s.runsSinceIpo = Math.min(typeof d.runsSinceIpo === "number" ? whole(d.runsSinceIpo) : s.runs, s.runs, s.sharesEarned);
     s.takeovers = whole(d.takeovers);
     s.bigShort = d.bigShort === true;
+    var dk = d.desk;
+    if (dk && typeof dk === "object" && MM_SPREADS[dk.spread] && num(dk.cap) > 0 && num(dk.cap) <= s.allTime &&
+        typeof dk.cash === "number" && isFinite(dk.cash) && Math.abs(dk.cash) <= num(dk.cap) * 50 &&
+        typeof dk.inv === "number" && Math.abs(dk.inv) <= MM_LOTS && dk.inv % 1 === 0) {
+      s.desk = { cap: dk.cap, cash: dk.cash, inv: dk.inv, spread: dk.spread, lean: dk.lean === true, trades: whole(dk.trades) };
+    }
+    s.mmTrades = whole(d.mmTrades);
+    s.mmPnl = (typeof d.mmPnl === "number" && isFinite(d.mmPnl)) ? Math.max(-s.allTime, Math.min(d.mmPnl, s.allTime)) : 0;
+    if (Object.prototype.toString.call(d.options) === "[object Array]") {
+      for (var oj = 0; oj < d.options.length && s.options.length < OPT_MAX; oj++) {
+        var op = d.options[oj];
+        if (op && (op.kind === "call" || op.kind === "put") && num(op.strike) >= 40 && num(op.strike) <= 220 && num(op.qty) > 0 &&
+            num(op.premium) > 0 && num(op.premium) <= s.allTime && num(op.expires) <= Date.now() + 301000)
+          s.options.push({ kind: op.kind, strike: op.strike, qty: op.qty, premium: op.premium, expires: num(op.expires) });
+      }
+    }
+    s.optPnl = (typeof d.optPnl === "number" && isFinite(d.optPnl)) ? Math.max(-s.allTime, Math.min(d.optPnl, s.allTime)) : 0;
+    s.inTheMoney = d.inTheMoney === true;
     s.scandals = whole(d.scandals);
     if (d.achievements && typeof d.achievements === "object") {
       for (var ai = 0; ai < ACHIEVEMENTS.length; ai++) {
@@ -731,6 +792,13 @@
   var UNITS = ["", "K", "M", "B", "T"];
   function format(n, decimalsBelow100) {
     if (!isFinite(n)) return "\u221e";
+    // Scientific style (a setting): everything from 1,000 up as 1.23e3.
+    if (state && state.settings && state.settings.numbers === "sci" && Math.abs(n) >= 1000) {
+      var neg = n < 0; n = Math.abs(n);
+      var ex = Math.floor(Math.log10(n)), mm = Math.floor(n / Math.pow(10, ex) * 100) / 100;
+      if (mm >= 10) { mm = 1; ex++; }
+      return (neg ? "-" : "") + mm.toFixed(2) + "e" + ex;
+    }
     if (n < 0) return "-" + format(-n, decimalsBelow100);
     if (n < 1000) {
       if (n >= 100 || !decimalsBelow100) return String(Math.floor(n));
@@ -912,12 +980,18 @@
   /* A company is worth its cheese in hand, plus what its current staff and
      this run's staff upgrades cost. Buying staff keeps your value; money
      spent on things that don't stay (press upgrades, fees) lowers it. */
+  // Every rat is priced individually, which adds up for big companies, and the
+  // page asks for this many times a redraw, so it's cached until staff change.
+  var svKey = "", svVal = 0;
   function staffValue() {
+    var key = state.owned.join(",");
+    if (key === svKey) return svVal;
     var v = 0;
     for (var t = 0; t < TIERS.length; t++) {
       var c = TIERS[t].cost, n = state.owned[t];
       for (var k = 0; k < n; k++) v += Math.ceil(c * Math.pow(COST_GROWTH, k));
     }
+    svKey = key; svVal = v;
     return v;
   }
   function staffUpValue() {
@@ -928,7 +1002,7 @@
     }
     return v;
   }
-  function valuation() { return state.cheese + staffValue() + staffUpValue() + positionValue() + bondsValue(); }
+  function valuation() { return state.cheese + staffValue() + staffUpValue() + positionValue() + bondsValue() + deskValue(false) + optionsValue(); }
   function shareScale() { return SHARE_SCALE * (1 + state.stock); }
   function pendingShares() { return Math.max(0, sharesFor(state.soldValue + valuation(), shareScale()) - state.sharesEarned); }
   // Extra company value needed for one more share than a sale would pay now.
@@ -973,6 +1047,8 @@
     var gained = pendingShares();
     if (gained < 1) return null;
     if (state.position) closePosition(true);           // close at market; it was already in the valuation
+    if (state.desk) closeDesk(true);                   // the desk closes at market, as part of the sale
+    if (state.options.length) settleOptions(true);    // options are settled at their fair value
     var value = valuation();
     state.soldValue += value;
     state.sharesEarned += gained;
@@ -1238,6 +1314,7 @@
     marketCarry -= Math.floor(marketCarry);
     var lp = Math.log(m.price), centre = Math.log(100), drift = PHASES[m.phase].drift;
     for (var i = 0; i < steps; i++) {
+      if (state.desk) makeMarketSecond(Math.exp(lp), drift);
       lp += drift - PRICE_PULL * (lp - centre) + PRICE_NOISE * gauss();
       lp = Math.max(Math.log(PRICE_MIN), Math.min(Math.log(PRICE_MAX), lp));
       m.histT += 1;
@@ -1249,6 +1326,146 @@
   function marketNext() { return owns("insight") && state.market && state.market.next ? state.market.next : null; }
   function marketMult() { return PHASES[marketPhase()].mult; }
   function marketLeft() { return state.market ? Math.max(0, (state.market.until - Date.now()) / 1000) : 0; }
+
+  /* ---------- market making ---------- */
+  function mmUnlocked() { return state.allTime >= MM_UNLOCK || !!state.desk || state.mmTrades > 0; }
+  function mmCap() { return Math.max(1e4, baseRate() * 60 * 10); }
+  function lotUnits() { return state.desk ? state.desk.cap / MM_LOTS / 100 : 0; }   // cheese per price point, per lot
+  function makeMarketSecond(mid, drift) {
+    var dk = state.desk, sp = MM_SPREADS[dk.spread], u = dk.cap / MM_LOTS / 100;
+    // Poisson arrivals
+    var L = sp.rate, p = Math.exp(-L), cum = p, r = Math.random(), k = 0;
+    while (r > cum && k < 10) { k++; p *= L / k; cum += p; }
+    for (var j = 0; j < k; j++) {
+      var buy;
+      if (drift !== 0 && Math.random() < MM_INFORMED) buy = drift > 0;                    // informed: trades with the move
+      else buy = Math.random() < 0.5 + (dk.lean ? 0.1 * dk.inv / MM_LOTS : 0);          // leaning attracts the side that sheds inventory
+      if (buy && dk.inv > -MM_LOTS) { dk.cash += u * mid * (1 + sp.half); dk.inv--; dk.trades++; state.mmTrades++; }
+      else if (!buy && dk.inv < MM_LOTS) { dk.cash -= u * mid * (1 - sp.half); dk.inv++; dk.trades++; state.mmTrades++; }
+    }
+    dirty = true;
+  }
+  function deskValue(flatten) {
+    var dk = state.desk; if (!dk) return 0;
+    var mid = state.market ? state.market.price : 100, u = lotUnits(), sp = MM_SPREADS[dk.spread];
+    var inv = dk.inv * u * mid * (flatten && dk.inv ? (1 - sp.half * (dk.inv > 0 ? 1 : -1)) : 1);
+    return Math.max(0, dk.cap + dk.cash + inv);
+  }
+  function openDesk(spread, frac) {
+    if (!active) { claim(); return false; }
+    if (!mmUnlocked() || state.desk || !MM_SPREADS[spread] || [0.25, 0.5, 1].indexOf(frac) === -1) return false;
+    var cap = Math.floor(Math.min(state.cheese * frac, mmCap()));
+    if (cap < 1000) return false;
+    if (!state.market) state.market = freshMarket();
+    state.cheese -= cap;
+    state.desk = { cap: cap, cash: 0, inv: 0, spread: spread, lean: false, trades: 0 };
+    dirty = true; save(); onChange();
+    return true;
+  }
+  function setDesk(opts) {
+    if (!active) { claim(); return; }
+    var dk = state.desk; if (!dk) return;
+    if (opts.spread && MM_SPREADS[opts.spread]) dk.spread = opts.spread;
+    if (typeof opts.lean === "boolean") dk.lean = opts.lean;
+    dirty = true; save(); onChange();
+  }
+  // Clear inventory at the market, paying half the spread; the desk stays open.
+  function flattenDesk() {
+    if (!active) { claim(); return false; }
+    var dk = state.desk; if (!dk || !dk.inv) return false;
+    var mid = state.market ? state.market.price : 100, u = lotUnits(), sp = MM_SPREADS[dk.spread];
+    dk.cash += dk.inv * u * mid * (1 - sp.half * (dk.inv > 0 ? 1 : -1));
+    dk.inv = 0;
+    dirty = true; save(); onChange();
+    return true;
+  }
+  var deskReports = [];
+  function closeDesk(quiet) {
+    if (!active && !quiet) { claim(); return null; }
+    var dk = state.desk; if (!dk) return null;
+    var v = deskValue(true), profit = v - dk.cap;
+    state.desk = null;
+    state.cheese += Math.min(v, dk.cap);
+    if (profit > 0) earn(profit);
+    state.mmPnl += profit;
+    var rep = { cap: dk.cap, value: v, profit: profit, trades: dk.trades };
+    if (!quiet) deskReports.push(rep);
+    dirty = true; save(); checkAchievements(); onChange();
+    return rep;
+  }
+  function takeDeskReports() { var r = deskReports; deskReports = []; return r; }
+
+  /* ---------- options ---------- */
+  function optUnlocked() { return state.allTime >= OPT_UNLOCK || state.options.length > 0 || state.optPnl !== 0; }
+  function ncdf(x) {   // standard normal CDF (Abramowitz and Stegun 7.1.26)
+    var t = 1 / (1 + 0.3275911 * Math.abs(x) / Math.SQRT2), y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x / 2);
+    return x >= 0 ? 0.5 * (1 + y) : 0.5 * (1 - y);
+  }
+  // Black and Scholes with no interest. The volatility is the spread the price
+  // really has over that time: the pull back towards 100 narrows it, so plain
+  // noise times the square root of time would overprice every option.
+  function optionSd(seconds) {
+    var T = Math.max(0, seconds);
+    return PRICE_NOISE * Math.sqrt((1 - Math.exp(-2 * PRICE_PULL * T)) / (2 * PRICE_PULL));
+  }
+  // The forward: where the price is expected to be at expiry. It includes the
+  // full pull back towards 100 and 85% of the market phase's drift, so options
+  // are close to fair; reading the phase better than the price does is the
+  // small edge that's left. (Pricing the drift at 0% made bull market calls
+  // return +78% on average, which would have been a money printer.)
+  var OPT_DRIFT_PRICED = 0.85;
+  function optionForward(S, seconds, phase) {
+    var T = Math.max(0, seconds), pullT = 1 - Math.exp(-PRICE_PULL * T);
+    var drift = PHASES[phase || marketPhase()].drift;
+    var m = pullT * (Math.log(100) - Math.log(S)) + OPT_DRIFT_PRICED * drift * pullT / PRICE_PULL;
+    var sd = optionSd(T);
+    return S * Math.exp(m + sd * sd / 2);
+  }
+  function optionPrice(kind, S, K, seconds, phase) {
+    var sd = optionSd(seconds);
+    if (sd <= 0) return Math.max(0, kind === "call" ? S - K : K - S);
+    var F = optionForward(S, seconds, phase);
+    var d1 = (Math.log(F / K) + sd * sd / 2) / sd, d2 = d1 - sd;
+    return kind === "call" ? F * ncdf(d1) - K * ncdf(d2) : K * ncdf(-d2) - F * ncdf(-d1);
+  }
+  function optQuote(kind, strikeIdx, termIdx) {
+    var S = state.market ? state.market.price : 100, K = S * (1 + OPT_STRIKES[strikeIdx]), T = OPT_TERMS[termIdx];
+    return { kind: kind, strike: K, seconds: T, unit: optionPrice(kind, S, K, T), spot: S };
+  }
+  function optStakeCap() { return Math.max(1e4, baseRate() * 60 * 5); }   // sized so playing options well adds roughly 10% of output, in line with the other desks
+  function buyOption(kind, strikeIdx, termIdx, frac) {
+    if (!active) { claim(); return false; }
+    if (!optUnlocked() || state.options.length >= OPT_MAX || (kind !== "call" && kind !== "put") ||
+        OPT_STRIKES[strikeIdx] === undefined || OPT_TERMS[termIdx] === undefined || [0.1, 0.25, 0.5].indexOf(frac) === -1) return false;
+    if (!state.market) state.market = freshMarket();
+    var q = optQuote(kind, strikeIdx, termIdx), premium = Math.floor(Math.min(state.cheese * frac, optStakeCap()));
+    if (premium < 1000 || q.unit <= 1e-9) return false;
+    state.cheese -= premium;
+    state.options.push({ kind: kind, strike: q.strike, qty: premium / q.unit, premium: premium, expires: Date.now() + q.seconds * 1000 });
+    dirty = true; save(); onChange();
+    return true;
+  }
+  function optionValue(o) {
+    var S = state.market ? state.market.price : 100, left = Math.max(0, (o.expires - Date.now()) / 1000);
+    return Math.min(o.qty * optionPrice(o.kind, S, o.strike, left), o.premium * OPT_CAP_X);
+  }
+  function optionsValue() { var v = 0; state.options.forEach(function (o) { v += optionValue(o); }); return v; }
+  var optReports = [];
+  function settleOptions(all) {
+    var now = Date.now(), kept = [], paid = false;
+    state.options.forEach(function (o) {
+      if (!all && now < o.expires) { kept.push(o); return; }
+      var payout = optionValue(o), profit = payout - o.premium;
+      state.cheese += Math.min(payout, o.premium);
+      if (profit > 0) earn(profit);
+      state.optPnl += profit;
+      if (payout >= 3 * o.premium) state.inTheMoney = true;
+      if (!all) optReports.push({ kind: o.kind, premium: o.premium, payout: payout, profit: profit });
+      paid = true;
+    });
+    if (paid) { state.options = kept; dirty = true; save(); checkAchievements(); onChange(); }
+  }
+  function takeOptReports() { var r = optReports; optReports = []; return r; }
 
   /* ---------- cheese futures ---------- */
   function futuresUnlocked() { return state.allTime >= FUTURES_UNLOCK || state.trades > 0 || !!state.position; }
@@ -1287,6 +1504,21 @@
   }
   function takeTradeReports() { var r = tradeReports; tradeReports = []; return r; }
 
+  /* Half Kelly for a futures trade held about two minutes: edge is the drift
+     you can expect over the hold (within the current phase), variance is the
+     price noise over the same time. Kelly stake = edge / variance; half of it,
+     capped at the 50% the desk allows. */
+  var KELLY_HOLD_S = 120;
+  function kellyAdvice() {
+    if (!owns("risk")) return null;
+    var ph = marketPhase(), d = PHASES[ph].drift, hold = Math.min(KELLY_HOLD_S, marketLeft());
+    var edge = Math.abs(d) * hold, sd = PRICE_NOISE * Math.sqrt(KELLY_HOLD_S);
+    var full = sd > 0 ? edge / (sd * sd) : 0, half = full / 2;
+    var stake = Math.min(0.5, half), pick = 0;
+    FUTURES_STAKES.forEach(function (x) { if (x <= stake + 1e-9) pick = x; });
+    return { side: d > 0 ? "long" : d < 0 ? "short" : null, edge: edge, sd: sd, full: full, half: half, stake: pick, capped: half > 0.5 };
+  }
+
   /* ---------- going public ---------- */
   // Listing always includes a real sale, so a sale must be on offer.
   function ipoReady() { return state.sharesEarned + pendingShares() >= IPO_MIN_SHARES && pendingShares() >= 1; }
@@ -1312,6 +1544,42 @@
     dirty = true; save(); checkAchievements(); onChange();
     return { stock: q.stock, totalStock: state.stock, mult: stockMult() };
   }
+
+  /* ---------- probability questions (asked by Reginald on /cheese) ----------
+     A correct answer pays 3 minutes of output. One question can be answered
+     once, within 45 seconds of being asked; the bank cycles without repeats. */
+  var Q_UNLOCK = 1e4, Q_REWARD_MIN = 3, Q_SECONDS = 45;
+  var asked = null;   // { id, until }, kept in memory only
+  function questionBank() { return global.CHEESE_QUESTIONS || []; }
+  function questionsOn() { return state.settings.questions !== false && state.allTime >= Q_UNLOCK && questionBank().length > 0; }
+  function askQuestion() {
+    if (!active || !questionsOn()) return null;
+    var bank = questionBank();
+    var fresh = bank.filter(function (q) { return state.qSeen.indexOf(q.id) === -1; });
+    if (!fresh.length) { state.qSeen = []; fresh = bank.slice(); }
+    var q = fresh[Math.floor(Math.random() * fresh.length)];
+    state.qSeen.push(q.id);
+    asked = { id: q.id, until: Date.now() + Q_SECONDS * 1000 };
+    dirty = true;
+    return { id: q.id, q: q.q, o: q.o.slice(), seconds: Q_SECONDS };
+  }
+  function answerQuestion(id, choice) {
+    if (!active) { claim(); return null; }
+    if (!asked || asked.id !== id || Date.now() > asked.until) { asked = null; return null; }
+    asked = null;
+    var q = null; questionBank().forEach(function (x) { if (x.id === id) q = x; });
+    if (!q) return null;
+    var right = choice === q.a, reward = 0;
+    state.qAnswered++;
+    if (right) {
+      reward = Math.min(baseRate() * 60 * Q_REWARD_MIN, Math.max(state.lifetime, 1000));
+      earn(reward);
+      state.qCorrect++; state.qStreak++; if (state.qStreak > state.qBest) state.qBest = state.qStreak;
+    } else state.qStreak = 0;
+    dirty = true; save(); checkAchievements(); onChange();
+    return { right: right, reward: reward, answer: q.o[q.a], why: q.why };
+  }
+  function letQuestionGo() { asked = null; }
 
   /* ---------- board decisions ---------- */
   function boostMult(kind) {
@@ -1362,6 +1630,25 @@
     return out;
   }
   function takeGoldenSoon() { var f = goldenSoonFlag; goldenSoonFlag = false; return f; }
+
+  // Expected value of a board decision option, in minutes of current output.
+  // Returns null where it depends on how much you press.
+  function decisionEV(id, choice) {
+    var dcs = decisionById(id), opt = dcs && dcs.options[choice];
+    if (!opt) return null;
+    if (opt.boosts && opt.boosts.some(function (b) { return b.kind === "press"; })) return null;
+    if (opt.golden) return null;
+    var stretch = owns("lunch") ? 1.5 : 1, ev = -(opt.cost || 0);
+    (opt.boosts || []).forEach(function (b) { ev += (b.mult - 1) * (b.len / 60) * stretch; });
+    if (opt.restructure) {
+      var teams = []; for (var i = 0; i < TIERS.length; i++) if (state.owned[i] > 0) teams.push(i);
+      var rate = baseRate(); if (teams.length && rate > 0) {
+        var sum = 0; teams.forEach(function (t) { sum += rehireCost(t, Math.min(state.owned[t], Math.max(1, Math.floor(state.owned[t] * opt.restructure)))); });
+        ev -= sum / teams.length / (rate * 60);
+      }
+    }
+    return ev;
+  }
 
   /* ---------- hostile takeovers ---------- */
   var offer = null;   // { value, premium, expires }, never saved: an offer only lasts 30 seconds
@@ -1487,21 +1774,40 @@
      The ten count toward the new rat at what they cost you, and you pay any
      gap in cheese, so a promotion never makes the company look more valuable
      than the cheese behind it. */
+  // Loyalty bonus: the ten count for 20% more than they cost. Any value that
+  // adds to the company is counted as earned (not as cheese), so a sale is
+  // still always backed by earnings.
+  var PROMOTE_BONUS = 1.2;
+  function milestoneOf(n) { var m = 1; for (var i = 0; i < MILESTONES.length; i++) if (n >= MILESTONES[i]) m *= 2; return m; }
   function promotionQuote(tier) {
     var next = tier + 1, n = state.owned[tier];
     if (next >= TIERS.length || n < PROMOTE_COUNT || !tierRevealed(next)) return null;
-    var credit = 0, c = TIERS[tier].cost;
-    for (var k = n - PROMOTE_COUNT; k < n; k++) credit += Math.ceil(c * Math.pow(COST_GROWTH, k));
-    var price = costOf(next), gap = Math.max(0, price - credit);
-    return { tier: tier, next: next, credit: credit, price: price, cost: gap, affordable: state.cheese >= gap };
+    var paid = 0, c = TIERS[tier].cost;
+    for (var k = n - PROMOTE_COUNT; k < n; k++) paid += Math.ceil(c * Math.pow(COST_GROWTH, k));
+    var credit = paid * PROMOTE_BONUS, price = costOf(next), gap = Math.max(0, price - credit);
+    // what it does to output
+    var before = baseRate();
+    state.owned[tier] -= PROMOTE_COUNT; state.owned[next] += 1;
+    var after = baseRate();
+    state.owned[tier] += PROMOTE_COUNT; state.owned[next] -= 1;
+    var notes = [];
+    var mNextB = milestoneOf(state.owned[next]), mNextA = milestoneOf(state.owned[next] + 1);
+    if (mNextA > mNextB) notes.push({ kind: "up", tier: next, count: state.owned[next] + 1, from: mNextB, to: mNextA });
+    var mLowB = milestoneOf(n), mLowA = milestoneOf(n - PROMOTE_COUNT);
+    if (mLowA < mLowB) notes.push({ kind: "down", tier: tier, count: n - PROMOTE_COUNT, from: mLowB, to: mLowA });
+    return { tier: tier, next: next, paid: paid, credit: credit, price: price, cost: gap, affordable: state.cheese >= gap,
+             rateBefore: before, rateAfter: after, change: before > 0 ? after / before - 1 : 0, notes: notes };
   }
   function promote(tier) {
     if (!active) { claim(); return false; }
     var q = promotionQuote(tier);
     if (!q || !q.affordable) return false;
+    var v0 = valuation();
     state.cheese -= q.cost;
     state.owned[tier] -= PROMOTE_COUNT;
     state.owned[q.next] += 1;
+    var gainInValue = valuation() - v0;
+    if (gainInValue > 0) { state.lifetime += gainInValue; state.allTime += gainInValue; }   // the bonus, counted as earned
     state.promotions++;
     dirty = true; save(); checkAchievements(); onChange();
     return true;
@@ -1571,6 +1877,36 @@
   }
   function takeConsultReports() { var r = consultReports; consultReports = []; return r; }
 
+  /* Expected value and spread of hiring a firm right now, in cheese.
+     Restructuring is valued at what it would cost to rehire the staff lost. */
+  function rehireCost(t, lose) {
+    var n = state.owned[t], c = TIERS[t].cost, v = 0;
+    for (var k = n - lose; k < n; k++) v += Math.ceil(c * Math.pow(COST_GROWTH, k));
+    return v;
+  }
+  function consultantEV(id) {
+    var f = consultantById(id); if (!f) return null;
+    var rate = baseRate(), fee = consultantFee(id), cash = Math.max(0, state.cheese - fee), cap = Math.max(state.lifetime, CONSULT_MIN_FEE);
+    var weight = function (o) { return o.w * (owns("retainer") && /overrun|restructure|lose/.test(o.kind) ? 0.5 : 1); };
+    var total = 0; f.outcomes.forEach(function (o) { total += weight(o); });
+    var teams = []; for (var i = 0; i < TIERS.length; i++) if (state.owned[i] > 0) teams.push(i);
+    var vals = f.outcomes.map(function (o) {
+      var v = 0;
+      if (o.kind === "gain") v = Math.min(rate * 60 * o.min, cap);
+      else if (o.kind === "overrun") v = -Math.min(rate * 60 * o.min, cash);
+      else if (o.kind === "lose") v = -cash * Math.min(o.share, 0.4);
+      else if (o.kind === "restructure" && teams.length) {
+        var lossFor = function (t) { var lose = Math.min(state.owned[t], Math.max(1, Math.floor(state.owned[t] * Math.min(o.share, 0.3)))); return rehireCost(t, lose); };
+        if (o.pick === "biggest") { var big = teams[0]; teams.forEach(function (t) { if (state.owned[t] * rateOf(t) > state.owned[big] * rateOf(big)) big = t; }); v = -lossFor(big); }
+        else { var sum = 0; teams.forEach(function (t) { sum += lossFor(t); }); v = -sum / teams.length; }
+      }
+      return { p: weight(o) / total, v: v - fee };
+    });
+    var ev = 0; vals.forEach(function (x) { ev += x.p * x.v; });
+    var vr = 0; vals.forEach(function (x) { vr += x.p * (x.v - ev) * (x.v - ev); });
+    return { ev: ev, sd: Math.sqrt(vr), fee: fee, perMinute: rate * 60 };
+  }
+
   /* ---------- golden cheese ---------- */
   // Picks and applies a bonus. Returns {kind, label, amount} for the page to show.
   function claimGolden() {
@@ -1636,6 +1972,7 @@
     }
     if (r > 0) { earn(r * dt); onChange(); }
     stepMarket(dt);
+    settleOptions(false);
     pruneBoosts();
     settleConsult();
     refreshOffers(false);
@@ -1757,7 +2094,15 @@
     bondsValue: bondsValue,
     takeBondReports: takeBondReports,
     maxBonds: MAX_BONDS,
+    questionsOn: questionsOn,
+    askQuestion: askQuestion,
+    answerQuestion: answerQuestion,
+    letQuestionGo: letQuestionGo,
+    questionUnlockAt: Q_UNLOCK,
     promotionQuote: promotionQuote,
+    consultantEV: consultantEV,
+    decisionEV: decisionEV,
+    kellyAdvice: kellyAdvice,
     promote: promote,
     decisions: DECISIONS,
     decisionsUnlocked: decisionsUnlocked,
@@ -1770,6 +2115,28 @@
     offerNow: offerNow,
     acceptTakeover: acceptTakeover,
     declineTakeover: declineTakeover,
+    mmSpreads: MM_SPREADS,
+    mmUnlocked: mmUnlocked,
+    mmUnlockAt: MM_UNLOCK,
+    mmCap: mmCap,
+    openDesk: openDesk,
+    setDesk: setDesk,
+    flattenDesk: flattenDesk,
+    closeDesk: function () { return closeDesk(false); },
+    deskValue: deskValue,
+    takeDeskReports: takeDeskReports,
+    optUnlocked: optUnlocked,
+    optUnlockAt: OPT_UNLOCK,
+    optTerms: OPT_TERMS,
+    optStrikes: OPT_STRIKES,
+    optQuote: optQuote,
+    optionPrice: optionPrice,
+    optionForward: optionForward,
+    buyOption: buyOption,
+    optionValue: optionValue,
+    optionsValue: optionsValue,
+    optStakeCap: optStakeCap,
+    takeOptReports: takeOptReports,
     phases: PHASES,
     marketPhase: marketPhase,
     marketMult: marketMult,
@@ -1812,6 +2179,15 @@
     buffActive: buffActive,
     buffLeft: buffLeft,
     baseRate: baseRate,
+    // Settings live in the save, so they apply on both pages.
+    setSetting: function (key, value) {
+      if (!active) { claim(); return; }
+      if (key === "facts") state.reginald.factsOff = !value;
+      else if (key === "reactions" || key === "questions") state.settings[key] = value === true;
+      else if (key === "numbers") state.settings.numbers = value === "sci" ? "sci" : "short";
+      else return;
+      dirty = true; save(); onChange();
+    },
     isActive: isActive,
     isOutdated: isOutdated,
     start: start

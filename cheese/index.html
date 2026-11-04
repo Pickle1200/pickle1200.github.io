@@ -165,7 +165,7 @@ section{margin-bottom:34px}
 .fut-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
 .fut-price{font-size:28px;font-weight:500;letter-spacing:-0.02em;font-variant-numeric:tabular-nums}
 .fut-change{font-size:12px;font-variant-numeric:tabular-nums}
-.fut-change.up{color:var(--amber-deep)}.fut-change.down{color:#E07A6B}
+.fut-change.up{color:var(--amber-deep)}.fut-change.down{color:#E07A6B}.fut-change.soft{color:var(--ink-soft)}
 .fut-chart{display:block;width:100%;height:70px;margin:8px 0 10px}
 .fut-chart polyline{fill:none;stroke:var(--amber);stroke-width:1.6;vector-effect:non-scaling-stroke}
 .fut-chart line{stroke:var(--rule);stroke-width:1;vector-effect:non-scaling-stroke;stroke-dasharray:3 3}
@@ -189,10 +189,18 @@ section{margin-bottom:34px}
 .active-deal[hidden],.deal[hidden],.bond-row[hidden]{display:none}
 .bond-terms{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
 .bond-row{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:7px 0;border-bottom:1px solid var(--rule)}
-.promote{font-size:11px;background:none;border:0;color:var(--ink-soft);cursor:pointer;padding:0;border-bottom:1px solid var(--ink-soft);align-self:flex-start}
+.promote{font-size:11px;background:none;border:0;color:var(--ink-soft);cursor:pointer;padding:0;border-bottom:1px solid var(--ink-soft);align-self:flex-start;text-align:left;line-height:1.5}
 .promote:hover:not(:disabled){color:var(--amber-deep);border-color:var(--amber-deep)}
 .promote:disabled{opacity:.4;cursor:default}
 .promote[hidden]{display:none}
+.promo-note{font-size:11px;line-height:1.45}
+.promo-note.good{color:var(--amber-deep)}
+.promo-note.bad{color:#E07A6B}
+.promo-note[hidden]{display:none}
+.firm .ev{font-size:11px;color:var(--ink-mid);line-height:1.5}
+.firm .ev b{font-weight:500}
+.kelly{font-size:11.5px;color:var(--ink-mid);margin-top:10px;line-height:1.5;border-left:3px solid var(--amber);padding-left:10px}
+.kelly[hidden]{display:none}
 
 /* ---------- consultants ---------- */
 .firms{display:grid;gap:10px}
@@ -212,6 +220,39 @@ section{margin-bottom:34px}
 .consult-report.bad{border-color:#C0392B}
 .consult-report[hidden]{display:none}
 
+/* ---------- tabs, how-to notes and settings ---------- */
+.game > main,.game > aside{min-width:0}   /* let the columns shrink so the tab bar scrolls instead of widening the page */
+.tabs{display:flex;gap:4px;overflow-x:auto;max-width:100%;margin-bottom:22px;border-bottom:1px solid var(--rule);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{position:relative;font-size:12px;letter-spacing:.04em;padding:9px 14px 10px;border:0;background:none;color:var(--ink-soft);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--amber)}
+.tab[hidden]{display:none}
+.tab .dot{position:absolute;top:7px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--amber-deep)}
+.tab .dot[hidden]{display:none}
+main[data-tab] > section[data-tab]{display:none}
+main[data-tab="office"] > section[data-tab="office"],
+main[data-tab="company"] > section[data-tab="company"],
+main[data-tab="markets"] > section[data-tab="markets"],
+main[data-tab="deals"] > section[data-tab="deals"],
+main[data-tab="records"] > section[data-tab="records"]{display:block}
+main > section[hidden]{display:none !important}
+.howto{margin-bottom:18px;font-size:12px;color:var(--ink-mid);line-height:1.55;border:1px solid var(--rule);padding:0 12px}
+.howto summary{cursor:pointer;padding:9px 0;color:var(--ink-soft);font-size:11.5px;list-style:none}
+.howto summary::-webkit-details-marker{display:none}
+.howto summary::before{content:"+ ";color:var(--amber-deep)}
+.howto[open] summary::before{content:"\2212  "}
+.howto p{margin:0 0 10px}
+.top-right{display:flex;gap:16px;align-items:baseline}
+.settings-btn{font-size:12px;background:none;border:0;color:var(--ink-soft);cursor:pointer;border-bottom:1px solid var(--ink-soft);padding:0 0 2px;font-family:var(--mono)}
+.settings-btn:hover{color:var(--ink);border-color:var(--ink)}
+.settings{position:absolute;right:0;top:calc(100% + 8px);z-index:45;width:min(300px,90vw);background:var(--panel);border:1px solid var(--rule);padding:14px;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.settings[hidden]{display:none}
+.settings h2{font-size:12px;font-weight:500;margin-bottom:10px}
+.set-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--rule);font-size:12px}
+.set-row .switch{min-width:62px}
+.set-row[hidden]{display:none}
+
 /* ---------- achievements and stats ---------- */
 .achs{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
 .ach{border:1px solid var(--rule);padding:9px 11px;min-height:64px}
@@ -224,7 +265,7 @@ section{margin-bottom:34px}
 .stat{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--rule);font-size:12.5px}
 .stat span{color:var(--ink-soft)}
 .stat b{font-weight:500;font-variant-numeric:tabular-nums;text-align:right}
-.toast.ach-toast{top:84px;left:50%}
+.toast.ach-toast{top:84px;left:50%;max-width:92vw;white-space:normal;text-align:center}
 
 /* ---------- the company: selling and perks ---------- */
 .company{border:1px solid var(--amber);background:var(--panel);padding:16px}
@@ -284,6 +325,9 @@ section{margin-bottom:34px}
 }
 @media (max-width:520px){
   body{padding:0 14px 120px}
+  .top{flex-wrap:wrap;gap:10px 20px;padding:20px 0 16px}
+  .top-right{width:100%;justify-content:flex-start;gap:20px}
+  .settings{left:0;right:auto}
   .wheel svg{width:62%}
 }
 </style>
@@ -296,7 +340,17 @@ section{margin-bottom:34px}
       <a class="name" href="/">Puranjay Kumar</a>
       <div class="sub">Cheese, the full game</div>
     </div>
-    <a class="back" href="/">Back to the portfolio</a>
+    <div class="top-right" style="position:relative">
+      <button type="button" class="settings-btn" id="settings-btn" aria-expanded="false" aria-controls="settings">Settings</button>
+      <a class="back" href="/">Back to the portfolio</a>
+      <div class="settings" id="settings" hidden role="dialog" aria-label="Settings">
+        <h2>Settings</h2>
+        <div class="set-row"><span>Reginald’s facts</span><button type="button" class="switch" data-set="facts"></button></div>
+        <div class="set-row"><span>Reginald’s reactions</span><button type="button" class="switch" data-set="reactions"></button></div>
+        <div class="set-row" id="set-q-row"><span>Probability questions</span><button type="button" class="switch" data-set="questions"></button></div>
+        <div class="set-row"><span>Big numbers</span><button type="button" class="switch" data-set="numbers"></button></div>
+      </div>
+    </div>
   </div>
 
   <div class="game">
@@ -336,7 +390,7 @@ section{margin-bottom:34px}
             <button type="button" class="buy" id="rec-hire"></button>
             <button type="button" class="switch" id="rec-switch" aria-pressed="false" hidden>Off</button>
           </div>
-          <p class="ds" id="rec-desc">Hires the best-value staff and upgrades for you, one every 1.5 seconds.</p>
+          <p class="ds" id="rec-desc">Hires the best value staff and upgrades for you, one every 1.5 seconds.</p>
           <p class="next" id="rec-next" hidden></p>
         </div>
 
@@ -361,7 +415,14 @@ section{margin-bottom:34px}
       <p class="shared">Progress is shared with the cheese game on the main page.</p>
     </aside>
 
-    <main>
+    <main id="main" data-tab="office">
+      <nav class="tabs" role="tablist" aria-label="Game sections">
+        <button type="button" class="tab" role="tab" data-tab-btn="office" aria-selected="true">Office<span class="dot" hidden></span></button>
+        <button type="button" class="tab" role="tab" data-tab-btn="company" aria-selected="false" hidden>Company<span class="dot" hidden></span></button>
+        <button type="button" class="tab" role="tab" data-tab-btn="markets" aria-selected="false" hidden>Markets<span class="dot" hidden></span></button>
+        <button type="button" class="tab" role="tab" data-tab-btn="deals" aria-selected="false" hidden>Deals<span class="dot" hidden></span></button>
+        <button type="button" class="tab" role="tab" data-tab-btn="records" aria-selected="false">Records<span class="dot" hidden></span></button>
+      </nav>
       <section id="company-sec" hidden>
         <div class="sec-label"><b>Your company</b><span id="runs-sum"></span></div>
         <div class="company">
@@ -439,8 +500,64 @@ section{margin-bottom:34px}
             <span id="fut-pos-text"></span>
             <button type="button" class="buy" id="fut-close" style="margin-left:8px">Close</button>
           </div>
+          <p class="kelly" id="kelly" hidden></p>
           <p class="fut-note">Long profits if the price rises, short if it falls. Bull markets nudge the price up and bear
           markets down, but the noise is bigger than the nudge. Open positions count toward your company’s value.</p>
+        </div>
+      </section>
+
+      <section id="mm-sec" hidden>
+        <div class="sec-label"><b>Market making</b><span id="mm-sum"></span></div>
+        <p class="consult-note" id="mm-note"></p>
+        <div class="futures" id="mm-box" hidden>
+          <div class="fut-controls" id="mm-open">
+            <div class="buymode" role="group" aria-label="Spread"><span>Spread</span>
+              <button type="button" data-mmspread="tight">Tight</button>
+              <button type="button" data-mmspread="normal" aria-pressed="true">Normal</button>
+              <button type="button" data-mmspread="wide">Wide</button></div>
+            <div class="buymode" role="group" aria-label="Capital"><span>Capital</span>
+              <button type="button" data-mmcap="0.25" aria-pressed="true">25%</button>
+              <button type="button" data-mmcap="0.5">50%</button>
+              <button type="button" data-mmcap="1">Max</button></div>
+            <button type="button" class="buy" id="mm-start">Open the desk</button>
+          </div>
+          <div id="mm-live" hidden>
+            <div class="fut-pos" id="mm-status"></div>
+            <div class="fut-controls" style="margin-top:10px">
+              <button type="button" class="switch" id="mm-lean" aria-pressed="false">Lean quotes: off</button>
+              <button type="button" class="buy" id="mm-flat">Flatten inventory</button>
+              <button type="button" class="buy" id="mm-close">Close the desk</button>
+            </div>
+          </div>
+          <p class="fut-note">Traders buy at your ask and sell at your bid, so every trade earns half the spread. Tight spreads
+          trade often for little; wide ones rarely for more. In bull and bear markets some traders know where the price is going,
+          and you lose on them. Leaning your quotes nudges trades towards whichever side clears your inventory.</p>
+        </div>
+      </section>
+
+      <section id="opt-sec" hidden>
+        <div class="sec-label"><b>Options desk</b><span id="opt-sum"></span></div>
+        <p class="consult-note" id="opt-note"></p>
+        <div class="futures" id="opt-box" hidden>
+          <div class="fut-controls">
+            <div class="buymode" role="group" aria-label="Strike"><span>Strike</span>
+              <button type="button" data-ostrike="0">5% below</button>
+              <button type="button" data-ostrike="1" aria-pressed="true">At the price</button>
+              <button type="button" data-ostrike="2">5% above</button></div>
+            <div class="buymode" role="group" aria-label="Expiry"><span>Expiry</span>
+              <button type="button" data-oterm="0" aria-pressed="true">2 min</button>
+              <button type="button" data-oterm="1">5 min</button></div>
+            <div class="buymode" role="group" aria-label="Premium"><span>Premium</span>
+              <button type="button" data-ofrac="0.1" aria-pressed="true">10%</button>
+              <button type="button" data-ofrac="0.25">25%</button>
+              <button type="button" data-ofrac="0.5">50%</button></div>
+          </div>
+          <p class="fut-pos" id="opt-quote"></p>
+          <div class="fut-controls"><button type="button" class="buy" id="opt-call">Buy a call</button><button type="button" class="buy" id="opt-put">Buy a put</button></div>
+          <div id="opt-list"></div>
+          <p class="fut-note">A call pays if the price ends above the strike, a put if it ends below. You can never lose more than
+          the premium. Prices are close to fair: they allow for the pull back towards 100 and most of the market’s current
+          trend, so the only edge is reading the market a little better than the price does.</p>
         </div>
       </section>
 
@@ -480,9 +597,9 @@ section{margin-bottom:34px}
       </section>
 
       <section id="lb-sec" hidden>
-        <div class="sec-label"><b>Leaderboard</b><span>All-time cheese</span></div>
+        <div class="sec-label"><b>Leaderboard</b><span>Cheese earned, all time</span></div>
         <div id="lb-join-box">
-          <p class="lb-intro">See how your all-time cheese compares. You’ll appear under a cheese name,
+          <p class="lb-intro">See how your cheese earned, all time, compares. You’ll appear under a cheese name,
           and can ask for your own. Nothing personal is stored.</p>
           <button type="button" class="buy" id="lb-join">Join the leaderboard</button>
           <p class="lb-msg" id="lb-status" hidden></p>
@@ -515,9 +632,10 @@ section{margin-bottom:34px}
 </div>
 
 <!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
-<script src="../js/cheese-core.js?v=23"></script>
-<script src="../js/reginald.js?v=23"></script>
-<script src="../js/leaderboard.js?v=23" defer></script>
+<script src="../js/cheese-core.js?v=30"></script>
+<script src="../js/reginald.js?v=30"></script>
+<script src="../js/questions.js?v=30"></script>
+<script src="../js/leaderboard.js?v=30" defer></script>
 <script>
 (function(){
   "use strict";
@@ -609,11 +727,12 @@ section{margin-bottom:34px}
 
     var promo = el("button","promote"); promo.type = "button"; promo.hidden = true;
     promo.addEventListener("click", function(){ G.promote(i); });
+    var promoNote = el("div","promo-note"); promoNote.hidden = true;
     var openView = el("div","open-view");
-    [desc, stats, bar, foot, promo].forEach(function(x){ openView.appendChild(x); });
+    [desc, stats, bar, foot, promo, promoNote].forEach(function(x){ openView.appendChild(x); });
     card.appendChild(head); card.appendChild(lockNote); card.appendChild(openView);
     staffEl.appendChild(card);
-    cards.push({card:card, icon:icon, nameEl:nameEl, roleEl:roleEl, desc:desc, descText:r.desc, lockNote:lockNote, qty:qty, promo:promo, each:each, total:total,
+    cards.push({card:card, icon:icon, nameEl:nameEl, roleEl:roleEl, desc:desc, descText:r.desc, lockNote:lockNote, qty:qty, promo:promo, promoNote:promoNote, each:each, total:total,
                 bar:bar, fill:fill, mile:mile, btn:btn, name:r.name, shown:null});
   });
 
@@ -666,9 +785,19 @@ section{margin-bottom:34px}
 
       var pq = G.promotionQuote(i);
       c.promo.hidden = !pq;
+      c.promoNote.hidden = !pq || !pq.notes.length;
       if(pq){
-        c.promo.textContent = "Promote 10 to " + ROLES[pq.next] + (pq.cost ? ", costs " + fmt(pq.cost) : ", free");
+        var pc = Math.round(pq.change * 100), delta = pq.rateAfter - pq.rateBefore;
+        var eff = pc !== 0 ? (pc > 0 ? "+" : "\u2212") + Math.abs(pc) + "%"
+                : (delta >= 0 ? "+" : "\u2212") + fmt(Math.abs(delta), true) + "/s";
+        c.promo.textContent = "Promote 10 to " + ROLES[pq.next] + ": output " + eff +
+          (pq.cost ? ", costs " + fmt(pq.cost) : ", free");
         c.promo.disabled = !pq.affordable;
+        c.promoNote.textContent = pq.notes.map(function(n){
+          return n.kind === "up" ? "Takes " + ROLES_PLURAL[n.tier] + " to " + n.count + ", doubling the team."
+                                 : "Drops " + ROLES_PLURAL[n.tier] + " to " + n.count + ", halving the team.";
+        }).join(" ");
+        c.promoNote.className = "promo-note" + (pq.notes.some(function(n){ return n.kind === "down"; }) ? " bad" : " good");
       }
       c.btn.textContent = (quote.count > 1 ? "\u00d7" + quote.count + " " : "") + fmt(quote.cost);
       c.btn.disabled = !quote.affordable;
@@ -1036,6 +1165,7 @@ section{margin-bottom:34px}
       ", output +" + G.achievementCount() + "%";
     var fresh = G.takeNewAchievements();
     fresh.forEach(function(a, k){ setTimeout(function(){ achToast(a); }, k * 900); });
+    if(fresh.length) markTab("records");
     var REACT = { t1: "chair", t2: "founder", t3: "banker", g1: "golden" };
     fresh.forEach(function(a){ if(REACT[a.id] && window.Reginald) window.Reginald.react(REACT[a.id]); });
   }
@@ -1044,6 +1174,9 @@ section{margin-bottom:34px}
     t.appendChild(el("b", null, "Achievement: "));
     t.appendChild(document.createTextNode(a.name + " (+1% output)"));
     t.setAttribute("role","status");
+    // Just below the header, so it never covers Settings or the portfolio link.
+    var hb = document.querySelector(".top").getBoundingClientRect().bottom;
+    t.style.top = Math.max(14, hb + 14) + "px";
     document.body.appendChild(t);
     setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 2700);
   }
@@ -1058,7 +1191,10 @@ section{margin-bottom:34px}
     ["Rats hired",               function(s){ return fmt(s.hired); }],
     ["Golden cheese clicked",    function(s){ return fmt(s.goldenClicks); }],
     ["Consultants hired",        function(s){ return fmt(s.consultsHired); }],
+    ["Questions answered",       function(s){ return s.qAnswered ? fmt(s.qCorrect) + " of " + fmt(s.qAnswered) + " right, best streak " + s.qBest : "0"; }],
     ["Futures profit",           function(s){ return (s.tradePnl < 0 ? "\u2212" : "") + fmt(Math.abs(s.tradePnl)); }],
+    ["Market making profit",     function(s){ return (s.mmPnl < 0 ? "\u2212" : "") + fmt(Math.abs(s.mmPnl)); }],
+    ["Options profit",           function(s){ return (s.optPnl < 0 ? "\u2212" : "") + fmt(Math.abs(s.optPnl)); }],
     ["Contracts completed",      function(s){ return fmt(s.contractsDone); }],
     ["Bond interest",            function(s){ return fmt(s.bondInterest); }],
     ["Times sold",               function(s){ return fmt(s.runs); }],
@@ -1130,8 +1266,10 @@ section{margin-bottom:34px}
     var m = s.market || {price:100, hist:[100]}, hist = m.hist.concat([m.price]);
     $("fut-price").textContent = m.price.toFixed(1);
     var first = hist[0], ch = (m.price / first - 1) * 100;
-    $("fut-change").textContent = (ch >= 0 ? "+" : "\u2212") + Math.abs(ch).toFixed(1) + "% in " + Math.round((hist.length - 1) * 5 / 60) + " min";
-    $("fut-change").className = "fut-change " + (ch >= 0 ? "up" : "down");
+    var mins = Math.round((hist.length - 1) * 5 / 60);
+    $("fut-change").textContent = mins < 1 ? "the chart fills in over the next few minutes"
+      : (ch >= 0 ? "+" : "\u2212") + Math.abs(ch).toFixed(1) + "% in " + mins + " min";
+    $("fut-change").className = "fut-change" + (mins < 1 ? " soft" : ch >= 0 ? " up" : " down");
     $("fut-phase").textContent = info.label + " market";
     var lo = Math.min.apply(null, hist.concat([95])), hi = Math.max.apply(null, hist.concat([105]));
     $("fut-line").setAttribute("points", hist.map(function(v, i){
@@ -1153,6 +1291,16 @@ section{margin-bottom:34px}
       $("fut-long").disabled = !can; $("fut-short").disabled = !can;
       $("fut-long").setAttribute("aria-label", "Go long with " + fmt(stake) + " cheese");
       $("fut-short").setAttribute("aria-label", "Go short with " + fmt(stake) + " cheese");
+    }
+    var k = G.kellyAdvice();
+    $("kelly").hidden = !k || !!p;
+    if(k && !p){
+      $("kelly").textContent = !k.side
+        ? "Risk desk: no edge in a flat market, so Kelly says stay out."
+        : k.stake === 0
+        ? "Risk desk: the phase is nearly over, so the edge is too small to bet on. Kelly says stay out."
+        : "Risk desk: expected edge " + (k.edge * 100).toFixed(1) + "% over two minutes, volatility " + (k.sd * 100).toFixed(1) + "%. " +
+          "Half Kelly suggests going " + k.side + " with " + Math.round(k.stake * 100) + "%" + (k.capped ? " (capped: Kelly wants more than the desk allows)." : ".");
     }
     $("fut-sum").textContent = s.trades ? s.trades + (s.trades === 1 ? " trade, " : " trades, ") +
       (s.tradePnl >= 0 ? "+" : "\u2212") + fmt(Math.abs(s.tradePnl)) + " overall" : "";
@@ -1204,6 +1352,7 @@ section{margin-bottom:34px}
       r.btn.textContent = cooling && !c ? "Next in " + Math.ceil((s.contractCooldown - now) / 1000) + "s" : "Take it on";
     });
     G.takeContractReports().forEach(function(rep){
+      markTab("deals");
       var box = $("contract-report");
       box.hidden = false;
       box.className = "consult-report" + (rep.done ? " good" : "");
@@ -1236,22 +1385,89 @@ section{margin-bottom:34px}
       : "The bond desk opens once you\u2019ve earned " + fmt(G.bondUnlockAt) + " cheese in total.";
     var stake = G.bondStake(bondFrac), full = s.bonds.length >= G.maxBonds;
     G.bondTerms.forEach(function(t, i){
-      bondBtns[i].textContent = t.minutes + " min, +" + Math.round(t.rate * 100) + "%";
+      var pctTxt = (t.rate * 100) % 1 ? (t.rate * 100).toFixed(1) : String(Math.round(t.rate * 100));
+      bondBtns[i].textContent = t.minutes + " min, +" + pctTxt + "%";
       bondBtns[i].disabled = full || stake < 100;
-      bondBtns[i].setAttribute("aria-label", "Buy a " + t.minutes + " minute bond with " + fmt(stake) + " cheese at " + Math.round(t.rate * 100) + "% interest");
+      bondBtns[i].setAttribute("aria-label", "Buy a " + t.minutes + " minute bond with " + fmt(stake) + " cheese at " + pctTxt + "% interest");
     });
     var list = $("bond-list"); list.textContent = "";
     s.bonds.forEach(function(b){
       var row = el("div","bond-row");
-      row.appendChild(el("span", null, fmt(b.stake) + " at " + Math.round(b.rate * 100) + "%, pays " + fmt(b.stake * (1 + b.rate))));
+      row.appendChild(el("span", null, fmt(b.stake) + " at " + ((b.rate * 100) % 1 ? (b.rate * 100).toFixed(1) : Math.round(b.rate * 100)) + "%, pays " + fmt(b.stake * (1 + b.rate))));
       row.appendChild(el("span", null, mmss(Math.max(0, (b.matures - Date.now()) / 1000))));
       list.appendChild(row);
     });
     $("bond-sum").textContent = s.bondsRedeemed ? "+" + fmt(s.bondInterest) + " interest so far" : "";
     G.takeBondReports().forEach(function(r){
+      markTab("markets");
       var c = $("count").getBoundingClientRect();
       toast({kind:"trade", label:"Bond matured", text:"+" + fmt(r.interest) + " interest"}, c.left + c.width / 2, c.top + c.height + 30);
     });
+  }
+
+  /* ---------- market making ---------- */
+  function pick(attr, def){ var on = document.querySelector("[" + attr + "][aria-pressed=\"true\"]"); return on ? on.getAttribute(attr) : def; }
+  function group(attr){ document.querySelectorAll("[" + attr + "]").forEach(function(b){ b.addEventListener("click", function(){
+    document.querySelectorAll("[" + attr + "]").forEach(function(x){ x.setAttribute("aria-pressed", String(x === b)); });
+    if(attr === "data-mmspread" && G.state.desk) G.setDesk({spread: b.getAttribute(attr)});
+    renderDesks(); }); }); }
+  ["data-mmspread","data-mmcap","data-ostrike","data-oterm","data-ofrac"].forEach(group);
+  $("mm-start").addEventListener("click", function(){ G.openDesk(pick("data-mmspread","normal"), Number(pick("data-mmcap","0.25"))); });
+  $("mm-lean").addEventListener("click", function(){ G.setDesk({lean: !G.state.desk.lean}); });
+  $("mm-flat").addEventListener("click", function(){ G.flattenDesk(); });
+  $("mm-close").addEventListener("click", function(){ G.closeDesk(); });
+  $("opt-call").addEventListener("click", function(){ G.buyOption("call", Number(pick("data-ostrike","1")), Number(pick("data-oterm","0")), Number(pick("data-ofrac","0.1"))); });
+  $("opt-put").addEventListener("click", function(){ G.buyOption("put", Number(pick("data-ostrike","1")), Number(pick("data-oterm","0")), Number(pick("data-ofrac","0.1"))); });
+  function signed(x){ return (x >= 0 ? "+" : "\u2212") + fmt(Math.abs(x)); }
+  function renderDesks(){
+    var s = G.state;
+    // market making
+    var mmU = G.mmUnlocked();
+    $("mm-sec").hidden = !(mmU || s.allTime >= G.mmUnlockAt / 2);
+    if(!$("mm-sec").hidden){
+      $("mm-box").hidden = !mmU;
+      $("mm-note").textContent = mmU ? "Put in capital, up to 10 minutes of your output (" + fmt(G.mmCap()) + " now), and quote a spread."
+        : "The market making desk opens once you\u2019ve earned " + fmt(G.mmUnlockAt) + " cheese in total.";
+      var dk = s.desk;
+      $("mm-open").hidden = !!dk; $("mm-live").hidden = !dk;
+      if(dk){
+        var v = G.deskValue(false), pnl = v - dk.cap;
+        $("mm-status").textContent = "Desk open with " + fmt(dk.cap) + ", " + dk.spread + " spread. Inventory " + (dk.inv > 0 ? "+" : dk.inv < 0 ? "\u2212" : "") + Math.abs(dk.inv) +
+          " of 10 lots, " + dk.trades + " trades. Worth " + fmt(v) + " (" + signed(pnl) + ").";
+        $("mm-lean").textContent = "Lean quotes: " + (dk.lean ? "on" : "off"); $("mm-lean").setAttribute("aria-pressed", String(dk.lean));
+        $("mm-flat").disabled = !dk.inv;
+        document.querySelectorAll("[data-mmspread]").forEach(function(x){ x.setAttribute("aria-pressed", String(x.getAttribute("data-mmspread") === dk.spread)); });
+      } else $("mm-start").disabled = Math.min(s.cheese * Number(pick("data-mmcap","0.25")), G.mmCap()) < 1000;
+      $("mm-sum").textContent = s.mmTrades ? s.mmTrades + " trades, " + signed(s.mmPnl) + " overall" : "";
+      G.takeDeskReports().forEach(function(r){ var c = $("count").getBoundingClientRect();
+        toast({kind:"trade", label: r.profit >= 0 ? "Desk closed" : "Desk closed at a loss", text: signed(r.profit) + " cheese over " + r.trades + " trades"}, c.left + c.width / 2, c.top + c.height + 30); });
+    }
+    // options
+    var oU = G.optUnlocked();
+    $("opt-sec").hidden = !(oU || s.allTime >= G.optUnlockAt / 2);
+    if(!$("opt-sec").hidden){
+      $("opt-box").hidden = !oU;
+      $("opt-note").textContent = oU ? "Each premium is up to 5 minutes of your output (" + fmt(G.optStakeCap()) + " now), with up to two options at once."
+        : "The options desk opens once you\u2019ve earned " + fmt(G.optUnlockAt) + " cheese in total.";
+      if(oU){
+        var si = Number(pick("data-ostrike","1")), ti = Number(pick("data-oterm","0"));
+        var qc = G.optQuote("call", si, ti), qp = G.optQuote("put", si, ti);
+        $("opt-quote").textContent = "Strike " + qc.strike.toFixed(1) + ", expiring in " + (qc.seconds / 60) + " minutes. Fair price per unit: call " +
+          qc.unit.toFixed(2) + ", put " + qp.unit.toFixed(2) + " (price now " + qc.spot.toFixed(1) + ").";
+        var full = s.options.length >= 2, prem = Math.min(s.cheese * Number(pick("data-ofrac","0.1")), G.optStakeCap());
+        $("opt-call").disabled = full || prem < 1000; $("opt-put").disabled = full || prem < 1000;
+        var list = $("opt-list"); list.textContent = "";
+        s.options.forEach(function(o){
+          var row = el("div","bond-row"), val = G.optionValue(o);
+          row.appendChild(el("span", null, (o.kind === "call" ? "Call" : "Put") + " at " + o.strike.toFixed(1) + ", paid " + fmt(o.premium) + ", worth " + fmt(val) + " (" + signed(val - o.premium) + ")"));
+          row.appendChild(el("span", null, mmss(Math.max(0, (o.expires - Date.now()) / 1000))));
+          list.appendChild(row);
+        });
+      }
+      $("opt-sum").textContent = s.optPnl ? signed(s.optPnl) + " overall" : "";
+      G.takeOptReports().forEach(function(r){ markTab("markets"); var c = $("count").getBoundingClientRect();
+        toast({kind:"trade", label: r.profit >= 0 ? "Option paid out" : "Option expired", text: r.payout > 0 ? fmt(r.payout) + " back, " + signed(r.profit) : "worthless, " + signed(r.profit)}, c.left + c.width / 2, c.top + c.height + 30); });
+    }
   }
 
   /* ---------- consultants ---------- */
@@ -1265,13 +1481,14 @@ section{margin-bottom:34px}
     box.appendChild(el("div","nm", f.name));
     box.appendChild(el("div","ds", f.style));
     box.appendChild(el("div","odds", oddsText(f)));
+    var evEl = el("div","ev"); box.appendChild(evEl);
     var work = el("div","work"); work.hidden = true; box.appendChild(work);
     var foot = el("div","foot"); var fee = el("span","fee");
     var b = el("button","buy"); b.type = "button"; b.textContent = "Hire";
     b.addEventListener("click", function(){ G.hireConsultant(f.id); });
     foot.appendChild(fee); foot.appendChild(b); box.appendChild(foot);
     $("firms").appendChild(box);
-    firmRows[f.id] = {box:box, fee:fee, btn:b, work:work};
+    firmRows[f.id] = {box:box, fee:fee, btn:b, work:work, ev:evEl};
   });
   function reportText(r){
     if(r.kind === "gain") return r.firm + ": " + r.label + ". +" + fmt(r.amount) + " cheese.";
@@ -1301,10 +1518,18 @@ section{margin-bottom:34px}
       r.work.hidden = !mine;
       if(mine) r.work.textContent = "At work: " + Math.ceil(G.consultLeft()) + "s left";
       r.fee.textContent = "Fee " + fmt(fee);
+      var e = G.consultantEV(f.id), per = e.perMinute;
+      var evText = per > 0 ? (e.ev >= 0 ? "+" : "\u2212") + (Math.abs(e.ev) / per).toFixed(1) + " min of output" : (e.ev >= 0 ? "+" : "\u2212") + fmt(Math.abs(e.ev));
+      var sdText = per > 0 ? (e.sd / per).toFixed(1) + " min" : fmt(e.sd);
+      r.ev.innerHTML = "";
+      r.ev.appendChild(document.createTextNode("Expected value "));
+      r.ev.appendChild(el("b", null, evText));
+      r.ev.appendChild(document.createTextNode(", spread \u00b1" + sdText));
       r.btn.disabled = !unlocked || !!s.consult || s.cheese < fee;
       r.btn.setAttribute("aria-label", "Hire " + f.name + " for " + fmt(fee) + " cheese");
     });
     G.takeConsultReports().forEach(function(rep){
+      markTab("deals");
       var box = $("consult-report"), good = rep.kind === "gain", text = reportText(rep);
       box.hidden = false; box.textContent = text;
       box.className = "consult-report" + (good ? " good" : rep.kind === "nothing" ? "" : " bad");
@@ -1320,15 +1545,39 @@ section{margin-bottom:34px}
 
   /* ---------- board decisions and hostile takeovers, brought by Reginald ---------- */
   var R = window.Reginald;
-  var DEC_GAP = [300, 540], TAKE_GAP = [600, 1080];
+  var DEC_GAP = [300, 540], TAKE_GAP = [600, 1080], Q_GAP = [360, 600];
   var nextDecisionAt = Date.now() + rnd([120, 240]) * 1000, nextTakeoverAt = Date.now() + rnd(TAKE_GAP) * 1000;
+  var nextQuestionAt = Date.now() + rnd([180, 300]) * 1000;
+  function presentQuestion(){
+    var q = G.askQuestion();
+    if(!q) return false;
+    R.say(q.q, { ms: q.seconds * 1000, tip: true,
+      choices: q.o.map(function(o){ return { label: o }; }),
+      onChoose: function(i){
+        if(i < 0){ G.letQuestionGo(); return; }
+        var res = G.answerQuestion(q.id, i);
+        if(!res) return;
+        setTimeout(function(){
+          R.say((res.right ? "Correct. " : "Not quite: it\u2019s " + res.answer + ". ") + res.why + (res.right ? " +" + fmt(res.reward) + " cheese." : ""),
+                { ms: 11000, reaction: true, full: true });
+        }, 250);
+        render();
+      }});
+    return true;
+  }
   var lastDecision = null;
   function presentDecision(){
     var pool = G.decisions.filter(function(x){ return x.id !== lastDecision; });
     var dcs = pool[Math.floor(Math.random() * pool.length)];
     lastDecision = dcs.id;
     R.say(dcs.text, { ms: 30000, tip: true,
-      choices: dcs.options.map(function(o){ return { label: o.label, desc: o.desc }; }),
+      choices: dcs.options.map(function(o, k){
+        var ev = G.decisionEV(dcs.id, k);
+        var evText = ev === null ? (o.boosts && o.boosts.some(function(b){ return b.kind === "press"; }) ? ". Worth more the more you press" : "")
+                   : Math.abs(ev) < 0.05 ? ". Expected value about zero"
+                   : ". Expected value " + (ev >= 0 ? "+" : "\u2212") + Math.abs(ev).toFixed(1) + " min of output";
+        return { label: o.label, desc: o.desc + evText };
+      }),
       onChoose: function(i){
         if(i < 0) return;
         var res = G.decide(dcs.id, i);
@@ -1368,7 +1617,11 @@ section{margin-bottom:34px}
       if(G.takeoverPossible() && presentTakeover()){ nextTakeoverAt = now + rnd(TAKE_GAP) * 1000; nextDecisionAt = Math.max(nextDecisionAt, now + 60000); return; }
       nextTakeoverAt = now + 120000;   // try again in a couple of minutes
     }
-    if(now >= nextDecisionAt && G.decisionsUnlocked()){ presentDecision(); nextDecisionAt = now + rnd(DEC_GAP) * 1000; }
+    if(now >= nextDecisionAt && G.decisionsUnlocked()){ presentDecision(); nextDecisionAt = now + rnd(DEC_GAP) * 1000; nextQuestionAt = Math.max(nextQuestionAt, now + 60000); return; }
+    if(now >= nextQuestionAt){
+      if(G.questionsOn() && presentQuestion()){ nextQuestionAt = now + rnd(Q_GAP) * 1000; nextDecisionAt = Math.max(nextDecisionAt, now + 60000); }
+      else nextQuestionAt = now + 60000;
+    }
   }, 1000);
 
   function renderBoosts(){
@@ -1384,8 +1637,101 @@ section{margin-bottom:34px}
     });
   }
 
+  /* ---------- tabs ----------
+     The side panel stays put; the main area shows one tab at a time. A tab
+     appears once something in it has opened, and a dot marks news. */
+  var TAB_ORDER = {
+    office:  ["staff-sec", "supg-sec", "upgrades-sec"],
+    company: ["company-sec"],
+    markets: ["fut-sec", "mm-sec", "opt-sec", "bond-sec"],
+    deals:   ["contract-sec", "consult-sec"],
+    records: ["achievements-sec", "stats-sec", "lb-sec"]
+  };
+  var HOWTO = {
+    office:  "Hire staff to make cheese for you. Each rank costs more and makes far more. Owning 10, 25, 50 and 100 of a rank doubles that whole team each time, and staff upgrades double it again. Promote 10 of a rank into 1 of the next once you have them.",
+    company: "Sell the company for shares, priced on what it\u2019s worth: your cheese plus what your staff and staff upgrades cost. Shares boost output for good and buy perks that never reset. With 150 shares you can go public, trading shares for stock, which boosts output even more.",
+    markets: "The market moves between bull, flat and bear phases, which change your output. On the futures desk, go long if you think the cheese price will rise and short if it will fall. The market making desk earns the spread on trades while carrying inventory risk, and the options desk lets you bet on big moves without risking more than the premium. Treasury bonds lock cheese away for a fixed time and pay it back with interest.",
+    deals:   "Contracts are timed challenges with a reward, and failing costs nothing. Consultants charge a fee, work for a minute, then report back: each firm shows its odds, from steady to brilliant or catastrophic.",
+    records: "Every achievement adds 1% to your output for good. Stats track your whole history, and the leaderboard ranks everyone by cheese earned, all time."
+  };
+  var mainEl = $("main"), tabBtns = {}, activeTab = "office";
+  (function(){
+    // name the staff, achievements and stats sections so they can be placed
+    $("staff").parentNode.id = "staff-sec";
+    $("achs").parentNode.id = "achievements-sec";
+    $("stats").parentNode.id = "stats-sec";
+    var nav = document.querySelector(".tabs");
+    Object.keys(TAB_ORDER).forEach(function(t){
+      var how = el("details","howto"); var sum = el("summary", null, "How this works"); how.appendChild(sum);
+      how.appendChild(el("p", null, HOWTO[t]));
+      var wrap = el("section"); wrap.setAttribute("data-tab", t); wrap.id = "howto-" + t; wrap.appendChild(how);
+      mainEl.appendChild(wrap);
+      TAB_ORDER[t].forEach(function(id){ var sec = $(id); sec.setAttribute("data-tab", t); mainEl.appendChild(sec); });
+    });
+    mainEl.insertBefore(nav, mainEl.firstChild);
+    document.querySelectorAll("[data-tab-btn]").forEach(function(b){
+      tabBtns[b.getAttribute("data-tab-btn")] = b;
+      b.addEventListener("click", function(){ showTab(b.getAttribute("data-tab-btn")); });
+    });
+    try { var saved = localStorage.getItem("pk_cheese_tab"); if(TAB_ORDER[saved]) activeTab = saved; } catch(e){}
+  })();
+  var dots = {};
+  function markTab(t){ if(t !== activeTab){ dots[t] = true; } }
+  function showTab(t){
+    if(!TAB_ORDER[t]) return;
+    activeTab = t; dots[t] = false;
+    mainEl.setAttribute("data-tab", t);
+    try { localStorage.setItem("pk_cheese_tab", t); } catch(e){}
+    renderTabs();
+  }
+  function tabOpen(t){
+    if(t === "office" || t === "records") return true;
+    return TAB_ORDER[t].some(function(id){ return !$(id).hidden; });
+  }
+  function renderTabs(){
+    if(!tabOpen(activeTab)) activeTab = "office";
+    mainEl.setAttribute("data-tab", activeTab);
+    Object.keys(tabBtns).forEach(function(t){
+      var b = tabBtns[t];
+      b.hidden = !tabOpen(t);
+      b.setAttribute("aria-selected", String(t === activeTab));
+      b.querySelector(".dot").hidden = !dots[t] || t === activeTab;
+    });
+    // the "how this works" boxes follow their tab's visibility
+    Object.keys(TAB_ORDER).forEach(function(t){ $("howto-" + t).hidden = !tabOpen(t); });
+  }
+
+  /* ---------- settings ---------- */
+  $("settings-btn").addEventListener("click", function(e){
+    e.stopPropagation();
+    var open = $("settings").hidden; $("settings").hidden = !open;
+    $("settings-btn").setAttribute("aria-expanded", String(open));
+  });
+  document.addEventListener("click", function(e){
+    if(!$("settings").hidden && !$("settings").contains(e.target)){ $("settings").hidden = true; $("settings-btn").setAttribute("aria-expanded", "false"); }
+  });
+  document.querySelectorAll("[data-set]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var k = b.getAttribute("data-set");
+      if(k === "facts") G.setSetting("facts", G.state.reginald.factsOff);   // flip
+      else if(k === "numbers") G.setSetting("numbers", G.state.settings.numbers === "short" ? "sci" : "short");
+      else G.setSetting(k, !G.state.settings[k]);
+      render();
+    });
+  });
+  function renderSettings(){
+    $("set-q-row").hidden = G.state.allTime < G.questionUnlockAt;
+    document.querySelectorAll("[data-set]").forEach(function(b){
+      var k = b.getAttribute("data-set"), on;
+      if(k === "facts") on = !G.state.reginald.factsOff;
+      else if(k === "numbers"){ b.textContent = G.state.settings.numbers === "short" ? "1.23B" : "1.23e9"; b.setAttribute("aria-pressed","true"); b.setAttribute("aria-label","Big numbers shown as " + b.textContent + ", click to switch"); return; }
+      else on = G.state.settings[k] !== false;
+      b.textContent = on ? "On" : "Off"; b.setAttribute("aria-pressed", String(on));
+    });
+  }
+
   /* ---------- buy mode ---------- */
-  var modeBtns = document.querySelectorAll(".buymode button");
+  var modeBtns = document.querySelectorAll(".buymode button[data-mode]");   // only the Hire 1/10/Max buttons
   for(var mb=0;mb<modeBtns.length;mb++){
     modeBtns[mb].addEventListener("click", function(){ G.setBuyMode(Number(this.getAttribute("data-mode"))); });
   }
@@ -1420,12 +1766,22 @@ section{margin-bottom:34px}
     renderRecruiter();
     renderCompany();
     renderMarket();
+    renderDesks();
     renderContracts();
     renderBonds();
     renderConsultants();
     renderAchievements();
     renderStats();
+    // Company gets a dot when a sale is well worth taking (at least 10 shares, and half again what you hold)
+    var pend = G.pendingShares();
+    if(pend >= Math.max(10, Math.ceil(G.state.sharesEarned * 0.5)) && !saleDotShown){ saleDotShown = true; markTab("company"); }
+    if(pend < 10) saleDotShown = false;
+    var openNow = ["company","markets","deals"].filter(tabOpen).join();
+    if(openNow !== lastOpen){ ["company","markets","deals"].forEach(function(t){ if(tabOpen(t) && lastOpen.indexOf(t) === -1 && lastOpen !== "init") markTab(t); }); lastOpen = openNow; }
+    renderTabs();
+    renderSettings();
   }
+  var saleDotShown = false, lastOpen = "init";
 
   // Reginald only does facts here; his tutorial lives on the main page.
   if(window.Reginald){ window.Reginald.setTutorial(false); window.Reginald.welcome(); }
@@ -1433,7 +1789,7 @@ section{margin-bottom:34px}
   G.start(render);
   $("bull-what").textContent = "Output \u00d7" + G.golden.bull.mult;
   $("paws-what").textContent = "Presses \u00d7" + G.golden.paws.mult;
-  setInterval(function(){ renderBuffs(); renderBoosts(); renderMarket(); renderContracts(); renderBonds(); if(G.state.consult) renderConsultants(); }, 250);
+  setInterval(function(){ renderBuffs(); renderBoosts(); renderMarket(); renderDesks(); renderContracts(); renderBonds(); if(G.state.consult) renderConsultants(); }, 250);
 })();
 </script>
 <script data-goatcounter="https://puranjay.goatcounter.com/count"

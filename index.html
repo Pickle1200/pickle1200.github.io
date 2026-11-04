@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Puranjay Kumar</title>
-<meta name="description" content="Second-year maths and data science at LSE. Projects, games, CV.">
+<meta name="description" content="Second year maths and data science at LSE. Projects, games, CV.">
 <link rel="canonical" href="https://puranjaykumar.com/">
 <!-- Link previews on LinkedIn and elsewhere -->
 <meta property="og:type" content="website">
@@ -245,7 +245,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <div class="block locked" id="b-about">
     <div class="lockbar"><span>About</span><span class="need" data-need="10">10 cheese</span></div>
     <div class="body">
-      <p>Second-year BSc Mathematics with Data Science at LSE. I build things and then
+      <p>Second year BSc Mathematics with Data Science at LSE. I build things and then
       measure whether they worked, usually in that order.</p>
     </div>
   </div>
@@ -260,8 +260,8 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
       </div>
       <div class="item">
         <h3>Futures Taskforce, Q5 Partners</h3>
-        <p>Co-authoring research for a client on what AI is doing to early careers in
-        financial services.</p>
+        <p>Writing research for a client, as part of a team, on what AI is doing to early
+        careers in financial services.</p>
       </div>
       <div class="item">
         <h3>Campus Ambassador, Everesteer</h3>
@@ -275,17 +275,17 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     <div class="lockbar"><span>Projects</span><span class="need" data-need="150">150 cheese</span></div>
     <div class="body">
       <div class="item">
-        <h3>Moving-average crossover backtest</h3>
-        <p>Ten years of SPY against a buy-and-hold benchmark, with realistic transaction
-        costs and a one-day signal lag. It reduced drawdown and lost to doing nothing once
+        <h3>Moving average crossover backtest</h3>
+        <p>Ten years of SPY against a buy and hold benchmark, with realistic transaction
+        costs and a one day signal lag. It reduced drawdown and lost to doing nothing once
         the costs were counted. Published as it came out.
         <a href="https://github.com/Pickle1200/ma-crossover-backtest">Code</a></p>
       </div>
       <div class="item">
-        <h3>Market risk-return dashboard</h3>
+        <h3>Market risk and return dashboard</h3>
         <p>Return, volatility, correlation structure and maximum drawdown across four asset
         classes. Halfway through I found every Sharpe ratio was wrong, because I had
-        implicitly treated the risk-free rate as zero.
+        implicitly treated the risk free rate as zero.
         <a href="https://github.com/Pickle1200/Market-risk-dashboard">Code</a></p>
       </div>
     </div>
@@ -297,7 +297,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
       <div class="item">
         <h3>Rats vs Cheese</h3>
         <p>Built solo in ten days. Persistent player economy, rebirth mechanics,
-        server-authoritative state and a payments layer. Balancing the economy took longer
+        state kept on the server and a payments layer. Balancing the economy took longer
         than writing it.
         <a href="https://www.roblox.com/games/117858380922857/Rats-vs-Cheese">Play</a></p>
       </div>
@@ -317,7 +317,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <div class="block locked" id="b-cv">
     <div class="lockbar"><span>CV and contact</span><span class="need" data-need="1000">1,000 cheese</span></div>
     <div class="body">
-      <p>Three A-Levels by sixteen, the first at fifteen, alongside GCSEs. Founded a tutoring agency at 14 and ran it to
+      <p>Three A Levels by sixteen, the first at fifteen, alongside GCSEs. Founded a tutoring agency at 14 and ran it to
       roughly fifty students before starting at LSE.</p>
       <div class="contact">
         <a href="puranjaykumarcv.pdf" data-goatcounter-click="cv-download">CV</a>
@@ -331,7 +331,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   <div class="block locked" id="b-hidden">
     <div class="lockbar"><span>Everything else</span><span class="need" data-need="2500">2,500 cheese</span></div>
     <div class="body">
-      <p>I built a portfolio holding equities, technology, long-dated bonds and gold,
+      <p>I built a portfolio holding equities, technology, long bonds and gold,
       expecting four positions. The correlation matrix showed something closer to two.
       Bonds and gold were moving together because both were priced off real rates, so the
       diversification I thought I had bought was conditional on a rate regime rather than
@@ -339,7 +339,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
       <ul class="facts">
         <li><span class="n">01</span><span>Six foot.</span></li>
         <li><span class="n">02</span><span>250 kg calf raise.</span></li>
-        <li><span class="n">03</span><span>Sat three A-Levels by sixteen, the first at fifteen, alongside my GCSEs.</span></li>
+        <li><span class="n">03</span><span>Sat three A Levels by sixteen, the first at fifteen, alongside my GCSEs.</span></li>
         <li><span class="n">04</span><span>Read Lord of the Rings early enough that it did most of the damage.</span></li>
         <li><span class="n">05</span><span>Taught myself Luau in a week and shipped three games with it.</span></li>
         <li><span class="n">06</span><span>Scored 932 out of 999 on an arcade boxing machine. Undefeated against anything that stays still.</span></li>
@@ -353,8 +353,8 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 </div>
 
 <!-- Bump ?v= on every release so browsers fetch the new files, not a cached copy -->
-<script src="js/cheese-core.js?v=23"></script>
-<script src="js/reginald.js?v=23"></script>
+<script src="js/cheese-core.js?v=30"></script>
+<script src="js/reginald.js?v=30"></script>
 <script>
 (function(){
   "use strict";
@@ -499,6 +499,7 @@ a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     if(G.takeConsultReports) G.takeConsultReports();     // consultant results are shown on /cheese
     if(G.takeTradeReports) G.takeTradeReports();
     if(G.takeContractReports){ G.takeContractReports(); G.takeBondReports(); }
+    if(G.takeDeskReports){ G.takeDeskReports(); G.takeOptReports(); }
     if(window.Reginald) window.Reginald.update();
   }
 

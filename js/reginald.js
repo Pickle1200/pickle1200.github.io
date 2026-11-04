@@ -70,7 +70,7 @@
     "A group of rats is called a mischief. Accurate.",
     "Britain makes over 700 named cheeses.",
     "Every spring, people chase a wheel of Double Gloucester down Cooper\u2019s Hill in Gloucestershire. The cheese usually wins.",
-    "The oldest cheese ever found is about 3,600 years old, buried with mummies in north-west China.",
+    "The oldest cheese ever found is about 3,600 years old, buried with mummies in northwest China.",
     "Cheddar is named after the village of Cheddar in Somerset, whose caves were used to age it.",
     "Stilton may only be made in Derbyshire, Leicestershire and Nottinghamshire. Not, awkwardly, in Stilton.",
     "Mice are not especially keen on cheese. Given the choice, they tend to prefer grain and sweet things.",
@@ -86,9 +86,9 @@
     "Brown rats are formally named Rattus norvegicus, though they did not come from Norway.",
     "Trained rats can also detect tuberculosis in samples, faster than a lab technician with a microscope.",
     "Rats are poor at seeing red, so labs often work under red light to keep them undisturbed.",
-    "Victorian rat-catchers bred unusually coloured rats as pets. Some of today\u2019s pet rats descend from them.",
+    "Victorian rat catchers bred unusually coloured rats as pets. Some of today\u2019s pet rats descend from them.",
     "Some researchers now think human fleas and lice, not rats, did most of the spreading of the Black Death.",
-    "Roquefort must be aged in the caves of Roquefort-sur-Soulzon, and has been protected by French law since 1925.",
+    "Roquefort must be aged in caves in one particular French village, and has been protected by French law since 1925.",
     "Red Leicester gets its colour from annatto, a dye made from the seeds of a tropical shrub.",
     "Wensleydale was first made by French monks who settled in Yorkshire in the twelfth century.",
     "Stinking Bishop, from Gloucestershire, is washed in perry while it ripens. The name is earned.",
@@ -107,7 +107,7 @@
     "Britain drinks around 100 million cups of tea a day.",
     "During tulip mania in the 1630s, single Dutch tulip bulbs reportedly sold for more than a house.",
     "In 2012 a software error cost the trading firm Knight Capital about $440 million in 45 minutes.",
-    "The Black\u2013Scholes paper on pricing options was published in 1973. Traders have argued about it since."
+    "Fischer Black and Myron Scholes published their paper on pricing options in 1973. Traders have argued about it since."
   ];
 
   /* ---------- drawing ---------- */
@@ -144,40 +144,53 @@
       'display:flex;align-items:flex-end;gap:4px;pointer-events:none;' +
       'transform:translateY(calc(100% + 40px));transition:transform .5s cubic-bezier(.2,.9,.3,1.15)}' +
     '#reginald.rg-show{transform:none}' +
-    '#reginald .rg-bubble{pointer-events:auto;position:relative;max-width:300px;margin-bottom:46px;' +
-      'background:var(--panel);border:1px solid var(--rule);padding:13px 30px 13px 14px;' +
-      'font-family:var(--mono);font-size:12.5px;line-height:1.55;color:var(--ink)}' +
+    '#reginald .rg-bubble{pointer-events:auto;position:relative;max-width:370px;margin-bottom:56px;' +
+      'background:var(--panel);border:1px solid var(--rule);padding:15px 34px 15px 16px;' +
+      'font-family:var(--mono);font-size:14.5px;line-height:1.55;color:var(--ink);box-shadow:0 6px 24px rgba(0,0,0,.35)}' +
+    '#reginald.rg-ask .rg-bubble{border-color:var(--amber);animation:rg-pulse 1.4s ease-out 3}' +
+    '@keyframes rg-pulse{0%{box-shadow:0 0 0 0 rgba(224,167,43,.55),0 6px 24px rgba(0,0,0,.35)}100%{box-shadow:0 0 0 14px rgba(224,167,43,0),0 6px 24px rgba(0,0,0,.35)}}' +
     '#reginald .rg-bubble::after{content:"";position:absolute;right:-7px;bottom:16px;width:12px;height:12px;' +
       'background:var(--panel);border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);transform:rotate(-45deg)}' +
     '#reginald .rg-close{position:absolute;top:4px;right:4px;width:26px;height:26px;border:0;background:none;' +
       'color:var(--ink-soft);font-size:16px;line-height:1;cursor:pointer;font-family:var(--mono)}' +
     '#reginald .rg-close:hover{color:var(--ink)}' +
-    '#reginald .rg-quiet{display:block;margin-top:9px;padding:0;border:0;background:none;cursor:pointer;' +
-      'font-family:var(--mono);font-size:11px;color:var(--amber-deep);border-bottom:1px solid currentColor}' +
+    '#reginald .rg-quiet{display:block;margin-top:10px;padding:0;border:0;background:none;cursor:pointer;' +
+      'font-family:var(--mono);font-size:12.5px;color:var(--amber-deep);border-bottom:1px solid currentColor}' +
     '#reginald .rg-quiet[hidden]{display:none}' +
     '#reginald .rg-link{display:inline-block;margin-top:9px;font-size:12px;color:var(--amber-deep);text-decoration:none;border-bottom:1px solid currentColor}' +
     '#reginald .rg-link[hidden]{display:none}' +
     '#reginald .rg-choices{display:grid;gap:6px;margin-top:10px}' +
     '#reginald .rg-choices[hidden]{display:none}' +
-    '#reginald .rg-choice{text-align:left;padding:7px 9px;border:1px solid var(--rule);background:var(--bg);color:var(--ink);cursor:pointer;font-family:var(--mono);font-size:12px;line-height:1.4}' +
+    '#reginald .rg-choice{text-align:left;padding:9px 11px;border:1px solid var(--rule);background:var(--bg);color:var(--ink);cursor:pointer;font-family:var(--mono);font-size:13px;line-height:1.4}' +
     '#reginald .rg-choice:hover{border-color:var(--amber)}' +
     '#reginald .rg-choice b{display:block;font-weight:500;color:var(--amber-deep)}' +
-    '#reginald .rg-choice span{color:var(--ink-soft);font-size:11px}' +
+    '#reginald .rg-choice span{color:var(--ink-soft);font-size:12px}' +
     '#reginald button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}' +
-    '#reginald .rg-rat{width:96px;flex:none}' +
+    '#reginald .rg-rat{width:122px;flex:none}' +
     '#reginald .rg-rat svg{display:block;width:100%;height:auto}' +
     '#reginald .rg-eye{transform-box:fill-box;transform-origin:center;animation:rg-blink 5.5s infinite}' +
     '#reginald .rg-hat{transform-box:fill-box;transform-origin:50% 100%;transform:rotate(-8deg)}' +
     '#reginald.rg-tip .rg-hat{animation:rg-tip .9s ease-in-out}' +
     '@keyframes rg-blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}' +
     '@keyframes rg-tip{0%,100%{transform:rotate(-8deg) translateY(0)}35%,60%{transform:rotate(-22deg) translateY(-7px)}}' +
+    // Compact: facts and reactions stay out of the way. On a laptop the bubble
+    // stacks above him (so he reaches far less into the page); on a phone he
+    // becomes a slimmer strip. Anything that needs an answer stays full size.
+    '#reginald.rg-compact{flex-direction:column;align-items:flex-end;gap:0}' +
+    '#reginald.rg-compact .rg-bubble{max-width:270px;margin-bottom:10px;font-size:13.5px;padding:12px 30px 12px 13px}' +
+    '#reginald.rg-compact .rg-bubble::after{right:44px;bottom:-7px;transform:rotate(45deg)}' +
+    '#reginald.rg-compact .rg-rat{width:92px}' +
     '@media (max-width:520px){' +
       '#reginald{left:10px;right:10px;justify-content:flex-end}' +
-      '#reginald .rg-bubble{flex:1;max-width:none;margin-bottom:30px;font-size:12px}' +
-      '#reginald .rg-rat{width:66px}' +
+      '#reginald.rg-compact{flex-direction:row;align-items:flex-end}' +
+      '#reginald.rg-compact .rg-bubble{flex:1;max-width:none;margin-bottom:22px;font-size:13px;padding:10px 30px 10px 12px}' +
+      '#reginald.rg-compact .rg-bubble::after{right:-7px;bottom:12px;transform:rotate(-45deg)}' +
+      '#reginald.rg-compact .rg-rat{width:58px}' +
+      '#reginald .rg-bubble{flex:1;max-width:none;margin-bottom:34px;font-size:13.5px}' +
+      '#reginald .rg-rat{width:80px}' +
     '}' +
     '@media (prefers-reduced-motion:reduce){' +
-      '#reginald{transition:none}#reginald .rg-eye,#reginald.rg-tip .rg-hat{animation:none}' +
+      '#reginald{transition:none}#reginald .rg-eye,#reginald.rg-tip .rg-hat,#reginald.rg-ask .rg-bubble{animation:none}' +
     '}';
 
   /* ---------- build ---------- */
@@ -233,6 +246,11 @@
     if (current && current.choices && current.onChoose && !current.chosen) { current.chosen = true; current.onChoose(-1); }
     choicesEl.textContent = "";
     choicesEl.hidden = !opts.choices;
+    root.classList.toggle("rg-ask", !!opts.choices);    // amber pulse when he needs an answer
+    var compact = !opts.choices && !opts.full && (opts.fact || opts.reaction);   // "full": an explanation worth reading in full
+    root.classList.toggle("rg-compact", !!compact);
+    // On a phone, chatty lines stay just long enough to read (about 5 seconds).
+    if (compact && (global.innerWidth || 1000) <= 520) opts.ms = Math.min(opts.ms || LINE_MS, Math.max(4500, Math.min(7000, text.length * 45)));
     if (opts.choices) {
       opts.choices.forEach(function (c, i) {
         var b = doc.createElement("button");
@@ -406,6 +424,7 @@
   function react(key, force) {
     var lines = REACTIONS[key];
     if (!lines || busy()) return false;
+    if (G.state.settings && G.state.settings.reactions === false) return false;   // switched off in Settings
     var now = Date.now();
     if (!force && now - lastReactionAt < REACTION_GAP) return false;
     lastReactionAt = now;
